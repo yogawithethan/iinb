@@ -61,18 +61,6 @@ function ChapterSection({
       style={{ scrollMarginTop: "120px" }}
     >
       <header className="mb-10 text-center">
-        {chapter.part ? (
-          <p
-            className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em]"
-            style={{
-              color: "var(--ink-tertiary)",
-              fontFamily:
-                "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
-            }}
-          >
-            {chapter.part}
-          </p>
-        ) : null}
         <h2 className="mb-2 text-[1.5em] font-medium leading-tight">
           {chapter.title}
         </h2>
