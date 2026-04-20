@@ -1,16 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CopyIcon, NoteIcon } from "./icons";
+import { CopyIcon, HighlightIcon, NoteIcon } from "./icons";
+import { useHighlights } from "./HighlightsContext";
 
-type HighlightColor = "yellow" | "blue" | "green" | "pink";
-
-const COLORS: { id: HighlightColor; bg: string }[] = [
-  { id: "yellow", bg: "#ffe476" },
-  { id: "blue", bg: "#8fcaff" },
-  { id: "green", bg: "#a8e0a0" },
-  { id: "pink", bg: "#ffa5c8" },
-];
+const HIGHLIGHT_NAME = "iinb-highlight";
+const COPY_ATTRIBUTION = "— Ignorance is not Bliss by Ethan Hill";
 
 type Pos = { top: number; left: number };
 
@@ -31,18 +26,29 @@ function selectionInsideReader(range: Range): boolean {
   );
 }
 
+function registerHighlight(range: Range): boolean {
+  if (!highlightsApiSupported()) return false;
+  const existing = CSS.highlights.get(HIGHLIGHT_NAME);
+  if (existing) {
+    existing.add(range);
+  } else {
+    CSS.highlights.set(HIGHLIGHT_NAME, new Highlight(range));
+  }
+  return true;
+}
+
 export function SelectionPopover() {
   const [pos, setPos] = useState<Pos | null>(null);
   const [apiOk, setApiOk] = useState(true);
-  /** The range captured at the moment the popover is shown. Survives the
-   * selection being blurred when the user clicks a popover button. */
+  /** Survives the browser clearing the live selection on button click. */
   const rangeRef = useRef<Range | null>(null);
+  const { addHighlight } = useHighlights();
 
   useEffect(() => {
     setApiOk(highlightsApiSupported());
   }, []);
 
-  const POPOVER_WIDTH = 260;
+  const POPOVER_WIDTH = 220;
 
   const syncFromSelection = useCallback(() => {
     const sel = window.getSelection();
@@ -75,7 +81,6 @@ export function SelectionPopover() {
 
   useEffect(() => {
     function onPointerUp() {
-      // Give the browser one frame to finalize the selection.
       window.setTimeout(syncFromSelection, 10);
     }
     function onSelectionChange() {
@@ -105,35 +110,18 @@ export function SelectionPopover() {
     setPos(null);
   }
 
-  function applyHighlight(color: HighlightColor) {
+  function highlight() {
     const range = rangeRef.current;
     if (!range) return;
     if (!apiOk) {
       // eslint-disable-next-line no-alert
       alert(
-        "Your browser doesn't support persistent highlights yet (CSS Highlight API). Upgrade Safari 17.2+ or Chrome 105+.",
+        "Your browser doesn't support persistent highlights yet. Upgrade to Safari 17.2+ or Chrome 105+.",
       );
       return;
     }
-    const name = `iinb-hl-${color}`;
-    const existing = CSS.highlights.get(name);
-    if (existing) {
-      existing.add(range);
-    } else {
-      CSS.highlights.set(name, new Highlight(range));
-    }
-    dismiss();
-  }
-
-  async function copy() {
-    const range = rangeRef.current;
-    if (!range) return;
-    const text = range.toString();
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // clipboard may be blocked — silent fallback
-    }
+    registerHighlight(range);
+    addHighlight(range.toString(), range);
     dismiss();
   }
 
@@ -143,10 +131,24 @@ export function SelectionPopover() {
     const text = range.toString();
     const preview = text.length > 40 ? `${text.slice(0, 40)}…` : text;
     const note = window.prompt(`Note for "${preview}"`);
-    if (note) {
-      // TODO: wire into persistent storage once highlights have a store
-      // eslint-disable-next-line no-console
-      console.info("Note saved:", { text, note });
+    if (!note || !note.trim()) {
+      dismiss();
+      return;
+    }
+    registerHighlight(range);
+    addHighlight(text, range, note.trim());
+    dismiss();
+  }
+
+  async function copy() {
+    const range = rangeRef.current;
+    if (!range) return;
+    const text = range.toString();
+    const payload = `${text}\n\n${COPY_ATTRIBUTION}`;
+    try {
+      await navigator.clipboard.writeText(payload);
+    } catch {
+      // clipboard may be blocked — silent fallback
     }
     dismiss();
   }
@@ -162,8 +164,6 @@ export function SelectionPopover() {
         transform: "translateX(-50%)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.14)",
       }}
-      // Cache the range on mousedown so the subsequent click can use it even
-      // though the browser will clear the live selection when focus shifts.
       onMouseDown={(e) => {
         const sel = window.getSelection();
         if (sel && !sel.isCollapsed && sel.rangeCount) {
@@ -172,30 +172,25 @@ export function SelectionPopover() {
         e.preventDefault();
       }}
     >
-      {COLORS.map((c) => (
-        <button
-          key={c.id}
-          type="button"
-          onClick={() => applyHighlight(c.id)}
-          aria-label={`Highlight ${c.id}`}
-          title={`Highlight ${c.id}`}
-          className="h-7 w-7 rounded-full transition-transform duration-150 hover:scale-[1.12] active:scale-95"
-          style={{
-            background: c.bg,
-            border: "1.5px solid rgba(0, 0, 0, 0.1)",
-          }}
-        />
-      ))}
-      <span
-        className="mx-1 h-5 w-px flex-shrink-0"
-        style={{ background: "var(--pill-border)" }}
-      />
+      <button
+        type="button"
+        onClick={highlight}
+        aria-label="Highlight"
+        title="Highlight"
+        className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+        style={{
+          color: "var(--accent-ink)",
+          background: "var(--accent-soft)",
+        }}
+      >
+        <HighlightIcon size={15} />
+      </button>
       <button
         type="button"
         onClick={addNote}
         aria-label="Add note"
         title="Add note"
-        className="iinb-selpop-btn flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+        className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
         style={{ color: "var(--ink)" }}
       >
         <NoteIcon size={14} />
@@ -203,9 +198,9 @@ export function SelectionPopover() {
       <button
         type="button"
         onClick={copy}
-        aria-label="Copy"
-        title="Copy"
-        className="iinb-selpop-btn flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+        aria-label="Copy with attribution"
+        title="Copy with attribution"
+        className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
         style={{ color: "var(--ink)" }}
       >
         <CopyIcon size={14} />

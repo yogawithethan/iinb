@@ -167,6 +167,15 @@ export function LockIcon(p: IconProps) {
   );
 }
 
+export function HighlightIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M14 2l8 8-12 12H2v-8z" />
+      <path d="M10 6l8 8" />
+    </Svg>
+  );
+}
+
 export function NoteIcon(p: IconProps) {
   return (
     <Svg {...p}>

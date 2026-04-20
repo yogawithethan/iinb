@@ -7,6 +7,7 @@ import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
 import { SearchPanel } from "./SearchPanel";
+import { HighlightsPanel } from "./HighlightsPanel";
 import { PaywallProvider } from "./PaywallContext";
 import { useOpenableState } from "@/hooks/useOpenableState";
 import { useReaderSettings } from "./SettingsContext";
@@ -80,7 +81,7 @@ export function Chrome({
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("display");
   const [tocOpen, setTocOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const hideTimer = useRef<number | null>(null);
 
   const paywallValue = useMemo(
@@ -98,11 +99,18 @@ export function Chrome({
   const settingsAnim = useOpenableState(settingsOpen, 200);
   const tocAnim = useOpenableState(tocOpen, 250);
   const searchAnim = useOpenableState(searchOpen, 220);
-  const anyPanelOpen = settingsOpen || tocOpen || searchOpen;
+  const bookmarksAnim = useOpenableState(bookmarksOpen, 250);
+  const anyPanelOpen = settingsOpen || tocOpen || searchOpen || bookmarksOpen;
   const anyPanelMounted =
-    settingsAnim.mounted || tocAnim.mounted || searchAnim.mounted;
+    settingsAnim.mounted ||
+    tocAnim.mounted ||
+    searchAnim.mounted ||
+    bookmarksAnim.mounted;
   const anyPanelAnimating =
-    settingsAnim.animate || tocAnim.animate || searchAnim.animate;
+    settingsAnim.animate ||
+    tocAnim.animate ||
+    searchAnim.animate ||
+    bookmarksAnim.animate;
 
   const effectiveVisible = isDesktop || visible || anyPanelOpen;
 
@@ -132,6 +140,7 @@ export function Chrome({
     setSettingsOpen(false);
     setTocOpen(false);
     setSearchOpen(false);
+    setBookmarksOpen(false);
   }
 
   function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -152,6 +161,7 @@ export function Chrome({
       setSettingsTab("display");
       setTocOpen(false);
       setSearchOpen(false);
+      setBookmarksOpen(false);
       setVisible(true);
     }
   }
@@ -163,6 +173,7 @@ export function Chrome({
       setTocOpen(true);
       setSettingsOpen(false);
       setSearchOpen(false);
+      setBookmarksOpen(false);
       setVisible(true);
     }
   }
@@ -174,6 +185,19 @@ export function Chrome({
       setSearchOpen(true);
       setSettingsOpen(false);
       setTocOpen(false);
+      setBookmarksOpen(false);
+      setVisible(true);
+    }
+  }
+
+  function toggleBookmarks() {
+    if (bookmarksOpen) {
+      setBookmarksOpen(false);
+    } else {
+      setBookmarksOpen(true);
+      setSettingsOpen(false);
+      setTocOpen(false);
+      setSearchOpen(false);
       setVisible(true);
     }
   }
@@ -224,6 +248,26 @@ export function Chrome({
                 setTocOpen(false);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Highlights & notes popover — anchored top-left (under bookmark bubble) */}
+      {bookmarksAnim.mounted && (
+        <div className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-start md:px-8 lg:px-12">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
+            style={{
+              maxHeight: "60vh",
+              opacity: bookmarksAnim.animate ? 1 : 0,
+              transform: bookmarksAnim.animate
+                ? "scale(1) translateY(0)"
+                : "scale(0.95) translateY(-8px)",
+              transformOrigin: isDesktop ? "top left" : "top center",
+            }}
+          >
+            <HighlightsPanel onClose={() => setBookmarksOpen(false)} />
           </div>
         </div>
       )}
@@ -332,12 +376,15 @@ export function Chrome({
                 {tocOpen ? <XIcon /> : <TocIcon />}
               </GlassBubble>
               <GlassBubble
-                label={bookmarked ? "Remove bookmark" : "Bookmark this page"}
-                dimmed={anyPanelOpen}
-                active={bookmarked}
-                onClick={() => setBookmarked((b) => !b)}
+                label={
+                  bookmarksOpen
+                    ? "Close highlights"
+                    : "Highlights & notes"
+                }
+                active={bookmarksOpen}
+                onClick={toggleBookmarks}
               >
-                <BookmarkIcon />
+                {bookmarksOpen ? <XIcon /> : <BookmarkIcon />}
               </GlassBubble>
             </div>
 
