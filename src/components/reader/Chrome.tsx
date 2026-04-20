@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { GlassBubble } from "./GlassBubble";
 import { DisplaySettings } from "./DisplaySettings";
+import { ReadingSettings } from "./ReadingSettings";
+import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
 import {
   BookIcon,
@@ -24,6 +26,7 @@ type ChromeProps = {
   chapterSubtitle: string;
   chapters: ChapterMeta[];
   currentId: string;
+  onNavigate: (chapterId: string) => void;
 };
 
 type SettingsTab = "display" | "reading" | "audio";
@@ -45,6 +48,7 @@ export function Chrome({
   chapterSubtitle,
   chapters,
   currentId,
+  onNavigate,
 }: ChromeProps) {
   const isDesktop = useIsDesktop();
   const [visible, setVisible] = useState(true);
@@ -117,6 +121,10 @@ export function Chrome({
         <TocPanel
           chapters={chapters}
           currentId={currentId}
+          onNavigate={(id) => {
+            onNavigate(id);
+            setTocOpen(false);
+          }}
           onClose={() => setTocOpen(false)}
         />
       )}
@@ -233,8 +241,8 @@ export function Chrome({
                 </div>
                 <div>
                   {settingsTab === "display" && <DisplaySettings />}
-                  {settingsTab === "reading" && <ComingSoon name="Reading" />}
-                  {settingsTab === "audio" && <ComingSoon name="Audio" />}
+                  {settingsTab === "reading" && <ReadingSettings />}
+                  {settingsTab === "audio" && <AudioSettings />}
                 </div>
               </div>
             </div>
@@ -301,13 +309,3 @@ function SubTab({
   );
 }
 
-function ComingSoon({ name }: { name: string }) {
-  return (
-    <div
-      className="px-4 py-8 text-center text-[13px]"
-      style={{ color: "var(--ink-tertiary)" }}
-    >
-      {name} settings coming soon
-    </div>
-  );
-}

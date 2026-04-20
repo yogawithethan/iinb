@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import type { ChapterMeta } from "@/content/chapters";
 
 type Props = {
   chapters: ChapterMeta[];
   currentId: string;
+  onNavigate: (chapterId: string) => void;
   onClose: () => void;
 };
 
@@ -20,7 +20,7 @@ function groupByPart(chapters: ChapterMeta[]) {
   return groups;
 }
 
-export function TocPanel({ chapters, currentId, onClose }: Props) {
+export function TocPanel({ chapters, currentId, onNavigate }: Props) {
   const groups = groupByPart(chapters);
 
   return (
@@ -53,13 +53,12 @@ export function TocPanel({ chapters, currentId, onClose }: Props) {
               <ul className="space-y-1">
                 {g.items.map((c) => {
                   const isCurrent = c.id === currentId;
-                  const href = `/read/${c.id}`;
                   return (
                     <li key={c.id}>
-                      <Link
-                        href={href}
-                        onClick={onClose}
-                        className="flex items-start justify-between gap-3 rounded-xl px-3 py-3 transition-colors"
+                      <button
+                        type="button"
+                        onClick={() => onNavigate(c.id)}
+                        className="flex w-full items-start justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors"
                         style={{
                           background: isCurrent
                             ? "var(--accent-soft)"
@@ -71,16 +70,16 @@ export function TocPanel({ chapters, currentId, onClose }: Props) {
                               : "var(--ink-secondary)",
                         }}
                       >
-                        <div className="min-w-0 flex-1">
-                          <div
-                            className="truncate text-[14px] font-medium"
+                        <span className="min-w-0 flex-1">
+                          <span
+                            className="block truncate text-[14px]"
                             style={{ fontWeight: isCurrent ? 600 : 500 }}
                           >
                             {c.title}
-                          </div>
+                          </span>
                           {c.subtitle ? (
-                            <div
-                              className="mt-0.5 truncate text-[12px] italic"
+                            <span
+                              className="mt-0.5 block truncate text-[12px] italic"
                               style={{
                                 color: isCurrent
                                   ? "var(--accent-ink)"
@@ -89,9 +88,9 @@ export function TocPanel({ chapters, currentId, onClose }: Props) {
                               }}
                             >
                               {c.subtitle}
-                            </div>
+                            </span>
                           ) : null}
-                        </div>
+                        </span>
                         {!c.isFree ? (
                           <svg
                             width="12"
@@ -102,7 +101,7 @@ export function TocPanel({ chapters, currentId, onClose }: Props) {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            aria-label="Not yet unlocked"
+                            aria-label="Locked (paid chapter)"
                             style={{
                               color: "var(--ink-tertiary)",
                               flexShrink: 0,
@@ -113,7 +112,7 @@ export function TocPanel({ chapters, currentId, onClose }: Props) {
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                           </svg>
                         ) : null}
-                      </Link>
+                      </button>
                     </li>
                   );
                 })}

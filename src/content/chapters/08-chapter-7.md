@@ -2,7 +2,7 @@
 id: ch7
 order: 8
 title: "Chapter 7: Vision"
-subtitle: ""
+subtitle: "The Kingdom"
 part: "Part III — Wings"
 isFree: false
 ---

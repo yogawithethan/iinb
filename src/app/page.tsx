@@ -1,22 +1,7 @@
-import { Chrome } from "@/components/reader/Chrome";
-import { ReaderView } from "@/components/reader/ReaderView";
-import { getFirstChapter, listChapters } from "@/content/chapters";
+import { ReaderShell } from "@/components/reader/ReaderShell";
+import { getAllChapters } from "@/content/chapters";
 
 export default async function Home() {
-  const [chapter, chapters] = await Promise.all([
-    getFirstChapter(),
-    listChapters(),
-  ]);
-
-  return (
-    <main className="reader-scroll min-h-[100dvh] w-full">
-      <ReaderView chapter={chapter} />
-      <Chrome
-        chapterTitle={chapter.title}
-        chapterSubtitle={chapter.subtitle}
-        chapters={chapters}
-        currentId={chapter.id}
-      />
-    </main>
-  );
+  const chapters = await getAllChapters();
+  return <ReaderShell chapters={chapters} />;
 }

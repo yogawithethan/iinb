@@ -1,8 +1,8 @@
 ---
 id: ch9
 order: 10
-title: "Chapter 9: The New Earth"
-subtitle: ""
+title: "Chapter 9: Ascension"
+subtitle: "The New Earth"
 part: "Part III — Wings"
 isFree: false
 ---

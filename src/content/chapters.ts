@@ -67,6 +67,14 @@ export async function getChapter(id: string): Promise<Chapter | null> {
   return { ...row.meta, blocks, isEmpty: blocks.length === 0 };
 }
 
+export async function getAllChapters(): Promise<Chapter[]> {
+  const rows = await readAll();
+  return rows.map((r) => {
+    const blocks = parseBlocks(r.content);
+    return { ...r.meta, blocks, isEmpty: blocks.length === 0 };
+  });
+}
+
 export async function getFirstChapter(): Promise<Chapter> {
   const rows = await readAll();
   const first = rows[0];

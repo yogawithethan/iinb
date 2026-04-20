@@ -2,16 +2,12 @@
 id: ch1
 order: 2
 title: "Chapter 1: Pleasure"
-subtitle: "Thirst Trap"
+subtitle: "Annica"
 part: "Part I — Comatosed"
 isFree: false
 ---
 
-<!-- Paste Chapter 1 here. -->
-
-# Chapter 1 : Pleasure
-## — Anicca —
-                                                                                                    
+<!-- Paste Chapter 1 here. -->                                                                                    
 
 Despite all the persuasive chatter from biohackers and AI evangelists, your body and mind will grow old and die. Even if it ends up taking a few hundreds years longer than biologically orchestrated, it is one of two things you can be absolutely certain about.
 How any of us can sleepwalk our way through life without really taking this fact to heart is a true mystery. Perhaps we are blocked by misguided faith, or by a belief that such contemplation is a waste of precious time, or by our simply looking too busy for the shock of mortality to come say hi. Whatever the reason, it can sometimes take an agonizingly large series of unfortunate events before one wakes up to the fact that, ultimately, what one calls ‘my life’ is effectively outside ’my control,’ and that, really, one needs to get to the bottom of the human predicament ASAP.

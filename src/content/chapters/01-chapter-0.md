@@ -2,20 +2,9 @@
 id: ch0
 order: 1
 title: "Chapter 0: Ignorance"
-subtitle: "The Water We Swim In"
-part: ""
+part: "Prologue"
 isFree: true
----
-
-<!-- Paste Chapter 0 here.
-
-Formatting:
-  _italic_   **bold**   # Heading   > Blockquote   ---  (section break)
-
-Delete this comment or paste beneath it. -->
-
-# Chapter 0 : Ignorance
-                                                                                                    
+---                                                                                                   
 
 There is a child, born to a small village set deep in the western wilderness, thousands of miles away from civilization. Perhaps we call this little village ’Ignorance,’ not as an insult, but as a simple fact, for the child and community grow up knowing only what the environment calls for: how to survive the cold, how to hunt, how to tend fire. Sure, living conditions in Ignorance are quite harsh by modern standards, but because no one remembers anything different, no one has any motivation to leave or change.
 This village has existed in isolation for so long that not even the elders carry stories of the past anymore. Accordingly, there is only what one is told is here and nothing more. A few villagers have left over the generations, seeking something beyond the tree line, but because none have returned, it only confirms what everyone already claims to know: nothing worthwhile exists outside of Ignorance.

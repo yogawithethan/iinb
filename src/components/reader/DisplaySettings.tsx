@@ -11,12 +11,10 @@ const THEME_CARDS: { id: Theme; label: string; bg: string; ink: string }[] = [
 ];
 
 export function DisplaySettings() {
-  const { theme, setTheme, fontFamily, setFontFamily, fontSize, setFontSize } =
-    useReaderSettings();
+  const { theme, fontFamily, fontSize, update } = useReaderSettings();
 
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
-      {/* Theme cards */}
       <section>
         <h3
           className="mb-2 text-[11px] font-medium uppercase tracking-[0.08em]"
@@ -31,11 +29,10 @@ export function DisplaySettings() {
               <button
                 key={t.id}
                 type="button"
-                onClick={() => setTheme(t.id)}
+                onClick={() => update({ theme: t.id })}
                 aria-pressed={selected}
                 className={clsx(
-                  "flex flex-col items-center gap-1.5 rounded-[14px] p-2 transition-all",
-                  "active:scale-95",
+                  "flex flex-col items-center gap-1.5 rounded-[14px] p-2 transition-all active:scale-95",
                 )}
                 style={{
                   border: selected
@@ -72,7 +69,6 @@ export function DisplaySettings() {
         </div>
       </section>
 
-      {/* Font size */}
       <section>
         <div className="mb-2 flex items-center justify-between">
           <h3
@@ -102,7 +98,7 @@ export function DisplaySettings() {
             max={28}
             step={1}
             value={fontSize}
-            onChange={(e) => setFontSize(Number(e.target.value))}
+            onChange={(e) => update({ fontSize: Number(e.target.value) })}
             aria-label="Text size"
             className="iinb-slider flex-1"
           />
@@ -116,7 +112,6 @@ export function DisplaySettings() {
         </div>
       </section>
 
-      {/* Font family */}
       <section>
         <h3
           className="mb-2 text-[11px] font-medium uppercase tracking-[0.08em]"
@@ -131,7 +126,7 @@ export function DisplaySettings() {
               <button
                 key={f}
                 type="button"
-                onClick={() => setFontFamily(f)}
+                onClick={() => update({ fontFamily: f })}
                 aria-pressed={selected}
                 className="rounded-[12px] px-3 py-2.5 text-[14px] transition-all active:scale-[0.98]"
                 style={{

@@ -1,8 +1,8 @@
 ---
 id: ch2
 order: 3
-title: "Chapter 2: Superior"
-subtitle: "Confirmation"
+title: "Chapter 2: Confirmation"
+subtitle: "Dukkha"
 part: "Part I — Comatosed"
 isFree: false
 ---

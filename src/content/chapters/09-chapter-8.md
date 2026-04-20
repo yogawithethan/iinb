@@ -2,7 +2,7 @@
 id: ch8
 order: 9
 title: "Chapter 8: Union"
-subtitle: ""
+subtitle: "The Christ"
 part: "Part III — Wings"
 isFree: false
 ---

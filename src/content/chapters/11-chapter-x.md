@@ -3,7 +3,7 @@ id: chx
 order: 11
 title: "Chapter X: Bliss"
 subtitle: ""
-part: "Part III — Wings"
+part: "Epilogue"
 isFree: false
 ---
 
