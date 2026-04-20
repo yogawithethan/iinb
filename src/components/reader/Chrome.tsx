@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GlassBubble } from "./GlassBubble";
 import { DisplaySettings } from "./DisplaySettings";
 import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
 import { SearchPanel } from "./SearchPanel";
+import { PaywallProvider } from "./PaywallContext";
 import { useOpenableState } from "@/hooks/useOpenableState";
+import { useReaderSettings } from "./SettingsContext";
 import type { Chapter } from "@/content/chapters";
 import {
   BookIcon,
@@ -70,6 +72,7 @@ export function Chrome({
   onOpenPaywall,
 }: ChromeProps) {
   const isDesktop = useIsDesktop();
+  const { purchased } = useReaderSettings();
   const [visible, setVisible] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("display");
@@ -77,6 +80,18 @@ export function Chrome({
   const [searchOpen, setSearchOpen] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const hideTimer = useRef<number | null>(null);
+
+  const paywallValue = useMemo(
+    () => ({
+      openPaywall: () => {
+        setSettingsOpen(false);
+        setTocOpen(false);
+        setSearchOpen(false);
+        onOpenPaywall();
+      },
+    }),
+    [onOpenPaywall],
+  );
 
   const settingsAnim = useOpenableState(settingsOpen, 200);
   const tocAnim = useOpenableState(tocOpen, 250);
@@ -158,7 +173,7 @@ export function Chrome({
   }
 
   return (
-    <>
+    <PaywallProvider value={paywallValue}>
       {/* Shared backdrop — blurs page when either TOC or Settings is open,
           and closes on click so anywhere-outside dismisses the panel. */}
       {anyPanelMounted && (
@@ -357,10 +372,11 @@ export function Chrome({
           </div>
         </div>
 
-        {/* BOTTOM MASK */}
+        {/* BOTTOM MASK — only show the gradient fade when the paywall is
+            NOT active (paywall handles its own fade). Bubbles always visible. */}
         <div
           onClick={handleStageClick}
-          className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom transition-opacity duration-300 ease-out"
+          className={`pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] transition-opacity duration-300 ease-out ${purchased ? "" : ""}`}
           style={{ opacity: effectiveVisible ? 1 : 0 }}
         >
           <div
@@ -401,7 +417,7 @@ export function Chrome({
           </div>
         </div>
       </div>
-    </>
+    </PaywallProvider>
   );
 }
 

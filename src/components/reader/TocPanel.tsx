@@ -61,7 +61,7 @@ export function TocPanel({
                   onClick={() =>
                     partLocked ? onOpenPaywall() : onNavigate(g.part!.id)
                   }
-                  className="mb-1.5 block w-full rounded-lg px-2 py-1 text-left text-[10px] font-medium uppercase tracking-[0.16em] transition-colors hover:opacity-80"
+                  className="toc-part mb-1.5 block w-full rounded-lg px-2 py-1 text-left text-[10px] font-medium uppercase tracking-[0.16em] transition-colors"
                   style={{
                     color: "var(--ink-tertiary)",
                     opacity: partLocked ? 0.55 : 1,
@@ -83,62 +83,62 @@ export function TocPanel({
                   const isLocked = !purchased && !c.isFree;
                   return (
                     <li key={c.id}>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            isLocked ? onOpenPaywall() : onNavigate(c.id)
-                          }
-                          className="flex flex-1 items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
-                          style={{
-                            background: isCurrent
-                              ? "var(--accent-soft)"
-                              : "transparent",
-                            color: isCurrent
-                              ? "var(--accent-ink)"
-                              : isLocked
-                                ? "var(--ink-tertiary)"
-                                : "var(--ink)",
-                            opacity: isLocked ? 0.55 : 1,
-                          }}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          isLocked ? onOpenPaywall() : onNavigate(c.id)
+                        }
+                        aria-label={
+                          isLocked ? `${c.title} (locked — unlock premium)` : c.title
+                        }
+                        data-current={isCurrent}
+                        className="toc-row flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
+                        style={{
+                          background: isCurrent
+                            ? "var(--accent-soft)"
+                            : "transparent",
+                          color: isCurrent
+                            ? "var(--accent-ink)"
+                            : "var(--ink)",
+                        }}
+                      >
+                        <span
+                          className="min-w-0 flex-1"
+                          style={{ opacity: isLocked ? 0.6 : 1 }}
                         >
-                          <span className="min-w-0 flex-1">
-                            <span
-                              className="block truncate text-[13px]"
-                              style={{ fontWeight: isCurrent ? 600 : 500 }}
-                            >
-                              {c.title}
-                            </span>
-                            {c.subtitle ? (
-                              <span
-                                className="mt-0.5 block truncate text-[11px] italic"
-                                style={{
-                                  color: isCurrent
-                                    ? "var(--accent-ink)"
-                                    : "var(--ink-secondary)",
-                                  opacity: isCurrent ? 0.85 : 1,
-                                }}
-                              >
-                                {c.subtitle}
-                              </span>
-                            ) : null}
+                          <span
+                            className="block truncate text-[13px]"
+                            style={{ fontWeight: isCurrent ? 600 : 500 }}
+                          >
+                            {c.title}
                           </span>
-                        </button>
+                          {c.subtitle ? (
+                            <span
+                              className="mt-0.5 block truncate text-[11px] italic"
+                              style={{
+                                color: isCurrent
+                                  ? "var(--accent-ink)"
+                                  : "var(--ink-secondary)",
+                                opacity: isCurrent ? 0.85 : 1,
+                              }}
+                            >
+                              {c.subtitle}
+                            </span>
+                          ) : null}
+                        </span>
                         {isLocked && (
-                          <button
-                            type="button"
-                            onClick={onOpenPaywall}
-                            aria-label="Unlock premium"
-                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full transition-transform active:scale-90"
+                          <span
+                            aria-hidden
+                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full"
                             style={{
                               background: "var(--accent-soft)",
                               color: "var(--accent-ink)",
                             }}
                           >
                             <LockIcon size={12} />
-                          </button>
+                          </span>
                         )}
-                      </div>
+                      </button>
                     </li>
                   );
                 })}

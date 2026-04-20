@@ -162,6 +162,36 @@ body {
 .paywall-header:hover {
   background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
+
+/* TOC rows: hover highlights the whole bar. Current row keeps its
+   accent-soft background. */
+.toc-row {
+  cursor: pointer;
+}
+.toc-row:not([data-current="true"]):hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.toc-part {
+  cursor: pointer;
+}
+.toc-part:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+/* Locked rows: hover gets a subtle accent wash and border shift */
+.paywall-locked-row {
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+.paywall-locked-row:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--accent) 35%,
+    var(--pill-border)
+  ) !important;
+}
 .paywall-price-compact:hover {
   filter: brightness(1.15);
 }

@@ -21,14 +21,20 @@ export function PaywallSticky({ expanded, onToggle, onOpenLicense }: Props) {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[30]">
-      {/* Very soft edge so the card's top border isn't a hard cut.
-          Text above simply continues behind the card. */}
+      {/* Long, smooth fade so text disappears gradually behind the card
+          — no visible horizontal cutoff line. */}
       <div
         aria-hidden="true"
         style={{
-          height: 28,
-          background:
-            "linear-gradient(to top, var(--bg) 0%, color-mix(in srgb, var(--bg) 50%, transparent) 100%)",
+          height: 110,
+          background: `linear-gradient(
+            to top,
+            var(--bg) 0%,
+            var(--bg) 30%,
+            color-mix(in srgb, var(--bg) 72%, transparent) 60%,
+            color-mix(in srgb, var(--bg) 36%, transparent) 82%,
+            color-mix(in srgb, var(--bg) 0%, transparent) 100%
+          )`,
         }}
       />
       <div className="w-full" style={{ background: "var(--bg)" }}>
@@ -36,7 +42,7 @@ export function PaywallSticky({ expanded, onToggle, onOpenLicense }: Props) {
           className="pointer-events-auto mx-auto w-full px-6 md:px-10"
           style={{ maxWidth: `${WIDTH_PX[readingWidth]}px` }}
         >
-          <div className="pb-[104px] md:pb-[112px]">
+          <div className="pb-[24px] md:pb-[28px]">
             <PaywallCard
               expanded={expanded}
               onToggle={onToggle}

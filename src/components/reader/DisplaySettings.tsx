@@ -7,7 +7,11 @@ import {
 } from "./SettingsContext";
 import { LockedRow, SectionLabel, ToggleRow } from "./SettingsPrimitives";
 import { ColorPicker } from "./ColorPicker";
+import { LockIcon } from "./icons";
+import { usePaywall } from "./PaywallContext";
 import clsx from "clsx";
+
+const PREMIUM_THEMES = new Set<Theme>(["sepia", "oled"]);
 
 const DEFAULT_ACCENTS_BY_THEME: Record<Theme, string> = {
   light: "#2563eb",
@@ -39,6 +43,7 @@ export function DisplaySettings() {
     purchased,
     update,
   } = useReaderSettings();
+  const paywall = usePaywall();
   const currentAccent =
     accentColor ?? DEFAULT_ACCENTS_BY_THEME[theme] ?? "#2563eb";
 
@@ -54,20 +59,27 @@ export function DisplaySettings() {
         <div className="grid grid-cols-4 gap-2">
           {THEME_CARDS.map((t) => {
             const selected = theme === t.id;
+            const isLocked = !purchased && PREMIUM_THEMES.has(t.id);
             return (
               <button
                 key={t.id}
                 type="button"
-                onClick={() => update({ theme: t.id })}
+                onClick={() =>
+                  isLocked
+                    ? paywall?.openPaywall()
+                    : update({ theme: t.id })
+                }
                 aria-pressed={selected}
+                aria-label={isLocked ? `${t.label} (premium)` : t.label}
                 className={clsx(
-                  "flex flex-col items-center gap-1.5 rounded-[14px] p-2 transition-all active:scale-95",
+                  "relative flex flex-col items-center gap-1.5 rounded-[14px] p-2 transition-all active:scale-95",
                 )}
                 style={{
                   border: selected
                     ? "1.5px solid var(--accent)"
                     : "1px solid var(--pill-border)",
                   background: selected ? "var(--accent-soft)" : "transparent",
+                  cursor: "pointer",
                 }}
               >
                 <span
@@ -77,6 +89,7 @@ export function DisplaySettings() {
                     background: t.bg,
                     color: t.ink,
                     border: "1px solid rgba(0,0,0,0.06)",
+                    opacity: isLocked ? 0.55 : 1,
                   }}
                 >
                   Aa
@@ -88,10 +101,23 @@ export function DisplaySettings() {
                       ? "var(--accent-ink)"
                       : "var(--ink-secondary)",
                     fontWeight: selected ? 600 : 500,
+                    opacity: isLocked ? 0.65 : 1,
                   }}
                 >
                   {t.label}
                 </span>
+                {isLocked && (
+                  <span
+                    aria-hidden
+                    className="absolute right-1.5 top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full"
+                    style={{
+                      background: "var(--accent-soft)",
+                      color: "var(--accent-ink)",
+                    }}
+                  >
+                    <LockIcon size={10} />
+                  </span>
+                )}
               </button>
             );
           })}

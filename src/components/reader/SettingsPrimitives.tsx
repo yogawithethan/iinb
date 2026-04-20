@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { LockIcon } from "./icons";
+import { usePaywall } from "./PaywallContext";
 
 /* ---------------- Section header ---------------- */
 export function SectionLabel({ children }: { children: ReactNode }) {
@@ -68,13 +69,12 @@ export function LockedRow({
   label: string;
   description?: string;
 }) {
-  return (
-    <div
-      className="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5"
-      style={{ border: "1px solid var(--pill-border)" }}
-      aria-disabled="true"
-    >
-      <span className="min-w-0 flex-1 pr-3">
+  const paywall = usePaywall();
+  const clickable = !!paywall;
+
+  const body = (
+    <>
+      <span className="min-w-0 flex-1 pr-3 text-left">
         <span
           className="block text-[13px] font-medium"
           style={{ color: "var(--ink-tertiary)" }}
@@ -101,6 +101,30 @@ export function LockedRow({
         <LockIcon size={12} />
         Premium
       </span>
+    </>
+  );
+
+  if (clickable) {
+    return (
+      <button
+        type="button"
+        onClick={() => paywall.openPaywall()}
+        aria-label={`${label} — unlock premium`}
+        className="paywall-locked-row flex w-full items-center justify-between rounded-[12px] px-3 py-2.5 text-left transition-colors"
+        style={{ border: "1px solid var(--pill-border)", cursor: "pointer" }}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5"
+      style={{ border: "1px solid var(--pill-border)" }}
+      aria-disabled="true"
+    >
+      {body}
     </div>
   );
 }
