@@ -117,6 +117,30 @@ body {
   color: var(--ink);
 }
 
+/* In-chapter section headers (from `##`/`###` in the markdown) */
+.reader-prose .reader-heading {
+  font-family: var(--font-lora), ui-serif, Georgia, serif;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+.reader-prose .reader-heading--h1 {
+  font-size: 1.55em;
+  margin-top: 2.6em;
+  margin-bottom: 1em;
+}
+.reader-prose .reader-heading--h2 {
+  font-size: 1.3em;
+  margin-top: 2.4em;
+  margin-bottom: 0.9em;
+}
+.reader-prose .reader-heading--h3 {
+  font-size: 1.1em;
+  margin-top: 2em;
+  margin-bottom: 0.7em;
+}
+
 /* Bionic reading: bolder fixation prefix on each word */
 .reader-prose b.iinb-bionic {
   font-weight: 700;

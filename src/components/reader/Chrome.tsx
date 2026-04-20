@@ -6,7 +6,9 @@ import { DisplaySettings } from "./DisplaySettings";
 import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
+import { SearchPanel } from "./SearchPanel";
 import { useOpenableState } from "@/hooks/useOpenableState";
+import type { Chapter } from "@/content/chapters";
 import {
   BookIcon,
   BookmarkIcon,
@@ -34,9 +36,11 @@ type ChromeProps = {
   chapterTitle: string;
   chapterSubtitle: string;
   chapters: ChapterMeta[];
+  searchableChapters: Chapter[];
   parts: PartMeta[];
   currentId: string;
   onNavigate: (chapterId: string) => void;
+  onNavigateParagraph: (anchor: string) => void;
 };
 
 type SettingsTab = "display" | "reading" | "audio";
@@ -57,50 +61,60 @@ export function Chrome({
   chapterTitle,
   chapterSubtitle,
   chapters,
+  searchableChapters,
   parts,
   currentId,
   onNavigate,
+  onNavigateParagraph,
 }: ChromeProps) {
   const isDesktop = useIsDesktop();
   const [visible, setVisible] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("display");
   const [tocOpen, setTocOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const hideTimer = useRef<number | null>(null);
 
   const settingsAnim = useOpenableState(settingsOpen, 200);
   const tocAnim = useOpenableState(tocOpen, 250);
+  const searchAnim = useOpenableState(searchOpen, 220);
+  const anyPanelOpen = settingsOpen || tocOpen || searchOpen;
+  const anyPanelMounted =
+    settingsAnim.mounted || tocAnim.mounted || searchAnim.mounted;
+  const anyPanelAnimating =
+    settingsAnim.animate || tocAnim.animate || searchAnim.animate;
 
-  const effectiveVisible =
-    isDesktop || visible || settingsOpen || tocOpen;
+  const effectiveVisible = isDesktop || visible || anyPanelOpen;
 
   useEffect(() => {
-    if (isDesktop || settingsOpen || tocOpen) return;
+    if (isDesktop || anyPanelOpen) return;
     function onScroll() {
       setVisible(false);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [isDesktop, settingsOpen, tocOpen]);
+  }, [isDesktop, anyPanelOpen]);
 
   useEffect(() => {
-    if (isDesktop || !visible || settingsOpen || tocOpen) return;
+    if (isDesktop || !visible || anyPanelOpen) return;
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
     hideTimer.current = window.setTimeout(() => setVisible(false), 4000);
     return () => {
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
-  }, [visible, settingsOpen, tocOpen, isDesktop]);
+  }, [visible, anyPanelOpen, isDesktop]);
+
+  function closeAllPanels() {
+    setSettingsOpen(false);
+    setTocOpen(false);
+    setSearchOpen(false);
+  }
 
   function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target !== e.currentTarget) return;
-    if (settingsOpen) {
-      setSettingsOpen(false);
-      return;
-    }
-    if (tocOpen) {
-      setTocOpen(false);
+    if (anyPanelOpen) {
+      closeAllPanels();
       return;
     }
     if (isDesktop) return;
@@ -114,6 +128,7 @@ export function Chrome({
       setSettingsOpen(true);
       setSettingsTab("display");
       setTocOpen(false);
+      setSearchOpen(false);
       setVisible(true);
     }
   }
@@ -124,72 +139,144 @@ export function Chrome({
     } else {
       setTocOpen(true);
       setSettingsOpen(false);
+      setSearchOpen(false);
       setVisible(true);
     }
   }
 
-  const topPad = settingsOpen ? "min-h-[500px]" : "min-h-[140px]";
+  function toggleSearch() {
+    if (searchOpen) {
+      setSearchOpen(false);
+    } else {
+      setSearchOpen(true);
+      setSettingsOpen(false);
+      setTocOpen(false);
+      setVisible(true);
+    }
+  }
 
   return (
     <>
-      {tocAnim.mounted && (
-        <>
-          {/* Backdrop — blurs page, clicks close TOC */}
-          <div
-            aria-hidden="true"
-            onClick={() => setTocOpen(false)}
-            className="pointer-events-auto fixed inset-0 z-[45] transition-opacity duration-[250ms]"
-            style={{
-              backdropFilter: "blur(14px) saturate(1.1)",
-              WebkitBackdropFilter: "blur(14px) saturate(1.1)",
-              background: "color-mix(in srgb, var(--bg) 35%, transparent)",
-              opacity: tocAnim.animate ? 1 : 0,
-            }}
-          />
-          {/* Popover capsule — above chrome stage so it anchors under the TOC bubble */}
-          <div
-            className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-start md:px-8 lg:px-12"
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[250ms] ease-out"
-              style={{
-                maxHeight: "calc(100vh - 100px)",
-                opacity: tocAnim.animate ? 1 : 0,
-                transform: tocAnim.animate
-                  ? "scale(1) translateY(0)"
-                  : "scale(0.95) translateY(-8px)",
-                transformOrigin: isDesktop ? "top left" : "top center",
-              }}
-            >
-              <TocPanel
-                chapters={chapters}
-                parts={parts}
-                currentId={currentId}
-                onNavigate={(id) => {
-                  onNavigate(id);
-                  setTocOpen(false);
-                }}
-              />
-            </div>
-          </div>
-        </>
-      )}
-
-      {settingsOpen && (
+      {/* Shared backdrop — blurs page when either TOC or Settings is open,
+          and closes on click so anywhere-outside dismisses the panel. */}
+      {anyPanelMounted && (
         <div
           aria-hidden="true"
-          onClick={() => setSettingsOpen(false)}
-          className="pointer-events-auto fixed inset-0 z-[45] transition-opacity duration-200"
+          onClick={closeAllPanels}
+          className="pointer-events-auto fixed inset-0 z-[45] transition-opacity duration-[220ms]"
           style={{
             backdropFilter: "blur(14px) saturate(1.1)",
             WebkitBackdropFilter: "blur(14px) saturate(1.1)",
             background: "color-mix(in srgb, var(--bg) 35%, transparent)",
-            opacity: settingsAnim.animate ? 1 : 0,
+            opacity: anyPanelAnimating ? 1 : 0,
           }}
         />
       )}
 
+      {/* TOC popover — anchored top-left on desktop, centered on mobile */}
+      {tocAnim.mounted && (
+        <div className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-start md:px-8 lg:px-12">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
+            style={{
+              maxHeight: "55vh",
+              opacity: tocAnim.animate ? 1 : 0,
+              transform: tocAnim.animate
+                ? "scale(1) translateY(0)"
+                : "scale(0.95) translateY(-8px)",
+              transformOrigin: isDesktop ? "top left" : "top center",
+            }}
+          >
+            <TocPanel
+              chapters={chapters}
+              parts={parts}
+              currentId={currentId}
+              onNavigate={(id) => {
+                onNavigate(id);
+                setTocOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Search popover — anchored bottom-right on desktop, centered on mobile */}
+      {searchAnim.mounted && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[84px] z-[55] flex justify-center px-4 md:justify-end md:px-8 lg:px-12">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
+            style={{
+              maxHeight: "55vh",
+              opacity: searchAnim.animate ? 1 : 0,
+              transform: searchAnim.animate
+                ? "scale(1) translateY(0)"
+                : "scale(0.95) translateY(8px)",
+              transformOrigin: isDesktop ? "bottom right" : "bottom center",
+            }}
+          >
+            <SearchPanel
+              chapters={searchableChapters}
+              onNavigate={(anchor) => {
+                onNavigateParagraph(anchor);
+                setSearchOpen(false);
+              }}
+              onClose={() => setSearchOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Settings popover — anchored top-right on desktop, centered on mobile */}
+      {settingsAnim.mounted && (
+        <div className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-end md:px-8 lg:px-12">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-capsule pointer-events-auto flex w-full max-w-[420px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[200ms] ease-out"
+            style={{
+              maxHeight: "calc(100vh - 120px)",
+              opacity: settingsAnim.animate ? 1 : 0,
+              transform: settingsAnim.animate
+                ? "scale(1) translateY(0)"
+                : "scale(0.95) translateY(-8px)",
+              transformOrigin: isDesktop ? "top right" : "top center",
+            }}
+          >
+            <div
+              className="flex items-center justify-center gap-2 px-3 py-3"
+              style={{ borderBottom: "1px solid var(--card-border)" }}
+            >
+              <SubTab
+                label="Display"
+                active={settingsTab === "display"}
+                onClick={() => setSettingsTab("display")}
+                icon={<SunIcon />}
+              />
+              <SubTab
+                label="Reading"
+                active={settingsTab === "reading"}
+                onClick={() => setSettingsTab("reading")}
+                icon={<BookIcon />}
+              />
+              <SubTab
+                label="Audio"
+                active={settingsTab === "audio"}
+                onClick={() => setSettingsTab("audio")}
+                icon={<MusicIcon />}
+              />
+            </div>
+            <div className="overflow-y-auto">
+              {settingsTab === "display" && <DisplaySettings />}
+              {settingsTab === "reading" && <ReadingSettings />}
+              {settingsTab === "audio" && <AudioSettings />}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chrome stage — only bubbles + mask gradients now; panels live
+          outside of it as proper sibling popovers. */}
       <div
         aria-hidden={effectiveVisible ? "false" : "true"}
         className="pointer-events-none fixed inset-0 z-50"
@@ -197,10 +284,18 @@ export function Chrome({
         {/* TOP MASK */}
         <div
           onClick={handleStageClick}
-          className={`pointer-events-auto absolute inset-x-0 top-0 ${topPad} mask-top transition-[min-height,opacity] duration-300 ease-out`}
+          className="pointer-events-auto absolute inset-x-0 top-0 min-h-[140px] mask-top transition-opacity duration-300 ease-out"
           style={{ opacity: effectiveVisible ? 1 : 0 }}
         >
-          <div className="relative flex h-[88px] w-full items-start justify-between px-4 pt-4 md:px-8 md:pt-6 lg:px-12">
+          <div
+            onClick={(e) => {
+              // Empty space in the bubble row should also close panels.
+              if (e.target === e.currentTarget && anyPanelOpen) {
+                closeAllPanels();
+              }
+            }}
+            className="relative flex h-[88px] w-full items-start justify-between px-4 pt-4 md:px-8 md:pt-6 lg:px-12"
+          >
             <div className="flex items-center gap-2">
               <GlassBubble
                 label={tocOpen ? "Close contents" : "Table of contents"}
@@ -211,7 +306,7 @@ export function Chrome({
               </GlassBubble>
               <GlassBubble
                 label={bookmarked ? "Remove bookmark" : "Bookmark this page"}
-                dimmed={settingsOpen || tocOpen}
+                dimmed={anyPanelOpen}
                 active={bookmarked}
                 onClick={() => setBookmarked((b) => !b)}
               >
@@ -254,51 +349,6 @@ export function Chrome({
               </GlassBubble>
             </div>
           </div>
-
-          {settingsAnim.mounted && (
-            <div className="flex w-full justify-center px-4 pb-4 md:justify-end md:px-8 lg:px-12">
-              <div
-                className="glass-capsule w-full max-w-[420px] overflow-hidden rounded-[22px] transition-[opacity,transform] duration-200 ease-out"
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  opacity: settingsAnim.animate ? 1 : 0,
-                  transform: settingsAnim.animate
-                    ? "scale(1) translateY(0)"
-                    : "scale(0.95) translateY(-8px)",
-                  transformOrigin: isDesktop ? "top right" : "top center",
-                }}
-              >
-                <div
-                  className="flex items-center justify-center gap-2 px-3 py-3"
-                  style={{ borderBottom: "1px solid var(--card-border)" }}
-                >
-                  <SubTab
-                    label="Display"
-                    active={settingsTab === "display"}
-                    onClick={() => setSettingsTab("display")}
-                    icon={<SunIcon />}
-                  />
-                  <SubTab
-                    label="Reading"
-                    active={settingsTab === "reading"}
-                    onClick={() => setSettingsTab("reading")}
-                    icon={<BookIcon />}
-                  />
-                  <SubTab
-                    label="Audio"
-                    active={settingsTab === "audio"}
-                    onClick={() => setSettingsTab("audio")}
-                    icon={<MusicIcon />}
-                  />
-                </div>
-                <div>
-                  {settingsTab === "display" && <DisplaySettings />}
-                  {settingsTab === "reading" && <ReadingSettings />}
-                  {settingsTab === "audio" && <AudioSettings />}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* BOTTOM MASK */}
@@ -307,17 +357,38 @@ export function Chrome({
           className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom transition-opacity duration-300 ease-out"
           style={{ opacity: effectiveVisible ? 1 : 0 }}
         >
-          <div className="flex h-[88px] w-full items-end justify-between px-4 pb-4 md:px-8 md:pb-6 lg:px-12">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget && anyPanelOpen) {
+                closeAllPanels();
+              }
+            }}
+            className="flex h-[88px] w-full items-end justify-between px-4 pb-4 md:px-8 md:pb-6 lg:px-12"
+          >
             <div className="flex items-center gap-2">
-              <GlassBubble label="Play narration" size="lg" onClick={() => {}}>
+              <GlassBubble
+                label="Play narration"
+                size="lg"
+                dimmed={anyPanelOpen}
+                onClick={() => {}}
+              >
                 <PlayIcon />
               </GlassBubble>
             </div>
             <div className="flex items-center gap-2">
-              <GlassBubble label="Search" onClick={() => {}}>
-                <SearchIcon />
+              <GlassBubble
+                label={searchOpen ? "Close search" : "Search"}
+                active={searchOpen}
+                dimmed={settingsOpen || tocOpen}
+                onClick={toggleSearch}
+              >
+                {searchOpen ? <XIcon /> : <SearchIcon />}
               </GlassBubble>
-              <GlassBubble label="Share" onClick={() => {}}>
+              <GlassBubble
+                label="Share"
+                dimmed={anyPanelOpen}
+                onClick={() => {}}
+              >
                 <ShareIcon />
               </GlassBubble>
             </div>

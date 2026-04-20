@@ -129,3 +129,40 @@ export function MusicIcon(p: IconProps) {
     </Svg>
   );
 }
+
+export function EyeIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </Svg>
+  );
+}
+
+export function RefreshIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M21 12a9 9 0 1 1-3.5-7.1" />
+      <polyline points="21 4 21 10 15 10" />
+    </Svg>
+  );
+}
+
+export function InfoIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="9" />
+      <line x1="12" y1="11" x2="12" y2="16" />
+      <circle cx="12" cy="8" r="0.4" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
+
+export function LockIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="4" y="11" width="16" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </Svg>
+  );
+}

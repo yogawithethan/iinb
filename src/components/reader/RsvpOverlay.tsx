@@ -20,7 +20,7 @@ function htmlToText(html: string): string {
 function buildStream(nodes: ReaderNode[]): WordEntry[] {
   const out: WordEntry[] = [];
   for (const node of nodes) {
-    if (node.kind === "part") continue; // skip part title pages from RSVP
+    if (node.kind !== "chapter") continue; // skip dedication + part title pages
     const { chapter } = node;
     for (let i = 0; i < chapter.blocks.length; i++) {
       const b = chapter.blocks[i];

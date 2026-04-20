@@ -2,6 +2,7 @@
 
 import type { ChapterMeta } from "@/content/chapters";
 import type { PartMeta } from "./Chrome";
+import { useReaderSettings } from "./SettingsContext";
 
 type Props = {
   chapters: ChapterMeta[];
@@ -28,7 +29,11 @@ function buildGroups(chapters: ChapterMeta[], parts: PartMeta[]): Group[] {
 }
 
 export function TocPanel({ chapters, parts, currentId, onNavigate }: Props) {
-  const groups = buildGroups(chapters, parts);
+  const { purchased } = useReaderSettings();
+  const visibleChapters = purchased
+    ? chapters
+    : chapters.filter((c) => c.isFree);
+  const groups = buildGroups(visibleChapters, parts);
 
   return (
     <div className="overflow-y-auto px-4 py-4" style={{ maxHeight: "inherit" }}>
@@ -72,11 +77,7 @@ export function TocPanel({ chapters, parts, currentId, onNavigate }: Props) {
                         background: isCurrent
                           ? "var(--accent-soft)"
                           : "transparent",
-                        color: isCurrent
-                          ? "var(--accent-ink)"
-                          : c.isFree
-                            ? "var(--ink)"
-                            : "var(--ink-secondary)",
+                        color: isCurrent ? "var(--accent-ink)" : "var(--ink)",
                       }}
                     >
                       <span className="min-w-0 flex-1">
@@ -100,26 +101,6 @@ export function TocPanel({ chapters, parts, currentId, onNavigate }: Props) {
                           </span>
                         ) : null}
                       </span>
-                      {!c.isFree ? (
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-label="Locked (paid chapter)"
-                          style={{
-                            color: "var(--ink-tertiary)",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <rect x="3" y="11" width="18" height="11" rx="2" />
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                      ) : null}
                     </button>
                   </li>
                 );

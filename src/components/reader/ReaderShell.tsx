@@ -22,6 +22,9 @@ export function ReaderShell({ stream }: Props) {
   const anchors: Anchor[] = useMemo(
     () =>
       nodes.map((n) => {
+        if (n.kind === "dedication") {
+          return { id: n.dedication.id, title: "", subtitle: "" };
+        }
         if (n.kind === "part") {
           return {
             id: n.part.id,
@@ -102,6 +105,13 @@ export function ReaderShell({ stream }: Props) {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  const navigateParagraph = useCallback((anchor: string) => {
+    const el = document.querySelector<HTMLElement>(
+      `[data-p-anchor="${CSS.escape(anchor)}"]`,
+    );
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, []);
+
   return (
     <>
       <main className="reader-scroll min-h-[100dvh] w-full">
@@ -111,9 +121,11 @@ export function ReaderShell({ stream }: Props) {
         chapterTitle={active?.title ?? ""}
         chapterSubtitle={active?.subtitle ?? ""}
         chapters={chapterMetas}
+        searchableChapters={chapters}
         parts={partMetas}
         currentId={activeId}
         onNavigate={navigateTo}
+        onNavigateParagraph={navigateParagraph}
       />
       <RsvpOverlay nodes={nodes} />
     </>

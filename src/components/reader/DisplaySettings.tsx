@@ -5,6 +5,7 @@ import {
   type ReadingWidth,
   type Theme,
 } from "./SettingsContext";
+import { SectionLabel, ToggleRow } from "./SettingsPrimitives";
 import clsx from "clsx";
 
 const THEME_CARDS: { id: Theme; label: string; bg: string; ink: string }[] = [
@@ -21,7 +22,7 @@ const WIDTH_OPTIONS: { id: ReadingWidth; label: string }[] = [
 ];
 
 export function DisplaySettings() {
-  const { theme, fontFamily, fontSize, readingWidth, update } =
+  const { theme, fontFamily, fontSize, readingWidth, purchased, update } =
     useReaderSettings();
 
   return (
@@ -195,6 +196,16 @@ export function DisplaySettings() {
             );
           })}
         </div>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <SectionLabel>Access (preview)</SectionLabel>
+        <ToggleRow
+          label="Premium unlocked"
+          description="Simulates a paid account. Unlocks paid chapters, hides lock icons."
+          value={purchased}
+          onChange={(v) => update({ purchased: v })}
+        />
       </section>
 
       <style jsx>{`

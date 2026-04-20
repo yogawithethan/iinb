@@ -1,13 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
 import { useReaderSettings, type ReadingWidth } from "./SettingsContext";
 import { BlockRenderer } from "./BlockRenderer";
 import { PartTitleSection } from "./PartTitleSection";
+import { DedicationSection } from "./DedicationSection";
+import { PaywallCard } from "./PaywallCard";
 import { bionify } from "./bionic";
 import type { Chapter } from "@/content/chapters";
 import type { ReaderNode } from "@/content/stream";
 
-type Props = { nodes: ReaderNode[] };
+type Props = {
+  nodes: ReaderNode[];
+  onOpenLicense?: () => void;
+};
 
 const WIDTH_PX: Record<ReadingWidth, number> = {
   narrow: 560,
@@ -15,8 +21,28 @@ const WIDTH_PX: Record<ReadingWidth, number> = {
   wide: 820,
 };
 
-export function ReaderView({ nodes }: Props) {
-  const { fontSize, readingWidth, bionicReading } = useReaderSettings();
+export function ReaderView({ nodes, onOpenLicense }: Props) {
+  const { fontSize, readingWidth, bionicReading, purchased } =
+    useReaderSettings();
+
+  // When not purchased, stop rendering at the first paid chapter.
+  const { visibleNodes, showPaywall } = useMemo(() => {
+    if (purchased) return { visibleNodes: nodes, showPaywall: false };
+    const kept: ReaderNode[] = [];
+    let hitPaid = false;
+    for (const n of nodes) {
+      if (n.kind === "chapter" && !n.chapter.isFree) {
+        hitPaid = true;
+        break;
+      }
+      if (n.kind === "part") {
+        // Skip part title pages too — they belong to paid content.
+        break;
+      }
+      kept.push(n);
+    }
+    return { visibleNodes: kept, showPaywall: hitPaid };
+  }, [nodes, purchased]);
 
   return (
     <div
@@ -26,9 +52,19 @@ export function ReaderView({ nodes }: Props) {
         maxWidth: `${WIDTH_PX[readingWidth]}px`,
       }}
     >
-      {nodes.map((node, idx) => {
+      {visibleNodes.map((node, idx) => {
+        if (node.kind === "dedication") {
+          return (
+            <DedicationSection
+              key={`dedication-${node.dedication.id}`}
+              dedication={node.dedication}
+            />
+          );
+        }
         if (node.kind === "part") {
-          return <PartTitleSection key={`part-${node.part.id}`} part={node.part} />;
+          return (
+            <PartTitleSection key={`part-${node.part.id}`} part={node.part} />
+          );
         }
         return (
           <ChapterSection
@@ -39,6 +75,10 @@ export function ReaderView({ nodes }: Props) {
           />
         );
       })}
+
+      {showPaywall && (
+        <PaywallCard onAlreadyPurchased={onOpenLicense} />
+      )}
     </div>
   );
 }

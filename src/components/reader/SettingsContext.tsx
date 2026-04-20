@@ -29,6 +29,8 @@ export type ReaderSettings = {
   autoScrollWithAudio: boolean;
   sleepTimer: SleepTimer;
   skipInterval: SkipInterval;
+  /** Dev flag that simulates a logged-in, purchased reader. */
+  purchased: boolean;
 };
 
 type Ctx = ReaderSettings & {
@@ -42,6 +44,7 @@ const DEFAULTS: ReaderSettings = {
   fontFamily: "serif",
   fontSize: 18,
   readingWidth: "medium",
+  purchased: false,
   scrollMode: "scroll",
   bionicReading: false,
   rsvpEnabled: false,
@@ -80,6 +83,7 @@ function sanitize(raw: Partial<ReaderSettings>): ReaderSettings {
     ),
     sleepTimer: (raw.sleepTimer as SleepTimer) ?? DEFAULTS.sleepTimer,
     skipInterval: (raw.skipInterval as SkipInterval) ?? DEFAULTS.skipInterval,
+    purchased: Boolean(raw.purchased ?? DEFAULTS.purchased),
   };
 }
 

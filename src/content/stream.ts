@@ -2,8 +2,10 @@ import "server-only";
 
 import { getAllChapters, type Chapter } from "./chapters";
 import { getAllParts, type Part } from "./parts";
+import { getDedication, type Dedication } from "./dedication";
 
 export type ReaderNode =
+  | { kind: "dedication"; dedication: Dedication }
   | { kind: "part"; part: Part }
   | { kind: "chapter"; chapter: Chapter };
 
@@ -11,15 +13,20 @@ export type ReaderStream = {
   nodes: ReaderNode[];
   chapters: Chapter[];
   parts: Part[];
+  dedication: Dedication | null;
 };
 
 export async function getReaderStream(): Promise<ReaderStream> {
-  const [chapters, parts] = await Promise.all([
+  const [chapters, parts, dedication] = await Promise.all([
     getAllChapters(),
     getAllParts(),
+    getDedication(),
   ]);
 
   const nodes: ReaderNode[] = [];
+
+  if (dedication) nodes.push({ kind: "dedication", dedication });
+
   let lastPart = "";
   for (const chapter of chapters) {
     if (chapter.part && chapter.part !== lastPart) {
@@ -30,5 +37,5 @@ export async function getReaderStream(): Promise<ReaderStream> {
     nodes.push({ kind: "chapter", chapter });
   }
 
-  return { nodes, chapters, parts };
+  return { nodes, chapters, parts, dedication };
 }

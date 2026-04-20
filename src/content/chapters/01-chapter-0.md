@@ -2,7 +2,7 @@
 id: ch0
 order: 1
 title: "Chapter 0: Ignorance"
-part: "Prologue"
+part: "Introduction"
 isFree: true
 ---                                                                                                   
 

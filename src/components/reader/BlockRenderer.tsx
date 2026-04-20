@@ -5,8 +5,10 @@ type Props = { block: ChapterBlock; anchor?: string };
 export function BlockRenderer({ block, anchor }: Props) {
   switch (block.type) {
     case "heading": {
+      const cls = `reader-heading reader-heading--h${block.level}`;
       const common = {
         "data-p-anchor": anchor,
+        className: cls,
         dangerouslySetInnerHTML: { __html: block.html },
       };
       if (block.level === 1) return <h1 {...common} />;
