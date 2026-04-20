@@ -1,7 +1,12 @@
 "use client";
 
 import { useReaderSettings, type SleepTimer, type SkipInterval } from "./SettingsContext";
-import { PillGroup, SectionLabel, ToggleRow } from "./SettingsPrimitives";
+import {
+  LockedRow,
+  PillGroup,
+  SectionLabel,
+  ToggleRow,
+} from "./SettingsPrimitives";
 
 const SLEEP_OPTIONS: { value: SleepTimer; label: string }[] = [
   { value: null, label: "Off" },
@@ -24,6 +29,7 @@ export function AudioSettings() {
     autoScrollWithAudio,
     sleepTimer,
     skipInterval,
+    purchased,
     update,
   } = useReaderSettings();
 
@@ -31,18 +37,33 @@ export function AudioSettings() {
     <div className="flex flex-col gap-5 px-4 py-4">
       <section className="flex flex-col gap-2">
         <SectionLabel>Narration</SectionLabel>
-        <ToggleRow
-          label="Karaoke highlighting"
-          description="Highlight each word as it's narrated."
-          value={karaokeHighlight}
-          onChange={(v) => update({ karaokeHighlight: v })}
-        />
-        <ToggleRow
-          label="Auto-scroll with audio"
-          description="Keep the current word centered as narration plays."
-          value={autoScrollWithAudio}
-          onChange={(v) => update({ autoScrollWithAudio: v })}
-        />
+        {purchased ? (
+          <>
+            <ToggleRow
+              label="Karaoke highlighting"
+              description="Highlight each word as it's narrated."
+              value={karaokeHighlight}
+              onChange={(v) => update({ karaokeHighlight: v })}
+            />
+            <ToggleRow
+              label="Auto-scroll with audio"
+              description="Keep the current word centered as narration plays."
+              value={autoScrollWithAudio}
+              onChange={(v) => update({ autoScrollWithAudio: v })}
+            />
+          </>
+        ) : (
+          <>
+            <LockedRow
+              label="Karaoke highlighting"
+              description="Highlight each word as it's narrated."
+            />
+            <LockedRow
+              label="Auto-scroll with audio"
+              description="Keep the current word centered as narration plays."
+            />
+          </>
+        )}
       </section>
 
       <section>

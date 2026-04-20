@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { LockIcon } from "./icons";
 
 /* ---------------- Section header ---------------- */
 export function SectionLabel({ children }: { children: ReactNode }) {
@@ -56,6 +57,51 @@ export function ToggleRow({
       </span>
       <Switch value={value} />
     </button>
+  );
+}
+
+/* ---------------- Locked row (paywalled toggle) ---------------- */
+export function LockedRow({
+  label,
+  description,
+}: {
+  label: string;
+  description?: string;
+}) {
+  return (
+    <div
+      className="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5"
+      style={{ border: "1px solid var(--pill-border)" }}
+      aria-disabled="true"
+    >
+      <span className="min-w-0 flex-1 pr-3">
+        <span
+          className="block text-[13px] font-medium"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          {label}
+        </span>
+        {description ? (
+          <span
+            className="mt-0.5 block text-[11px] leading-snug"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
+            {description}
+          </span>
+        ) : null}
+      </span>
+      <span
+        className="flex flex-shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.1em]"
+        style={{
+          color: "var(--ink-tertiary)",
+          background:
+            "color-mix(in srgb, var(--ink-tertiary) 14%, transparent)",
+        }}
+      >
+        <LockIcon size={12} />
+        Premium
+      </span>
+    </div>
   );
 }
 

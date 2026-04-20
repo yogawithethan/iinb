@@ -61,7 +61,12 @@ export function PaywallCard({ onPurchase, onAlreadyPurchased }: Props) {
   }
 
   return (
-    <div className="my-16">
+    <div
+      id="paywall"
+      data-chapter-anchor="paywall"
+      className="my-16"
+      style={{ scrollMarginTop: "120px" }}
+    >
       <div
         className="w-full overflow-hidden rounded-[20px] transition-[box-shadow] duration-200"
         style={{

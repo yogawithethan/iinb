@@ -2,12 +2,12 @@
 
 import { useReaderSettings } from "./SettingsContext";
 import {
+  LockedRow,
   PillGroup,
   SectionLabel,
   SliderRow,
   ToggleRow,
 } from "./SettingsPrimitives";
-import { LockIcon } from "./icons";
 
 export function ReadingSettings() {
   const {
@@ -45,38 +45,19 @@ export function ReadingSettings() {
 
       <section className="flex flex-col gap-3">
         <SectionLabel>RSVP</SectionLabel>
-        <div className="relative">
+        {purchased ? (
           <ToggleRow
             label="Rapid serial presentation"
             description="One word at a time, centered on screen."
-            value={rsvpEnabled && purchased}
-            onChange={(v) => {
-              if (!purchased) return;
-              update({ rsvpEnabled: v });
-            }}
+            value={rsvpEnabled}
+            onChange={(v) => update({ rsvpEnabled: v })}
           />
-          {!purchased && (
-            <div
-              className="pointer-events-none absolute inset-0 flex items-center justify-end rounded-[12px] pr-4"
-              style={{
-                background:
-                  "color-mix(in srgb, var(--bg) 55%, transparent)",
-              }}
-            >
-              <span
-                className="flex items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.1em]"
-                style={{
-                  color: "var(--ink-tertiary)",
-                  background:
-                    "color-mix(in srgb, var(--ink-tertiary) 15%, transparent)",
-                }}
-              >
-                <LockIcon size={12} />
-                Premium
-              </span>
-            </div>
-          )}
-        </div>
+        ) : (
+          <LockedRow
+            label="Rapid serial presentation"
+            description="One word at a time, centered on screen."
+          />
+        )}
         <SliderRow
           label="Speed"
           min={200}
@@ -91,3 +72,4 @@ export function ReadingSettings() {
     </div>
   );
 }
+
