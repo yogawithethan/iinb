@@ -19,3 +19,64 @@ Markdown cheatsheet for the manuscript:
 
 Delete this comment block before pasting, or just paste your text beneath it.
 -->
+# Preface
+
+Okay, so what is this book? I hesitate to say, because whatever I call it will inform how you read it—and there are so many ways to read it wrong.
+
+Call it non-fiction and you'll look for proof. Call it wisdom and you'll expect to automatically get wiser from reading. Call it spiritual and you'll identify with it. Call it prophetic and you'll take it literally.
+
+I want to avoid these pitfalls, so rather than telling you what this book is, let me tell you what it isn't. Perhaps then you will see the forest despite the trees.
+
+This is not a self-help or personal development book, for the Self does not need help, nor the personality need developing to become worthy of living in Bliss. The Bouncer at the gate is not double-checking that you have an attractive body, cool hobbies or trendy opinions; It is checking only that you are righteous and true to your word, both of which automatically get forged while walking along the Path.
+
+This book is also not a scholarly or historical analysis on the teachings of the Buddha, yogic traditions, or Christianity. Solely trying to certify spiritual truths intellectually proves to be as effective as trying to bite your own teeth. Better to actually see for oneself than to think about what might happen when one sees for themselves…you see?
+
+This book is not fantasy or science fiction, either. In fact, quite the opposite. However wild some claims may seem on the surface, metaphysical and spiritual experiences become commonplace as one ventures along the Path. Indeed, they can seem far more real than anything one might normally call reality, especially while they are occurring.
+
+This book is also not an instruction manual on attaining enlightenment. There is no secret formula for becoming free, no shortcuts or "3-step protocols" for transcending the ego. If there were, we'd all be Buddhas by now. No, the whole Path must be both improvised and walked on foot.
+
+By analogy, because the number of potential chessboard configurations and situations is astronomical, chess masters rarely teach specifics—'when they move their rook to C4, always move your pawn to G6'. Instead, they teach their students fundamentals and overall strategy to prepare them for when the opponent makes an unexpected, cunning move.
+
+Ah, if only the mind were as simple as a chess match and not of an all-out cosmic war. And if only the ego—that which distracts or convinces one not to take the next necessary step towards Bliss—were not some kind of military genius! But alas, until one fully abides in the Great City, this is the reality one faces: The ego knows every weakness, desire, flaw, and aversion in the psyche. It has access to one's entire memory bank. It can mimic any voice or conjure any image. It can dodge, deflect, camouflage, and overpower. And perhaps most dangerous of all, when its back is against the wall, it can deploy some damn cute puppy dog eyes.
+
+Nevertheless, there must be a way through. Otherwise the whole setup would be cruel—a war that is fundamentally unwinnable? Who would create such a scenario?
+
+So again: what is this book?
+
+Perhaps it is a gentle tap on the shoulder, pointing out that if contentment is your goal, you're looking in the wrong spot. Or perhaps it will be a basic map—far simpler than the ancient religious traditions, but sufficient to get one walking in the right direction. Maybe it will inspire one to try harder in your seeking. Or maybe inspire you to stop trying to seek so hard. The intention behind each word might serve as an attunement you can feel and align to. Or the book will be seen as merely the author's final vain attempt at putting words to the wordless before he slips across the nirvanic event horizon and disappears forever.
+
+Most likely it will be none of these things, presenting itself as something unique that was not originally intended or planned for, changing in meaning each time the reader engages with it.
+
+This book is written for those of you who perk up at the words "end of suffering," "real peace," and "true happiness." For whatever reason not everyone does, and it is strictly against spiritual law to shake someone by the shoulders to manually rip them out of the dream. Why pick the fruit before it ripens? Why stop the movie before the director yells wrap? If you're ready to make the transition, great. If not, also great.
+
+Moreover, this book is written for those of you with the courage to be led down the Path that the masters so neatly set out for us, even if (when) that Path becomes intensely, mind-crushingly uncomfortable.
+
+Actually, to be more precise, it is written for those of you with a willingness to die for the sake of Truth. Not necessarily a physical death, but certainly an ideological one. In order for one to ascend the mountainous heights where Bliss is located, one needs to forsake all identifications and false idols. All identifications and false idols, not just the obvious ones like possessions and fame. One needs to be stripped bare of any and all ideas that something like safety, being right, being seen, being held, or even being holy will bring lasting fulfillment. They won't. Actually, they can't. At best these identifications kick the can down the road for a future you to let go of. At worst, they generate an intense, black hole of misery that even light cannot penetrate.
+
+By the way, if any of this sounds horrible or exaggerated, rest assured that it is neither. As the heavy chains of misery melt away, one happily discovers that ideological death was nothing to be afraid of, and that all of the so-called sacrifices pale in comparison to the reward waiting on the "other side". Why? Well, as it turns out, the whole process is just a matter of exchanging thoughts which make one miserable for a steady, indescribable experience of quiet presence without anyone present—exchanging ignorance for bliss. Not a bad trade!
+
+Also rest assured that the author (who occasionally is referred to as 'me') is walking the same Path, encountering the same obstacles, and is holding nothing but good will and compassion for his fellow brothers and sisters who have also heard the call. The only potential difference is that the author has momentarily entered the gates of Bliss, and can confirm that it is as Real and amazing as they say it is.
+
+---
+
+This book is split into three parts.
+
+Part 1 attempts to make clear the philosophy of suffering—why it happens, how it happens, and who it actually happens to. It addresses the fact that modernity is fueling our unhappiness and trapping us into an anxious cycle, a cycle that is becoming increasingly difficult to escape from. It is largely based on Buddhist wisdom.
+
+Part 2 tries to detail how one gets free from this cycle. It teaches the fundamentals of physical, mental, emotional and spiritual purification by which the chain reaction of discontentment slows and eventually stops. It draws moreso on the structure and language of yogic thought and practice.
+
+And Part 3 does its best to describe what life is like beyond the purification process, atop the mountain in the city of Bliss. How does one view themselves at this elevation? How does one view others? What might the planet look like once our species abides there? It leans more on Christian terminology and doctrine.
+
+Seen altogether, one may naturally come to the conclusion that, in fact, all Paths are One, and all descriptions of Bliss are the same Ultimate Reality. That is, the masters of each tradition were all pointing to the same moon under the same stars. Sure, the words used to describe the Ignorance, Path and Abiding may have differed—some said _tanha_, _vipassana_ and _nirvana_, some said _klesha_, _tapas_ and _moksha_, and some said sin, atonement and heaven—but fundamentally there is no difference.
+
+Intuiting some backlash about cherry-picking from different traditions to bolster—creating a Frankenstein monster of spiritual ideas, as it were—I will remind the critical eye that the opposite has been happening throughout time. The Buddha's teaching fractures into Theravada and Mahayana. The life of Krishna inspired yoga which has fragmented into Hatha, Kriya, Kundalini, Bhakti and a long list. The man who inspired Christianity has had his teachings rupture into orthodox and protestantism, which has further prismed into Baptist, Mormon, Methodist, Presbyterian and so on.
+
+I'm reminded of the often-recalled story of the blind men who attempt to describe the Elephant. One feels the tail and says it's like a brush; another the tusks and claims it's a spear. Saying what something is _like_ is not saying what that something _is_. Or imagine three doctors examining the same patient. One orders bloodwork, one an MRI, and one evaluates psychological history. This is not cherry-picking medical opinions—it's trying to understand the multidimensionality of the problem within the patient. Three witnesses are describing the same event: one reports actions, one reports motivations, one reports emotional impact. If someone says "these testimonies contradict each other," a good judge replies: "they describe different dimensions of the same occurrence." A complex aircraft can be analyzed by its aerodynamics, materials science, control systems, and fuel chemistry. A topographic map, political map and climate map of the same region contradict each other visually, while emphasizing different features, and are useless if mistaken for the territory. This book is not a verdict on God, reality or salvation; it's how truth appears from different interior positions. The Holy Spirit is the Great Comforter is the Cosmic Om is equanimity itself.
+
+Different traditions are not competing answers to the same exact questions. They are answers to subtly different questions as arise in the mind of the seeker.
+
+Better still, by virtue of continuous practice and surrender, one may actually experience the Great Realization for oneself, after which case the book loses all necessity.
+
+And that, dear reader, would be the greatest outcome I could hope for.
+
+*Ethan Hill, December 2025 ॐ*

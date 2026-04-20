@@ -90,10 +90,20 @@ function parseBlocks(md: string): ChapterBlock[] {
     switch (t.type) {
       case "paragraph": {
         const p = t as Tokens.Paragraph;
-        out.push({
-          type: "paragraph",
-          html: marked.parseInline(p.text) as string,
-        });
+        // Docx-pasted prose often separates paragraphs with single newlines
+        // rather than blank lines; split each line into its own paragraph
+        // so the page renders as discrete <p> elements (also lines us up
+        // for future per-paragraph audio tap targets).
+        const lines = p.text
+          .split(/\n/)
+          .map((l) => l.trim())
+          .filter(Boolean);
+        for (const line of lines) {
+          out.push({
+            type: "paragraph",
+            html: marked.parseInline(line) as string,
+          });
+        }
         break;
       }
       case "heading": {

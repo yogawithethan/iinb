@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GlassBubble } from "./GlassBubble";
 import { DisplaySettings } from "./DisplaySettings";
+import { TocPanel } from "./TocPanel";
 import {
   BookIcon,
   BookmarkIcon,
@@ -16,49 +17,73 @@ import {
   TocIcon,
   XIcon,
 } from "./icons";
+import type { ChapterMeta } from "@/content/chapters";
 
 type ChromeProps = {
   chapterTitle: string;
   chapterSubtitle: string;
+  chapters: ChapterMeta[];
+  currentId: string;
 };
 
-type SettingsTab = "display" | "reading" | "audio" | null;
+type SettingsTab = "display" | "reading" | "audio";
 
-export function Chrome({ chapterTitle, chapterSubtitle }: ChromeProps) {
+function useIsDesktop(): boolean {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return isDesktop;
+}
+
+export function Chrome({
+  chapterTitle,
+  chapterSubtitle,
+  chapters,
+  currentId,
+}: ChromeProps) {
+  const isDesktop = useIsDesktop();
   const [visible, setVisible] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("display");
+  const [tocOpen, setTocOpen] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
-
   const hideTimer = useRef<number | null>(null);
 
-  // Auto-hide chrome after a few seconds of inactivity (mimics the spec's
-  // "tap to reveal, scroll to dismiss" feel). Scrolling also dismisses.
+  const effectiveVisible =
+    isDesktop || visible || settingsOpen || tocOpen;
+
+  // Scroll-to-dismiss (mobile only, and not while a panel is open)
   useEffect(() => {
+    if (isDesktop || settingsOpen || tocOpen) return;
     function onScroll() {
-      if (settingsOpen) return;
       setVisible(false);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [settingsOpen]);
+  }, [isDesktop, settingsOpen, tocOpen]);
 
+  // Auto-hide after inactivity (mobile only)
   useEffect(() => {
-    if (!visible || settingsOpen) return;
+    if (isDesktop || !visible || settingsOpen || tocOpen) return;
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
     hideTimer.current = window.setTimeout(() => setVisible(false), 4000);
     return () => {
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
-  }, [visible, settingsOpen]);
+  }, [visible, settingsOpen, tocOpen, isDesktop]);
 
   function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
-    // Only toggle when clicking the transparent stage, not the bubbles themselves.
     if (e.target !== e.currentTarget) return;
     if (settingsOpen) {
       setSettingsOpen(false);
       return;
     }
+    if (isDesktop) return;
     setVisible((v) => !v);
   }
 
@@ -68,172 +93,178 @@ export function Chrome({ chapterTitle, chapterSubtitle }: ChromeProps) {
     } else {
       setSettingsOpen(true);
       setSettingsTab("display");
+      setTocOpen(false);
       setVisible(true);
     }
   }
 
-  const topPad = settingsOpen ? "min-h-[420px]" : "min-h-[140px]";
+  function toggleToc() {
+    if (tocOpen) {
+      setTocOpen(false);
+    } else {
+      setTocOpen(true);
+      setSettingsOpen(false);
+      setVisible(true);
+    }
+  }
+
+  const topPad = settingsOpen ? "min-h-[440px]" : "min-h-[140px]";
 
   return (
-    <div
-      aria-hidden={!visible && !settingsOpen ? "true" : "false"}
-      className="pointer-events-none fixed inset-0 z-40"
-    >
-      {/* Tap-stage — covers the whole screen but only receives pointer events
-          via the chrome pieces. The top/bottom mask zones accept taps to
-          toggle chrome; the middle passes through to the text. */}
+    <>
+      {/* TOC full-page takeover (below chrome so bubbles stay tappable) */}
+      {tocOpen && (
+        <TocPanel
+          chapters={chapters}
+          currentId={currentId}
+          onClose={() => setTocOpen(false)}
+        />
+      )}
 
-      {/* TOP MASK + BUBBLES */}
+      {/* Settings backdrop: blurs the page and closes on outside click */}
+      {settingsOpen && (
+        <div
+          aria-hidden="true"
+          onClick={() => setSettingsOpen(false)}
+          className="pointer-events-auto fixed inset-0 z-[45] transition-opacity duration-200"
+          style={{
+            backdropFilter: "blur(14px) saturate(1.1)",
+            WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+            background: "color-mix(in srgb, var(--bg) 35%, transparent)",
+          }}
+        />
+      )}
+
+      {/* Chrome stage (always on top) */}
       <div
-        onClick={handleStageClick}
-        className={`pointer-events-auto absolute inset-x-0 top-0 ${topPad} mask-top transition-[min-height,opacity] duration-300 ease-out`}
-        style={{
-          opacity: visible || settingsOpen ? 1 : 0,
-        }}
+        aria-hidden={effectiveVisible ? "false" : "true"}
+        className="pointer-events-none fixed inset-0 z-50"
       >
-        <div className="relative mx-auto flex h-[88px] max-w-[720px] items-start justify-between px-4 pt-4 md:px-6">
-          {/* Top left bubbles */}
-          <div className="flex items-center gap-2">
-            <GlassBubble
-              label="Table of contents"
-              dimmed={settingsOpen}
-              onClick={() => {
-                /* TOC takeover — to be built next */
-              }}
-            >
-              <TocIcon />
-            </GlassBubble>
-            <GlassBubble
-              label={bookmarked ? "Remove bookmark" : "Bookmark this page"}
-              dimmed={settingsOpen}
-              active={bookmarked}
-              onClick={() => setBookmarked((b) => !b)}
-            >
-              <BookmarkIcon />
-            </GlassBubble>
-          </div>
-
-          {/* Chapter title center */}
-          <div className="pointer-events-none absolute left-1/2 top-5 hidden -translate-x-1/2 text-center sm:block">
-            <div
-              className="text-[14px] font-medium leading-tight"
-              style={{ color: "var(--ink)" }}
-            >
-              {chapterTitle}
+        {/* TOP MASK + bubbles */}
+        <div
+          onClick={handleStageClick}
+          className={`pointer-events-auto absolute inset-x-0 top-0 ${topPad} mask-top transition-[min-height,opacity] duration-300 ease-out`}
+          style={{ opacity: effectiveVisible ? 1 : 0 }}
+        >
+          <div className="relative mx-auto flex h-[88px] max-w-[720px] items-start justify-between px-4 pt-4 md:px-6">
+            {/* Top-left */}
+            <div className="flex items-center gap-2">
+              <GlassBubble
+                label={tocOpen ? "Close contents" : "Table of contents"}
+                active={tocOpen}
+                onClick={toggleToc}
+              >
+                {tocOpen ? <XIcon /> : <TocIcon />}
+              </GlassBubble>
+              <GlassBubble
+                label={bookmarked ? "Remove bookmark" : "Bookmark this page"}
+                dimmed={settingsOpen || tocOpen}
+                active={bookmarked}
+                onClick={() => setBookmarked((b) => !b)}
+              >
+                <BookmarkIcon />
+              </GlassBubble>
             </div>
-            <div
-              className="mt-0.5 text-[12px] italic"
-              style={{ color: "var(--ink-secondary)" }}
-            >
-              {chapterSubtitle}
-            </div>
-          </div>
 
-          {/* Top right bubbles */}
-          <div className="flex items-center gap-2">
-            <GlassBubble
-              label={settingsOpen ? "Close settings" : "Open settings"}
-              active={settingsOpen}
-              onClick={toggleSettings}
-            >
-              {settingsOpen ? <XIcon /> : <GearIcon />}
-            </GlassBubble>
-            <GlassBubble
-              label="Ask the book (AI)"
-              dimmed={settingsOpen}
-              onClick={() => {
-                /* AI takeover — future */
-              }}
-            >
-              <SparkleIcon />
-            </GlassBubble>
-          </div>
-        </div>
-
-        {/* Settings capsule (frosted glass container that visually connects
-            the gear to the sub-bubbles and panel) */}
-        {settingsOpen && (
-          <div className="mx-auto max-w-[420px] px-4 pb-4">
-            <div className="glass-capsule mx-auto mt-1 overflow-hidden rounded-[22px]">
-              {/* Sub-bubble row */}
+            {/* Chapter title center */}
+            <div className="pointer-events-none absolute left-1/2 top-5 hidden -translate-x-1/2 text-center sm:block">
               <div
-                className="flex items-center justify-center gap-2 px-3 py-3"
-                style={{
-                  borderBottom: "1px solid var(--card-border)",
+                className="text-[14px] font-medium leading-tight"
+                style={{ color: "var(--ink)" }}
+              >
+                {chapterTitle}
+              </div>
+              {chapterSubtitle ? (
+                <div
+                  className="mt-0.5 text-[12px] italic"
+                  style={{ color: "var(--ink-secondary)" }}
+                >
+                  {chapterSubtitle}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Top-right */}
+            <div className="flex items-center gap-2">
+              <GlassBubble
+                label={settingsOpen ? "Close settings" : "Open settings"}
+                active={settingsOpen}
+                onClick={toggleSettings}
+              >
+                {settingsOpen ? <XIcon /> : <GearIcon />}
+              </GlassBubble>
+              <GlassBubble
+                label="Ask the book (AI)"
+                onClick={() => {
+                  /* AI takeover — future */
                 }}
               >
-                <SubTab
-                  label="Display"
-                  active={settingsTab === "display"}
-                  onClick={() => setSettingsTab("display")}
-                  icon={<SunIcon />}
-                />
-                <SubTab
-                  label="Reading"
-                  active={settingsTab === "reading"}
-                  onClick={() => setSettingsTab("reading")}
-                  icon={<BookIcon />}
-                />
-                <SubTab
-                  label="Audio"
-                  active={settingsTab === "audio"}
-                  onClick={() => setSettingsTab("audio")}
-                  icon={<MusicIcon />}
-                />
-              </div>
-
-              {/* Panel body */}
-              <div>
-                {settingsTab === "display" && <DisplaySettings />}
-                {settingsTab === "reading" && <ComingSoon name="Reading" />}
-                {settingsTab === "audio" && <ComingSoon name="Audio" />}
-              </div>
+                <SparkleIcon />
+              </GlassBubble>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* BOTTOM MASK + BUBBLES */}
-      <div
-        onClick={handleStageClick}
-        className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom transition-opacity duration-300 ease-out"
-        style={{
-          opacity: visible ? 1 : 0,
-        }}
-      >
-        <div className="mx-auto flex h-[88px] max-w-[720px] items-end justify-between px-4 pb-4 md:px-6">
-          <div className="flex items-center gap-2">
-            <GlassBubble
-              label="Play narration"
-              size="lg"
-              onClick={() => {
-                /* Audio flow — future */
-              }}
-            >
-              <PlayIcon />
-            </GlassBubble>
-          </div>
-          <div className="flex items-center gap-2">
-            <GlassBubble
-              label="Search"
-              onClick={() => {
-                /* Search takeover — future */
-              }}
-            >
-              <SearchIcon />
-            </GlassBubble>
-            <GlassBubble
-              label="Share"
-              onClick={() => {
-                /* Share — future */
-              }}
-            >
-              <ShareIcon />
-            </GlassBubble>
+          {/* Settings capsule */}
+          {settingsOpen && (
+            <div className="mx-auto max-w-[420px] px-4 pb-4">
+              <div className="glass-capsule mx-auto mt-1 overflow-hidden rounded-[22px]">
+                <div
+                  className="flex items-center justify-center gap-2 px-3 py-3"
+                  style={{ borderBottom: "1px solid var(--card-border)" }}
+                >
+                  <SubTab
+                    label="Display"
+                    active={settingsTab === "display"}
+                    onClick={() => setSettingsTab("display")}
+                    icon={<SunIcon />}
+                  />
+                  <SubTab
+                    label="Reading"
+                    active={settingsTab === "reading"}
+                    onClick={() => setSettingsTab("reading")}
+                    icon={<BookIcon />}
+                  />
+                  <SubTab
+                    label="Audio"
+                    active={settingsTab === "audio"}
+                    onClick={() => setSettingsTab("audio")}
+                    icon={<MusicIcon />}
+                  />
+                </div>
+                <div>
+                  {settingsTab === "display" && <DisplaySettings />}
+                  {settingsTab === "reading" && <ComingSoon name="Reading" />}
+                  {settingsTab === "audio" && <ComingSoon name="Audio" />}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* BOTTOM MASK + bubbles */}
+        <div
+          onClick={handleStageClick}
+          className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom transition-opacity duration-300 ease-out"
+          style={{ opacity: effectiveVisible ? 1 : 0 }}
+        >
+          <div className="mx-auto flex h-[88px] max-w-[720px] items-end justify-between px-4 pb-4 md:px-6">
+            <div className="flex items-center gap-2">
+              <GlassBubble label="Play narration" size="lg" onClick={() => {}}>
+                <PlayIcon />
+              </GlassBubble>
+            </div>
+            <div className="flex items-center gap-2">
+              <GlassBubble label="Search" onClick={() => {}}>
+                <SearchIcon />
+              </GlassBubble>
+              <GlassBubble label="Share" onClick={() => {}}>
+                <ShareIcon />
+              </GlassBubble>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -263,9 +294,7 @@ function SubTab({
       }}
     >
       <span aria-hidden>{icon}</span>
-      <span
-        className="text-[10px] font-medium uppercase tracking-[0.06em]"
-      >
+      <span className="text-[10px] font-medium uppercase tracking-[0.06em]">
         {label}
       </span>
     </button>

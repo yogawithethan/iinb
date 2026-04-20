@@ -1,12 +1,24 @@
+import { notFound } from "next/navigation";
 import { Chrome } from "@/components/reader/Chrome";
 import { ReaderView } from "@/components/reader/ReaderView";
-import { getFirstChapter, listChapters } from "@/content/chapters";
+import { getChapter, listChapters } from "@/content/chapters";
 
-export default async function Home() {
+export async function generateStaticParams() {
+  const chapters = await listChapters();
+  return chapters.map((c) => ({ id: c.id }));
+}
+
+export default async function ReadChapter({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const [chapter, chapters] = await Promise.all([
-    getFirstChapter(),
+    getChapter(id),
     listChapters(),
   ]);
+  if (!chapter) notFound();
 
   return (
     <main className="reader-scroll min-h-[100dvh] w-full">
