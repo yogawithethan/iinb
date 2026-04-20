@@ -1,26 +1,165 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------
+   IINB — Design tokens
+   Four themes: light (default), dark, sepia, oled
+--------------------------------------------------------------- */
+
+:root,
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-soft: #fafafa;
+  --ink: #1a1a1a;
+  --ink-secondary: #4a4a4a;
+  --ink-tertiary: #8a8a8a;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --accent-ink: #1d4ed8;
+  --bubble-fill: rgba(255, 255, 255, 0.78);
+  --bubble-border: rgba(0, 0, 0, 0.08);
+  --bubble-ink: #1a1a1a;
+  --mask-stop: rgba(255, 255, 255, 1);
+  --card-border: rgba(0, 0, 0, 0.1);
+  --pill-border: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  --bg: #121214;
+  --bg-soft: #18181b;
+  --ink: #ededed;
+  --ink-secondary: #b4b4b4;
+  --ink-tertiary: #707070;
+  --accent: #60a5fa;
+  --accent-soft: rgba(96, 165, 250, 0.18);
+  --accent-ink: #93c5fd;
+  --bubble-fill: rgba(40, 40, 44, 0.72);
+  --bubble-border: rgba(255, 255, 255, 0.08);
+  --bubble-ink: #ededed;
+  --mask-stop: rgba(18, 18, 20, 1);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --pill-border: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="sepia"] {
+  --bg: #f5ecd7;
+  --bg-soft: #efe4c7;
+  --ink: #3a2a17;
+  --ink-secondary: #6b523a;
+  --ink-tertiary: #9c8566;
+  --accent: #b4653a;
+  --accent-soft: rgba(180, 101, 58, 0.18);
+  --accent-ink: #8a4a26;
+  --bubble-fill: rgba(255, 249, 232, 0.78);
+  --bubble-border: rgba(58, 42, 23, 0.1);
+  --bubble-ink: #3a2a17;
+  --mask-stop: rgba(245, 236, 215, 1);
+  --card-border: rgba(58, 42, 23, 0.14);
+  --pill-border: rgba(58, 42, 23, 0.18);
+}
+
+[data-theme="oled"] {
+  --bg: #000000;
+  --bg-soft: #0a0a0a;
+  --ink: #f2f2f2;
+  --ink-secondary: #a8a8a8;
+  --ink-tertiary: #5a5a5a;
+  --accent: #6ba6ff;
+  --accent-soft: rgba(107, 166, 255, 0.18);
+  --accent-ink: #9cc3ff;
+  --bubble-fill: rgba(28, 28, 30, 0.72);
+  --bubble-border: rgba(255, 255, 255, 0.08);
+  --bubble-ink: #f2f2f2;
+  --mask-stop: rgba(0, 0, 0, 1);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --pill-border: rgba(255, 255, 255, 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-accent: var(--accent);
+  --font-serif: var(--font-lora);
+  --font-sans: var(--font-inter);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Book text: serif by default, sans when [data-reading-font="sans"] */
+[data-reading-font="sans"] .reader-prose {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.reader-prose {
+  font-family: var(--font-lora), ui-serif, Georgia, "Times New Roman", serif;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.reader-prose p + p {
+  margin-top: 1.1em;
+}
+
+.reader-prose h1,
+.reader-prose h2,
+.reader-prose h3 {
+  font-family: var(--font-lora), ui-serif, Georgia, serif;
+  color: var(--ink);
+}
+
+/* Hide scrollbars on webkit for a cleaner chrome-free feel */
+.reader-scroll::-webkit-scrollbar {
+  display: none;
+}
+.reader-scroll {
+  scrollbar-width: none;
+}
+
+/* Glass bubble primitive */
+.glass-bubble {
+  background: var(--bubble-fill);
+  border: 0.5px solid var(--bubble-border);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  color: var(--bubble-ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.glass-capsule {
+  background: var(--bubble-fill);
+  border: 0.5px solid var(--bubble-border);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Gradient masks that fade page text behind the chrome */
+.mask-top {
+  background: linear-gradient(
+    to bottom,
+    var(--mask-stop) 0%,
+    var(--mask-stop) 45%,
+    color-mix(in srgb, var(--mask-stop) 60%, transparent) 75%,
+    transparent 100%
+  );
+}
+
+.mask-bottom {
+  background: linear-gradient(
+    to top,
+    var(--mask-stop) 0%,
+    var(--mask-stop) 45%,
+    color-mix(in srgb, var(--mask-stop) 60%, transparent) 75%,
+    transparent 100%
+  );
 }

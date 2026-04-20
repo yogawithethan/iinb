@@ -1,0 +1,195 @@
+"use client";
+
+import { useReaderSettings, type Theme } from "./SettingsContext";
+import clsx from "clsx";
+
+const THEME_CARDS: { id: Theme; label: string; bg: string; ink: string }[] = [
+  { id: "light", label: "Light", bg: "#ffffff", ink: "#1a1a1a" },
+  { id: "dark", label: "Dark", bg: "#18181b", ink: "#ededed" },
+  { id: "sepia", label: "Sepia", bg: "#f5ecd7", ink: "#3a2a17" },
+  { id: "oled", label: "OLED", bg: "#000000", ink: "#f2f2f2" },
+];
+
+export function DisplaySettings() {
+  const { theme, setTheme, fontFamily, setFontFamily, fontSize, setFontSize } =
+    useReaderSettings();
+
+  return (
+    <div className="flex flex-col gap-5 px-4 py-4">
+      {/* Theme cards */}
+      <section>
+        <h3
+          className="mb-2 text-[11px] font-medium uppercase tracking-[0.08em]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          Theme
+        </h3>
+        <div className="grid grid-cols-4 gap-2">
+          {THEME_CARDS.map((t) => {
+            const selected = theme === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTheme(t.id)}
+                aria-pressed={selected}
+                className={clsx(
+                  "flex flex-col items-center gap-1.5 rounded-[14px] p-2 transition-all",
+                  "active:scale-95",
+                )}
+                style={{
+                  border: selected
+                    ? "1.5px solid var(--accent)"
+                    : "1px solid var(--pill-border)",
+                  background: selected ? "var(--accent-soft)" : "transparent",
+                }}
+              >
+                <span
+                  aria-hidden
+                  className="flex h-10 w-full items-center justify-center rounded-[9px] font-serif text-[15px]"
+                  style={{
+                    background: t.bg,
+                    color: t.ink,
+                    border: "1px solid rgba(0,0,0,0.06)",
+                  }}
+                >
+                  Aa
+                </span>
+                <span
+                  className="text-[11px]"
+                  style={{
+                    color: selected
+                      ? "var(--accent-ink)"
+                      : "var(--ink-secondary)",
+                    fontWeight: selected ? 600 : 500,
+                  }}
+                >
+                  {t.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Font size */}
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h3
+            className="text-[11px] font-medium uppercase tracking-[0.08em]"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
+            Text size
+          </h3>
+          <span
+            className="text-[11px] tabular-nums"
+            style={{ color: "var(--ink-secondary)" }}
+          >
+            {fontSize}px
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden
+            className="font-serif leading-none"
+            style={{ color: "var(--ink-secondary)", fontSize: "13px" }}
+          >
+            A
+          </span>
+          <input
+            type="range"
+            min={12}
+            max={28}
+            step={1}
+            value={fontSize}
+            onChange={(e) => setFontSize(Number(e.target.value))}
+            aria-label="Text size"
+            className="iinb-slider flex-1"
+          />
+          <span
+            aria-hidden
+            className="font-serif leading-none"
+            style={{ color: "var(--ink-secondary)", fontSize: "22px" }}
+          >
+            A
+          </span>
+        </div>
+      </section>
+
+      {/* Font family */}
+      <section>
+        <h3
+          className="mb-2 text-[11px] font-medium uppercase tracking-[0.08em]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          Font
+        </h3>
+        <div className="grid grid-cols-2 gap-2">
+          {(["serif", "sans"] as const).map((f) => {
+            const selected = fontFamily === f;
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFontFamily(f)}
+                aria-pressed={selected}
+                className="rounded-[12px] px-3 py-2.5 text-[14px] transition-all active:scale-[0.98]"
+                style={{
+                  border: selected
+                    ? "1.5px solid var(--accent)"
+                    : "1px solid var(--pill-border)",
+                  background: selected ? "var(--accent-soft)" : "transparent",
+                  color: selected
+                    ? "var(--accent-ink)"
+                    : "var(--ink-secondary)",
+                  fontFamily:
+                    f === "serif"
+                      ? "var(--font-lora), ui-serif, Georgia, serif"
+                      : "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                  fontWeight: selected ? 600 : 500,
+                }}
+              >
+                {f === "serif" ? "Serif" : "Sans-serif"}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <style jsx>{`
+        .iinb-slider {
+          appearance: none;
+          -webkit-appearance: none;
+          height: 4px;
+          border-radius: 999px;
+          background: color-mix(
+            in srgb,
+            var(--ink-tertiary) 35%,
+            transparent
+          );
+          outline: none;
+        }
+        .iinb-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: var(--accent);
+          border: 2px solid var(--bg);
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+        }
+        .iinb-slider::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: var(--accent);
+          border: 2px solid var(--bg);
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
+        }
+      `}</style>
+    </div>
+  );
+}
