@@ -121,6 +121,29 @@ export function Chrome({
     onPanelStateChange?.(anyPanelOpen);
   }, [anyPanelOpen, onPanelStateChange]);
 
+  // ⌘F / Ctrl+F opens the search popover instead of the browser's find bar.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        if (searchOpen) {
+          setSearchOpen(false);
+        } else {
+          setSearchOpen(true);
+          setSettingsOpen(false);
+          setTocOpen(false);
+          setBookmarksOpen(false);
+          setVisible(true);
+        }
+      } else if (e.key === "Escape" && anyPanelOpen) {
+        closeAllPanels();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchOpen, anyPanelOpen]);
+
   useEffect(() => {
     if (isDesktop || anyPanelOpen) return;
     function onScroll() {

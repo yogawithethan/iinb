@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CopyIcon, HighlightIcon, NoteIcon } from "./icons";
+import { CopyIcon, HighlightIcon, NoteIcon, XIcon } from "./icons";
 import { useHighlights } from "./HighlightsContext";
 
 const HIGHLIGHT_NAME = "iinb-highlight";
@@ -44,7 +44,11 @@ export function SelectionPopover() {
   const [apiOk, setApiOk] = useState(true);
   /** Survives the browser clearing the live selection on button click. */
   const rangeRef = useRef<Range | null>(null);
-  const { addHighlight } = useHighlights();
+  const { addHighlight, highlights, removeHighlight } = useHighlights();
+  /** Any existing highlight that overlaps the current selection. Null if
+   * the selection covers only virgin text. */
+  const overlappingIdRef = useRef<string | null>(null);
+  const [overlappingId, setOverlappingId] = useState<string | null>(null);
 
   useEffect(() => {
     setApiOk(highlightsApiSupported());
@@ -53,6 +57,7 @@ export function SelectionPopover() {
   const POPOVER_WIDTH = 220;
 
   const syncFromSelection = useCallback(() => {
+    // Helper must be inside because of the highlights closure.
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount) {
       rangeRef.current = null;
@@ -72,6 +77,26 @@ export function SelectionPopover() {
       return;
     }
     rangeRef.current = range.cloneRange();
+
+    // Detect any existing highlight that intersects this selection.
+    let overlap: string | null = null;
+    for (const h of highlights) {
+      if (!h.range) continue;
+      try {
+        const cmpEnd = range.compareBoundaryPoints(Range.START_TO_END, h.range);
+        const cmpStart = range.compareBoundaryPoints(Range.END_TO_START, h.range);
+        // Overlap = this.start < other.end && this.end > other.start
+        if (cmpEnd > 0 && cmpStart < 0) {
+          overlap = h.id;
+          break;
+        }
+      } catch {
+        // Ranges from detached documents can throw — ignore.
+      }
+    }
+    overlappingIdRef.current = overlap;
+    setOverlappingId(overlap);
+
     const top = Math.max(12, rect.top + window.scrollY - 52);
     const rawLeft = rect.left + window.scrollX + rect.width / 2;
     const half = POPOVER_WIDTH / 2;
@@ -79,7 +104,7 @@ export function SelectionPopover() {
     const maxLeft = window.scrollX + window.innerWidth - half - 12;
     const left = Math.max(minLeft, Math.min(maxLeft, rawLeft));
     setPos({ top, left });
-  }, []);
+  }, [highlights]);
 
   useEffect(() => {
     // Listen to every release event the browser might use. Whichever fires
@@ -113,7 +138,15 @@ export function SelectionPopover() {
     const sel = window.getSelection();
     sel?.removeAllRanges();
     rangeRef.current = null;
+    overlappingIdRef.current = null;
+    setOverlappingId(null);
     setPos(null);
+  }
+
+  function unhighlight() {
+    const id = overlappingIdRef.current;
+    if (id) removeHighlight(id);
+    dismiss();
   }
 
   function highlight() {
@@ -178,19 +211,36 @@ export function SelectionPopover() {
         e.preventDefault();
       }}
     >
-      <button
-        type="button"
-        onClick={highlight}
-        aria-label="Highlight"
-        title="Highlight"
-        className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-        style={{
-          color: "var(--accent-ink)",
-          background: "var(--accent-soft)",
-        }}
-      >
-        <HighlightIcon size={15} />
-      </button>
+      {overlappingId ? (
+        <button
+          type="button"
+          onClick={unhighlight}
+          aria-label="Remove highlight"
+          title="Remove highlight"
+          className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+          style={{
+            color: "var(--ink)",
+            background:
+              "color-mix(in srgb, var(--ink-tertiary) 16%, transparent)",
+          }}
+        >
+          <XIcon size={14} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={highlight}
+          aria-label="Highlight"
+          title="Highlight"
+          className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+          style={{
+            color: "var(--accent-ink)",
+            background: "var(--accent-soft)",
+          }}
+        >
+          <HighlightIcon size={15} />
+        </button>
+      )}
       <button
         type="button"
         onClick={addNote}

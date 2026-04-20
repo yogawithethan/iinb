@@ -75,7 +75,7 @@ export function HighlightsPanel({ onClose }: Props) {
                     type="button"
                     onClick={() => removeHighlight(h.id)}
                     aria-label="Delete"
-                    className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)] group-hover:opacity-100"
+                    className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[color-mix(in_srgb,var(--ink)_8%,transparent)]"
                     style={{ color: "var(--ink-tertiary)" }}
                   >
                     <XIcon size={12} />
