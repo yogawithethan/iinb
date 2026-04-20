@@ -5,6 +5,7 @@ import { ReaderView } from "./ReaderView";
 import { Chrome } from "./Chrome";
 import { RsvpOverlay } from "./RsvpOverlay";
 import { PaywallSticky } from "./PaywallSticky";
+import { SelectionPopover } from "./SelectionPopover";
 import { useReaderSettings } from "./SettingsContext";
 import type { ChapterMeta } from "@/content/chapters";
 import type { Part } from "@/content/parts";
@@ -152,6 +153,7 @@ export function ReaderShell({ stream }: Props) {
         />
       )}
       <RsvpOverlay nodes={nodes} />
+      <SelectionPopover />
     </>
   );
 }

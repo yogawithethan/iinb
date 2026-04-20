@@ -21,8 +21,8 @@ export type ReaderSettings = {
   fontFamily: ReadingFont;
   fontSize: number;
   readingWidth: ReadingWidth;
-  /** Optional override for the accent color. Null = theme default. Hex string. */
-  accentColor: string | null;
+  /** Per-theme accent override. Null = use theme default. */
+  accentByTheme: Record<Theme, string | null>;
   scrollMode: ScrollMode;
   bionicReading: boolean;
   rsvpEnabled: boolean;
@@ -35,6 +35,8 @@ export type ReaderSettings = {
   purchased: boolean;
 };
 
+const ALL_THEMES: readonly Theme[] = ["light", "dark", "sepia", "oled"];
+
 type Ctx = ReaderSettings & {
   update: (patch: Partial<ReaderSettings>) => void;
 };
@@ -46,7 +48,7 @@ const DEFAULTS: ReaderSettings = {
   fontFamily: "serif",
   fontSize: 18,
   readingWidth: "medium",
-  accentColor: null,
+  accentByTheme: { light: null, dark: null, sepia: null, oled: null },
   purchased: false,
   scrollMode: "scroll",
   bionicReading: false,
@@ -67,17 +69,46 @@ function clampWpm(n: number) {
   return Math.max(200, Math.min(800, Math.round(n)));
 }
 
-function sanitize(raw: Partial<ReaderSettings>): ReaderSettings {
+function sanitizeAccents(
+  raw: unknown,
+  legacyAccentColor: unknown,
+  theme: Theme,
+): Record<Theme, string | null> {
+  const out: Record<Theme, string | null> = {
+    light: null,
+    dark: null,
+    sepia: null,
+    oled: null,
+  };
+  const hex = /^#[0-9a-f]{6}$/i;
+  if (raw && typeof raw === "object") {
+    for (const t of ALL_THEMES) {
+      const v = (raw as Record<string, unknown>)[t];
+      if (typeof v === "string" && hex.test(v)) out[t] = v;
+    }
+  }
+  // Migrate legacy `accentColor` (single global) onto the active theme slot.
+  if (
+    typeof legacyAccentColor === "string" &&
+    hex.test(legacyAccentColor) &&
+    out[theme] === null
+  ) {
+    out[theme] = legacyAccentColor;
+  }
+  return out;
+}
+
+function sanitize(
+  raw: Partial<ReaderSettings> & { accentColor?: unknown },
+): ReaderSettings {
+  const theme = (raw.theme as Theme) ?? DEFAULTS.theme;
   return {
-    theme: (raw.theme as Theme) ?? DEFAULTS.theme,
+    theme,
     fontFamily: (raw.fontFamily as ReadingFont) ?? DEFAULTS.fontFamily,
     fontSize: clampSize(raw.fontSize ?? DEFAULTS.fontSize),
     readingWidth:
       (raw.readingWidth as ReadingWidth) ?? DEFAULTS.readingWidth,
-    accentColor:
-      typeof raw.accentColor === "string" && /^#[0-9a-f]{6}$/i.test(raw.accentColor)
-        ? raw.accentColor
-        : null,
+    accentByTheme: sanitizeAccents(raw.accentByTheme, raw.accentColor, theme),
     scrollMode: (raw.scrollMode as ScrollMode) ?? DEFAULTS.scrollMode,
     bionicReading: Boolean(raw.bionicReading ?? DEFAULTS.bionicReading),
     rsvpEnabled: Boolean(raw.rsvpEnabled ?? DEFAULTS.rsvpEnabled),
@@ -122,21 +153,14 @@ export function ReaderSettingsProvider({
       "data-bionic",
       settings.bionicReading ? "on" : "off",
     );
-    // Apply user-selected accent color (or clear to fall back to theme default)
-    if (settings.accentColor) {
-      root.style.setProperty("--accent", settings.accentColor);
-      root.style.setProperty(
-        "--accent-soft",
-        `color-mix(in srgb, ${settings.accentColor} 18%, transparent)`,
-      );
-      root.style.setProperty(
-        "--accent-ink",
-        `color-mix(in srgb, ${settings.accentColor} 80%, black 20%)`,
-      );
+    // Apply per-theme accent override (or clear to fall back to theme default).
+    // --accent-soft and --accent-ink are derived from --accent via color-mix
+    // in globals.css, so we only need to set --accent here.
+    const currentAccent = settings.accentByTheme[settings.theme];
+    if (currentAccent) {
+      root.style.setProperty("--accent", currentAccent);
     } else {
       root.style.removeProperty("--accent");
-      root.style.removeProperty("--accent-soft");
-      root.style.removeProperty("--accent-ink");
     }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));

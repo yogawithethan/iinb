@@ -178,6 +178,25 @@ body {
   background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
+/* Selection popover — highlight color swatch, note, copy */
+.iinb-selpop-btn:hover {
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+/* CSS Highlight API colors for the 4 swatches */
+::highlight(iinb-hl-yellow) {
+  background-color: rgba(255, 228, 118, 0.55);
+}
+::highlight(iinb-hl-blue) {
+  background-color: rgba(143, 202, 255, 0.55);
+}
+::highlight(iinb-hl-green) {
+  background-color: rgba(168, 224, 160, 0.55);
+}
+::highlight(iinb-hl-pink) {
+  background-color: rgba(255, 165, 200, 0.5);
+}
+
 /* Locked rows: hover gets a subtle accent wash and border shift */
 .paywall-locked-row {
   transition:

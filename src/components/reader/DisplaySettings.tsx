@@ -39,13 +39,18 @@ export function DisplaySettings() {
     fontFamily,
     fontSize,
     readingWidth,
-    accentColor,
+    accentByTheme,
     purchased,
     update,
   } = useReaderSettings();
   const paywall = usePaywall();
+  const themeAccent = accentByTheme[theme];
   const currentAccent =
-    accentColor ?? DEFAULT_ACCENTS_BY_THEME[theme] ?? "#2563eb";
+    themeAccent ?? DEFAULT_ACCENTS_BY_THEME[theme] ?? "#2563eb";
+
+  function setAccent(hex: string | null) {
+    update({ accentByTheme: { ...accentByTheme, [theme]: hex } });
+  }
 
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
@@ -249,10 +254,10 @@ export function DisplaySettings() {
           >
             Accent color
           </h3>
-          {purchased && accentColor ? (
+          {purchased && themeAccent ? (
             <button
               type="button"
-              onClick={() => update({ accentColor: null })}
+              onClick={() => setAccent(null)}
               className="text-[11px] underline underline-offset-4 transition-opacity hover:opacity-70"
               style={{ color: "var(--ink-tertiary)" }}
             >
@@ -263,7 +268,7 @@ export function DisplaySettings() {
         {purchased ? (
           <ColorPicker
             value={currentAccent}
-            onChange={(hex) => update({ accentColor: hex })}
+            onChange={(hex) => setAccent(hex)}
           />
         ) : (
           <LockedRow
