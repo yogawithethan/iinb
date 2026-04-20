@@ -188,6 +188,16 @@ body {
   background-color: var(--accent-soft);
 }
 
+/* Glossary terms wrapped inline by the server */
+.gloss-term {
+  border-bottom: 1.5px dashed var(--accent);
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+.gloss-term:hover {
+  background-color: var(--accent-soft);
+}
+
 /* Locked rows: hover gets a subtle accent wash and border shift */
 .paywall-locked-row {
   transition:

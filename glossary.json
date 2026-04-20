@@ -1,0 +1,62 @@
+[
+  {
+    "term": "tanha",
+    "display": "taṇhā",
+    "lang": "Pali",
+    "pronunciation": "TAN-hah",
+    "definition": "Craving, thirst, or desire — in the Buddhist tradition, the force that binds us to suffering by perpetually pulling us toward pleasant experiences and away from unpleasant ones.",
+    "chapter": 1,
+    "order": 1,
+    "also_see": ["dukkha", "nirvana"]
+  },
+  {
+    "term": "dukkha",
+    "display": "dukkha",
+    "lang": "Pali",
+    "pronunciation": "DOO-kha",
+    "definition": "Suffering, unsatisfactoriness, or existential dis-ease — the first of the Buddha's Four Noble Truths.",
+    "chapter": 2,
+    "order": 1,
+    "also_see": ["tanha"]
+  },
+  {
+    "term": "anatta",
+    "display": "anattā",
+    "lang": "Pali",
+    "pronunciation": "an-AT-tah",
+    "definition": "Non-self. The teaching that there is no permanent, unchanging self at the core of one's experience.",
+    "chapter": 3,
+    "order": 1,
+    "also_see": []
+  },
+  {
+    "term": "anicca",
+    "display": "anicca",
+    "lang": "Pali",
+    "pronunciation": "ah-NEE-chah",
+    "definition": "Impermanence. The characteristic of all conditioned phenomena constantly arising and passing away.",
+    "chapter": 1,
+    "order": 2,
+    "also_see": ["dukkha"]
+  },
+  {
+    "term": "nirvana",
+    "display": "nirvāṇa",
+    "lang": "Sanskrit",
+    "pronunciation": "nir-VAH-nah",
+    "definition": "The cessation of suffering; liberation. Literally 'blown out' or 'extinguished' — the quieting of the fires of craving, aversion, and delusion.",
+    "chapter": 1,
+    "order": 3,
+    "also_see": ["tanha", "moksha"]
+  },
+  {
+    "term": "moksha",
+    "display": "mokṣa",
+    "lang": "Sanskrit",
+    "pronunciation": "MOHK-shah",
+    "definition": "Liberation from the cycle of birth and death; release into one's true nature.",
+    "chapter": 4,
+    "order": 1,
+    "also_see": ["nirvana"]
+  }
+]

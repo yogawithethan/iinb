@@ -3,6 +3,8 @@ import "server-only";
 import { getAllChapters, type Chapter } from "./chapters";
 import { getAllParts, type Part } from "./parts";
 import { getDedication, type Dedication } from "./dedication";
+import { getGlossary, type GlossaryEntry } from "./glossary";
+import { wrapGlossaryInChapter } from "./glossaryWrap";
 
 export type ReaderNode =
   | { kind: "dedication"; dedication: Dedication }
@@ -14,14 +16,31 @@ export type ReaderStream = {
   chapters: Chapter[];
   parts: Part[];
   dedication: Dedication | null;
+  glossary: GlossaryEntry[];
 };
 
 export async function getReaderStream(): Promise<ReaderStream> {
-  const [chapters, parts, dedication] = await Promise.all([
+  const [rawChapters, parts, dedication, glossary] = await Promise.all([
     getAllChapters(),
     getAllParts(),
     getDedication(),
+    getGlossary(),
   ]);
+
+  // For each chapter, scope the glossary to that chapter and wrap first
+  // occurrences in the chapter's blocks. glossary.json uses a numeric
+  // `chapter` field that maps to "ch1", "ch2", etc.
+  const chapters = rawChapters.map((ch) => {
+    const numberMatch = ch.id.match(/^ch(\d+)$/);
+    const chapterNumber = numberMatch ? parseInt(numberMatch[1], 10) : -1;
+    const entriesForChapter = glossary.filter(
+      (g) => g.chapter === chapterNumber,
+    );
+    return {
+      ...ch,
+      blocks: wrapGlossaryInChapter(ch.blocks, entriesForChapter),
+    };
+  });
 
   const nodes: ReaderNode[] = [];
 
@@ -37,5 +56,5 @@ export async function getReaderStream(): Promise<ReaderStream> {
     nodes.push({ kind: "chapter", chapter });
   }
 
-  return { nodes, chapters, parts, dedication };
+  return { nodes, chapters, parts, dedication, glossary };
 }

@@ -26,6 +26,7 @@ import {
   XIcon,
 } from "./icons";
 import type { ChapterMeta } from "@/content/chapters";
+import type { GlossaryEntry } from "@/content/glossary";
 
 export type PartMeta = {
   id: string;
@@ -41,6 +42,7 @@ type ChromeProps = {
   chapters: ChapterMeta[];
   searchableChapters: Chapter[];
   parts: PartMeta[];
+  glossary: GlossaryEntry[];
   currentId: string;
   onNavigate: (chapterId: string) => void;
   onNavigateParagraph: (anchor: string) => void;
@@ -68,6 +70,7 @@ export function Chrome({
   chapters,
   searchableChapters,
   parts,
+  glossary,
   currentId,
   onNavigate,
   onNavigateParagraph,
@@ -238,6 +241,7 @@ export function Chrome({
             <TocPanel
               chapters={chapters}
               parts={parts}
+              glossary={glossary}
               currentId={currentId}
               onNavigate={(id) => {
                 onNavigate(id);

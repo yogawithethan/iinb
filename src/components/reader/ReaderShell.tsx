@@ -7,6 +7,7 @@ import { RsvpOverlay } from "./RsvpOverlay";
 import { PaywallSticky } from "./PaywallSticky";
 import { SelectionPopover } from "./SelectionPopover";
 import { HighlightsProvider } from "./HighlightsContext";
+import { GlossaryProvider } from "./GlossaryContext";
 import { useReaderSettings } from "./SettingsContext";
 import type { ChapterMeta } from "@/content/chapters";
 import type { Part } from "@/content/parts";
@@ -21,7 +22,7 @@ type Anchor = {
 };
 
 export function ReaderShell({ stream }: Props) {
-  const { nodes, chapters, parts } = stream;
+  const { nodes, chapters, parts, glossary } = stream;
   const { purchased } = useReaderSettings();
   const [paywallExpanded, setPaywallExpanded] = useState(false);
   const [anyPanelOpen, setAnyPanelOpen] = useState(false);
@@ -131,6 +132,7 @@ export function ReaderShell({ stream }: Props) {
 
   return (
     <HighlightsProvider>
+      <GlossaryProvider entries={glossary}>
       <main className="reader-scroll min-h-[100dvh] w-full">
         <ReaderView nodes={nodes} />
       </main>
@@ -140,6 +142,7 @@ export function ReaderShell({ stream }: Props) {
         chapters={chapterMetas}
         searchableChapters={chapters}
         parts={partMetas}
+        glossary={glossary}
         currentId={activeId}
         onNavigate={navigateTo}
         onNavigateParagraph={navigateParagraph}
@@ -155,6 +158,7 @@ export function ReaderShell({ stream }: Props) {
       )}
       <RsvpOverlay nodes={nodes} />
       <SelectionPopover />
+      </GlossaryProvider>
     </HighlightsProvider>
   );
 }
