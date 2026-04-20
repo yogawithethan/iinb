@@ -22,6 +22,12 @@ export function ReaderShell({ stream }: Props) {
   const { nodes, chapters, parts } = stream;
   const { purchased } = useReaderSettings();
   const [paywallExpanded, setPaywallExpanded] = useState(false);
+  const [anyPanelOpen, setAnyPanelOpen] = useState(false);
+
+  // Collapse the paywall whenever a popover opens so the two don't stack.
+  useEffect(() => {
+    if (anyPanelOpen && paywallExpanded) setPaywallExpanded(false);
+  }, [anyPanelOpen, paywallExpanded]);
 
   const anchors: Anchor[] = useMemo(
     () =>
@@ -136,11 +142,13 @@ export function ReaderShell({ stream }: Props) {
         onNavigate={navigateTo}
         onNavigateParagraph={navigateParagraph}
         onOpenPaywall={openPaywall}
+        onPanelStateChange={setAnyPanelOpen}
       />
       {!purchased && (
         <PaywallSticky
           expanded={paywallExpanded}
           onToggle={() => setPaywallExpanded((v) => !v)}
+          hidden={anyPanelOpen}
         />
       )}
       <RsvpOverlay nodes={nodes} />

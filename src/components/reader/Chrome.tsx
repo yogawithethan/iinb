@@ -44,6 +44,7 @@ type ChromeProps = {
   onNavigate: (chapterId: string) => void;
   onNavigateParagraph: (anchor: string) => void;
   onOpenPaywall: () => void;
+  onPanelStateChange?: (anyOpen: boolean) => void;
 };
 
 type SettingsTab = "display" | "reading" | "audio";
@@ -70,6 +71,7 @@ export function Chrome({
   onNavigate,
   onNavigateParagraph,
   onOpenPaywall,
+  onPanelStateChange,
 }: ChromeProps) {
   const isDesktop = useIsDesktop();
   const { purchased } = useReaderSettings();
@@ -103,6 +105,10 @@ export function Chrome({
     settingsAnim.animate || tocAnim.animate || searchAnim.animate;
 
   const effectiveVisible = isDesktop || visible || anyPanelOpen;
+
+  useEffect(() => {
+    onPanelStateChange?.(anyPanelOpen);
+  }, [anyPanelOpen, onPanelStateChange]);
 
   useEffect(() => {
     if (isDesktop || anyPanelOpen) return;

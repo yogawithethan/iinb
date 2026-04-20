@@ -13,8 +13,8 @@
   --ink-secondary: #4a4a4a;
   --ink-tertiary: #8a8a8a;
   --accent: #2563eb;
-  --accent-soft: #dbeafe;
-  --accent-ink: #1d4ed8;
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+  --accent-ink: color-mix(in srgb, var(--accent) 80%, black 20%);
   --bubble-fill: rgba(255, 255, 255, 0.78);
   --bubble-border: rgba(0, 0, 0, 0.08);
   --bubble-ink: #1a1a1a;
@@ -30,8 +30,8 @@
   --ink-secondary: #b4b4b4;
   --ink-tertiary: #707070;
   --accent: #60a5fa;
-  --accent-soft: rgba(96, 165, 250, 0.18);
-  --accent-ink: #93c5fd;
+  --accent-soft: color-mix(in srgb, var(--accent) 22%, transparent);
+  --accent-ink: color-mix(in srgb, var(--accent) 92%, white 8%);
   --bubble-fill: rgba(40, 40, 44, 0.72);
   --bubble-border: rgba(255, 255, 255, 0.08);
   --bubble-ink: #ededed;
@@ -47,8 +47,8 @@
   --ink-secondary: #6b523a;
   --ink-tertiary: #9c8566;
   --accent: #b4653a;
-  --accent-soft: rgba(180, 101, 58, 0.18);
-  --accent-ink: #8a4a26;
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-ink: color-mix(in srgb, var(--accent) 80%, black 20%);
   --bubble-fill: rgba(255, 249, 232, 0.78);
   --bubble-border: rgba(58, 42, 23, 0.1);
   --bubble-ink: #3a2a17;
@@ -64,8 +64,8 @@
   --ink-secondary: #a8a8a8;
   --ink-tertiary: #5a5a5a;
   --accent: #6ba6ff;
-  --accent-soft: rgba(107, 166, 255, 0.18);
-  --accent-ink: #9cc3ff;
+  --accent-soft: color-mix(in srgb, var(--accent) 22%, transparent);
+  --accent-ink: color-mix(in srgb, var(--accent) 92%, white 8%);
   --bubble-fill: rgba(28, 28, 30, 0.72);
   --bubble-border: rgba(255, 255, 255, 0.08);
   --bubble-ink: #f2f2f2;

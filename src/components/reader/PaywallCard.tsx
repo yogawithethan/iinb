@@ -152,8 +152,9 @@ export function PaywallCard({
           </div>
         </div>
 
-        {/* Expandable body — grid trick animates based on actual content
-            height (no max-height guessing, no pop-in at the end). */}
+        {/* Expandable body — grid-template-rows animates on actual content
+            height. Wrap the bordered content in an overflow:hidden shell so
+            the border/padding are clipped when collapsed (no 1px leak). */}
         <div
           style={{
             display: "grid",
@@ -163,15 +164,11 @@ export function PaywallCard({
               "grid-template-rows 440ms cubic-bezier(0.4, 0, 0.2, 1), opacity 320ms cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
+          <div style={{ minHeight: 0, overflow: "hidden" }}>
           <div
             className="px-4 pb-5 pt-1 sm:px-5"
             style={{
-              minHeight: 0,
-              overflow: "hidden",
-              borderTop: expanded
-                ? "1px solid var(--card-border)"
-                : "1px solid transparent",
-              transition: "border-color 240ms ease-out",
+              borderTop: "1px solid var(--card-border)",
             }}
           >
             <ul className="flex flex-col gap-4 pt-4">
@@ -246,6 +243,7 @@ export function PaywallCard({
             >
               Already purchased?
             </button>
+          </div>
           </div>
         </div>
       </div>
