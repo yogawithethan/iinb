@@ -198,6 +198,57 @@ body {
   background-color: var(--accent-soft);
 }
 
+/* Inline footnotes — superscript marker, muted, no decoration. Prose font. */
+.footnote-ref {
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  font-family: inherit;
+  user-select: none;
+  margin-left: 1px;
+  transition: color 120ms ease-out;
+}
+.footnote-ref:hover {
+  color: var(--ink-secondary);
+}
+
+/* Footnote text is just more prose — inherit everything, no background / border. */
+.footnote-text {
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.footnote-cursor {
+  display: inline-block;
+  color: var(--ink-secondary);
+  animation: iinb-fn-blink 1s step-end infinite;
+}
+@keyframes iinb-fn-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.footnote-close {
+  font-size: 0.72em;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  font-family: inherit;
+  user-select: none;
+  margin-left: 2px;
+  transition: color 120ms ease-out;
+}
+.footnote-close:hover {
+  color: var(--ink-secondary);
+}
+
 /* Locked rows: hover gets a subtle accent wash and border shift */
 .paywall-locked-row {
   transition:

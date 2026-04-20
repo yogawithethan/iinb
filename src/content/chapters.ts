@@ -94,14 +94,15 @@ function parseBlocks(md: string): ChapterBlock[] {
   const tokens = marked.lexer(cleaned);
   const out: ChapterBlock[] = [];
 
+  // Per-chapter footnote counter. Resets on every parseBlocks() call, so each
+  // chapter starts from 1 independently.
+  let footnoteCounter = 0;
+  const nextFootnoteNumber = () => ++footnoteCounter;
+
   for (const t of tokens) {
     switch (t.type) {
       case "paragraph": {
         const p = t as Tokens.Paragraph;
-        // Docx-pasted prose often separates paragraphs with single newlines
-        // rather than blank lines; split each line into its own paragraph
-        // so the page renders as discrete <p> elements (also lines us up
-        // for future per-paragraph audio tap targets).
         const lines = p.text
           .split(/\n/)
           .map((l) => l.trim())
@@ -109,7 +110,7 @@ function parseBlocks(md: string): ChapterBlock[] {
         for (const line of lines) {
           out.push({
             type: "paragraph",
-            html: marked.parseInline(line) as string,
+            html: renderInlineWithFootnotes(line, nextFootnoteNumber),
           });
         }
         break;
@@ -120,7 +121,7 @@ function parseBlocks(md: string): ChapterBlock[] {
         out.push({
           type: "heading",
           level,
-          html: marked.parseInline(h.text) as string,
+          html: renderInlineWithFootnotes(h.text, nextFootnoteNumber),
         });
         break;
       }
@@ -136,14 +137,46 @@ function parseBlocks(md: string): ChapterBlock[] {
         out.push({ type: "separator" });
         break;
       case "space":
-        // ignore blank-line tokens
         break;
       default:
-        // Lists, code, tables etc. are not expected in the manuscript.
-        // If they show up later, extend this switch.
         break;
     }
   }
 
   return out;
+}
+
+/**
+ * Preprocess inline markdown text, extracting [[footnote text]] tokens
+ * before running through marked, then swapping them back as superscript
+ * spans afterwards. The spans carry the footnote text in a data attribute
+ * and a sequential number; a client-side controller handles open/close +
+ * typing animation.
+ */
+function renderInlineWithFootnotes(
+  text: string,
+  nextNum: () => number,
+): string {
+  const footnotes: Array<{ num: number; text: string }> = [];
+  const pre = text.replace(/\[\[([^\]]+(?:\](?!\])[^\]]+)*)\]\]/g, (_, t) => {
+    const num = nextNum();
+    footnotes.push({ num, text: String(t).trim() });
+    return `@@FN${footnotes.length - 1}@@`;
+  });
+  let html = marked.parseInline(pre) as string;
+  html = html.replace(/@@FN(\d+)@@/g, (_, idxStr) => {
+    const idx = parseInt(idxStr, 10);
+    const fn = footnotes[idx];
+    const textAttr = escapeAttr(fn.text);
+    return `<span class="footnote-ref" data-fn-num="${fn.num}" data-fn-text="${textAttr}" role="button" tabindex="0">${fn.num}</span>`;
+  });
+  return html;
+}
+
+function escapeAttr(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
