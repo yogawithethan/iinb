@@ -5,6 +5,8 @@
     "lang": "Pali",
     "pronunciation": "TAN-hah",
     "definition": "Craving, thirst, or desire — in the Buddhist tradition, the force that binds us to suffering by perpetually pulling us toward pleasant experiences and away from unpleasant ones.",
+    "example": "He recognized the familiar taṇhā rising — the quiet, reflexive wanting that tells you the next thing will finally be enough.",
+    "used_in_sentence": "He recognized the familiar taṇhā rising — the quiet, reflexive wanting that tells you the next thing will finally be enough.",
     "chapter": 1,
     "order": 1,
     "also_see": ["dukkha", "nirvana"]
@@ -15,6 +17,8 @@
     "lang": "Pali",
     "pronunciation": "DOO-kha",
     "definition": "Suffering, unsatisfactoriness, or existential dis-ease — the first of the Buddha's Four Noble Truths.",
+    "example": "Even at the peak of the climb, dukkha waited, patient as weather.",
+    "used_in_sentence": "Even at the peak of the climb, dukkha waited, patient as weather.",
     "chapter": 2,
     "order": 1,
     "also_see": ["tanha"]
@@ -25,6 +29,8 @@
     "lang": "Pali",
     "pronunciation": "an-AT-tah",
     "definition": "Non-self. The teaching that there is no permanent, unchanging self at the core of one's experience.",
+    "example": "For a brief moment, the idea of anattā was not a concept but a relief — as if a weight he had been carrying without knowing had been set down.",
+    "used_in_sentence": "For a brief moment, the idea of anattā was not a concept but a relief — as if a weight he had been carrying without knowing had been set down.",
     "chapter": 3,
     "order": 1,
     "also_see": []
@@ -35,6 +41,8 @@
     "lang": "Pali",
     "pronunciation": "ah-NEE-chah",
     "definition": "Impermanence. The characteristic of all conditioned phenomena constantly arising and passing away.",
+    "example": "The thought came and went, anicca made plain — a cloud passing over the field of attention.",
+    "used_in_sentence": "The thought came and went, anicca made plain — a cloud passing over the field of attention.",
     "chapter": 1,
     "order": 2,
     "also_see": ["dukkha"]
@@ -45,6 +53,8 @@
     "lang": "Sanskrit",
     "pronunciation": "nir-VAH-nah",
     "definition": "The cessation of suffering; liberation. Literally 'blown out' or 'extinguished' — the quieting of the fires of craving, aversion, and delusion.",
+    "example": "She did not talk about nirvāṇa; she simply sat in such a way that you forgot, for a while, that you had been looking for something.",
+    "used_in_sentence": "She did not talk about nirvāṇa; she simply sat in such a way that you forgot, for a while, that you had been looking for something.",
     "chapter": 1,
     "order": 3,
     "also_see": ["tanha", "moksha"]
@@ -55,6 +65,8 @@
     "lang": "Sanskrit",
     "pronunciation": "MOHK-shah",
     "definition": "Liberation from the cycle of birth and death; release into one's true nature.",
+    "example": "The word mokṣa does not so much describe a destination as mark the moment the door swings open from the inside.",
+    "used_in_sentence": "The word mokṣa does not so much describe a destination as mark the moment the door swings open from the inside.",
     "chapter": 4,
     "order": 1,
     "also_see": ["nirvana"]

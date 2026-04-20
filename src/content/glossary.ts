@@ -9,6 +9,8 @@ export type GlossaryEntry = {
   lang: string;
   pronunciation: string;
   definition: string;
+  example?: string;
+  used_in_sentence?: string;
   chapter: number;
   order: number;
   also_see: string[];

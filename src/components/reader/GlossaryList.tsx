@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { GlossaryEntry } from "@/content/glossary";
 import type { ChapterMeta } from "@/content/chapters";
-import { useGlossary } from "./GlossaryContext";
+import { GlossaryExpandedCard } from "./GlossaryExpandedCard";
 
 type Props = {
   entries: GlossaryEntry[];
@@ -31,7 +31,6 @@ function groupByChapter(
       });
     }
   }
-  // Sort groups by chapter number ascending, and items by .order ascending.
   const list = Array.from(groups.values()).sort(
     (a, b) => a.chapterNumber - b.chapterNumber,
   );
@@ -42,9 +41,30 @@ function groupByChapter(
 }
 
 export function GlossaryList({ entries, chapters }: Props) {
-  const { showTooltip } = useGlossary();
-  const rowRefs = useRef(new Map<string, HTMLButtonElement>());
+  const [expandedTerm, setExpandedTerm] = useState<string | null>(null);
+  const rowRefs = useRef(new Map<string, HTMLElement>());
   const groups = groupByChapter(entries, chapters);
+
+  const toggle = useCallback(
+    (term: string) => {
+      setExpandedTerm((current) =>
+        current?.toLowerCase() === term.toLowerCase() ? null : term,
+      );
+    },
+    [],
+  );
+
+  const switchTo = useCallback(
+    (term: string) => {
+      setExpandedTerm(term);
+      // Scroll the target row into view after the layout settles.
+      requestAnimationFrame(() => {
+        const row = rowRefs.current.get(term.toLowerCase());
+        row?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    },
+    [],
+  );
 
   if (entries.length === 0) {
     return (
@@ -68,43 +88,78 @@ export function GlossaryList({ entries, chapters }: Props) {
             {g.label}
           </h3>
           <ul className="space-y-0.5">
-            {g.items.map((e) => (
-              <li key={e.term}>
-                <button
+            {g.items.map((e) => {
+              const isExpanded = expandedTerm?.toLowerCase() === e.term.toLowerCase();
+              return (
+                <li
+                  key={e.term}
                   ref={(el) => {
-                    if (el) rowRefs.current.set(e.term, el);
-                    else rowRefs.current.delete(e.term);
+                    if (el) rowRefs.current.set(e.term.toLowerCase(), el);
+                    else rowRefs.current.delete(e.term.toLowerCase());
                   }}
-                  type="button"
-                  onClick={() => {
-                    const anchor = rowRefs.current.get(e.term);
-                    if (anchor) showTooltip(e.term, anchor);
-                  }}
-                  className="toc-row flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
                 >
-                  <span
-                    className="text-[17px] italic"
+                  <button
+                    type="button"
+                    onClick={() => toggle(e.term)}
+                    aria-expanded={isExpanded}
+                    className="toc-row flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
                     style={{
-                      color: "var(--ink)",
-                      fontFamily:
-                        "var(--font-lora), ui-serif, Georgia, serif",
+                      ...(isExpanded && {
+                        background: "var(--accent-soft)",
+                      }),
                     }}
                   >
-                    {e.display}
-                  </span>
-                  <span
-                    className="text-[11px] font-medium uppercase tracking-[0.08em]"
+                    <span
+                      className="text-[17px] italic"
+                      style={{
+                        color: isExpanded
+                          ? "var(--accent-ink)"
+                          : "var(--ink)",
+                        fontFamily:
+                          "var(--font-lora), ui-serif, Georgia, serif",
+                      }}
+                    >
+                      {e.display}
+                    </span>
+                    <span
+                      className="text-[11px] font-medium uppercase tracking-[0.08em]"
+                      style={{
+                        color: isExpanded
+                          ? "var(--accent-ink)"
+                          : "var(--ink-tertiary)",
+                        fontFamily:
+                          "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                        opacity: isExpanded ? 0.85 : 1,
+                      }}
+                    >
+                      {e.lang}
+                    </span>
+                  </button>
+
+                  {/* Grid-row trick: animates on actual card height. */}
+                  <div
                     style={{
-                      color: "var(--ink-tertiary)",
-                      fontFamily:
-                        "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                      display: "grid",
+                      gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                      opacity: isExpanded ? 1 : 0,
+                      transition: isExpanded
+                        ? "grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)"
+                        : "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1), opacity 180ms ease-out",
                     }}
                   >
-                    {e.lang}
-                  </span>
-                </button>
-              </li>
-            ))}
+                    <div style={{ minHeight: 0, overflow: "hidden" }}>
+                      {isExpanded && (
+                        <GlossaryExpandedCard
+                          entry={e}
+                          entries={entries}
+                          onSwitchTo={switchTo}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       ))}
