@@ -99,6 +99,10 @@ export function Chrome({
       setSettingsOpen(false);
       return;
     }
+    if (tocOpen) {
+      setTocOpen(false);
+      return;
+    }
     if (isDesktop) return;
     setVisible((v) => !v);
   }
@@ -129,25 +133,47 @@ export function Chrome({
   return (
     <>
       {tocAnim.mounted && (
-        <div
-          className="pointer-events-auto fixed inset-0 z-40 transition-[opacity,transform] duration-[250ms] ease-out"
-          style={{
-            opacity: tocAnim.animate ? 1 : 0,
-            transform: tocAnim.animate
-              ? "translateY(0)"
-              : "translateY(12px)",
-          }}
-        >
-          <TocPanel
-            chapters={chapters}
-            parts={parts}
-            currentId={currentId}
-            onNavigate={(id) => {
-              onNavigate(id);
-              setTocOpen(false);
+        <>
+          {/* Backdrop — blurs page, clicks close TOC */}
+          <div
+            aria-hidden="true"
+            onClick={() => setTocOpen(false)}
+            className="pointer-events-auto fixed inset-0 z-[45] transition-opacity duration-[250ms]"
+            style={{
+              backdropFilter: "blur(14px) saturate(1.1)",
+              WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+              background: "color-mix(in srgb, var(--bg) 35%, transparent)",
+              opacity: tocAnim.animate ? 1 : 0,
             }}
           />
-        </div>
+          {/* Popover capsule — above chrome stage so it anchors under the TOC bubble */}
+          <div
+            className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-start md:px-8 lg:px-12"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[250ms] ease-out"
+              style={{
+                maxHeight: "calc(100vh - 100px)",
+                opacity: tocAnim.animate ? 1 : 0,
+                transform: tocAnim.animate
+                  ? "scale(1) translateY(0)"
+                  : "scale(0.95) translateY(-8px)",
+                transformOrigin: isDesktop ? "top left" : "top center",
+              }}
+            >
+              <TocPanel
+                chapters={chapters}
+                parts={parts}
+                currentId={currentId}
+                onNavigate={(id) => {
+                  onNavigate(id);
+                  setTocOpen(false);
+                }}
+              />
+            </div>
+          </div>
+        </>
       )}
 
       {settingsOpen && (

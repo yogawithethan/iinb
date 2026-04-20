@@ -136,10 +136,10 @@ body {
   line-height: 1.5;
 }
 [data-anchor-kind="part"] blockquote p + p {
-  margin-top: 0.5em;
-  font-size: 0.85em;
+  margin-top: 0.2em;
+  font-size: 0.82em;
   color: var(--ink-tertiary);
-  font-style: normal;
+  font-style: italic;
   letter-spacing: 0.01em;
 }
 
