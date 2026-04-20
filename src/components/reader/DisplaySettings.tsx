@@ -6,7 +6,15 @@ import {
   type Theme,
 } from "./SettingsContext";
 import { SectionLabel, ToggleRow } from "./SettingsPrimitives";
+import { ColorPicker } from "./ColorPicker";
 import clsx from "clsx";
+
+const DEFAULT_ACCENTS_BY_THEME: Record<Theme, string> = {
+  light: "#2563eb",
+  dark: "#60a5fa",
+  sepia: "#b4653a",
+  oled: "#6ba6ff",
+};
 
 const THEME_CARDS: { id: Theme; label: string; bg: string; ink: string }[] = [
   { id: "light", label: "Light", bg: "#ffffff", ink: "#1a1a1a" },
@@ -22,8 +30,17 @@ const WIDTH_OPTIONS: { id: ReadingWidth; label: string }[] = [
 ];
 
 export function DisplaySettings() {
-  const { theme, fontFamily, fontSize, readingWidth, purchased, update } =
-    useReaderSettings();
+  const {
+    theme,
+    fontFamily,
+    fontSize,
+    readingWidth,
+    accentColor,
+    purchased,
+    update,
+  } = useReaderSettings();
+  const currentAccent =
+    accentColor ?? DEFAULT_ACCENTS_BY_THEME[theme] ?? "#2563eb";
 
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
@@ -196,6 +213,31 @@ export function DisplaySettings() {
             );
           })}
         </div>
+      </section>
+
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h3
+            className="text-[11px] font-medium uppercase tracking-[0.08em]"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
+            Accent color
+          </h3>
+          {accentColor ? (
+            <button
+              type="button"
+              onClick={() => update({ accentColor: null })}
+              className="text-[11px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
+        <ColorPicker
+          value={currentAccent}
+          onChange={(hex) => update({ accentColor: hex })}
+        />
       </section>
 
       <section className="flex flex-col gap-2">

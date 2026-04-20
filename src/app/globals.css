@@ -146,6 +146,31 @@ body {
   font-weight: 700;
 }
 
+/* Dedication page: lines stay close together (no paragraph-break gap) */
+.reader-prose .reader-dedication p {
+  margin: 0;
+  line-height: 1.5;
+}
+.reader-prose .reader-dedication p + p {
+  margin-top: 0.2em;
+}
+
+/* Paywall card hover — header row gets a subtle wash on hover */
+.paywall-header {
+  transition: background-color 160ms ease-out;
+}
+.paywall-header:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.paywall-price-compact:hover {
+  filter: brightness(1.15);
+}
+.paywall-price-full:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+}
+
 /* Part title pages: epigraph blockquote — quote + attribution stacked */
 [data-anchor-kind="part"] blockquote {
   margin: 0;

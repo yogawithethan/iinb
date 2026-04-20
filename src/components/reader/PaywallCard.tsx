@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   EyeIcon,
   InfoIcon,
@@ -10,10 +9,7 @@ import {
   XIcon,
 } from "./icons";
 
-// When you set up the Lemon Squeezy product, export the checkout URL as
-// NEXT_PUBLIC_LS_CHECKOUT_URL. Until then the price button opens a stub.
-const CHECKOUT_URL =
-  process.env.NEXT_PUBLIC_LS_CHECKOUT_URL ?? "";
+const CHECKOUT_URL = process.env.NEXT_PUBLIC_LS_CHECKOUT_URL ?? "";
 
 const PRICE_LABEL = "$14.99";
 const BOOK_TITLE = "Ignorance is not Bliss";
@@ -47,13 +43,18 @@ const FEATURES: {
 ];
 
 type Props = {
+  expanded: boolean;
+  onToggle: () => void;
   onPurchase?: () => void;
   onAlreadyPurchased?: () => void;
 };
 
-export function PaywallCard({ onPurchase, onAlreadyPurchased }: Props) {
-  const [expanded, setExpanded] = useState(false);
-
+export function PaywallCard({
+  expanded,
+  onToggle,
+  onPurchase,
+  onAlreadyPurchased,
+}: Props) {
   function handlePurchase() {
     if (onPurchase) onPurchase();
     else if (CHECKOUT_URL) window.open(CHECKOUT_URL, "_blank");
@@ -64,28 +65,38 @@ export function PaywallCard({ onPurchase, onAlreadyPurchased }: Props) {
     <div
       id="paywall"
       data-chapter-anchor="paywall"
-      className="my-16"
       style={{ scrollMarginTop: "120px" }}
     >
       <div
-        className="w-full overflow-hidden rounded-[20px] transition-[box-shadow] duration-200"
+        className="w-full overflow-hidden rounded-[20px] transition-[box-shadow] duration-300"
         style={{
           border: "1px solid var(--card-border)",
           background: "var(--bg-soft)",
           boxShadow: expanded
-            ? "0 12px 32px rgba(0,0,0,0.08)"
-            : "0 4px 12px rgba(0,0,0,0.04)",
+            ? "0 20px 48px rgba(0,0,0,0.10)"
+            : "0 4px 14px rgba(0,0,0,0.05)",
         }}
       >
-        {/* Header row */}
-        <div className="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5">
-          <div className="min-w-0">
+        {/* Header row — entire row toggles the expand */}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-expanded={expanded}
+          onClick={onToggle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onToggle();
+            }
+          }}
+          className="paywall-header flex cursor-pointer select-none items-start justify-between gap-3 px-4 py-3.5 transition-colors sm:px-5"
+        >
+          <div className="min-w-0 flex-1">
             <div
               className="truncate text-[15px] font-semibold leading-tight"
               style={{
                 color: "var(--ink)",
-                fontFamily:
-                  "var(--font-lora), ui-serif, Georgia, serif",
+                fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
               }}
             >
               {BOOK_TITLE}
@@ -97,43 +108,57 @@ export function PaywallCard({ onPurchase, onAlreadyPurchased }: Props) {
               {AUTHOR}
             </div>
           </div>
+
           <div className="flex flex-shrink-0 items-center gap-2">
+            {/* Compact price pill */}
             <button
               type="button"
-              onClick={handlePurchase}
-              className="rounded-full px-4 py-2 text-[13px] font-medium transition-transform active:scale-95"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePurchase();
+              }}
+              aria-hidden={expanded ? "true" : "false"}
+              tabIndex={expanded ? -1 : 0}
+              className="paywall-price-compact rounded-full px-4 py-2 text-[13px] font-medium transition-[opacity,transform,width,margin] duration-300 ease-out"
               style={{
                 background: "var(--ink)",
                 color: "var(--bg)",
                 fontFamily:
                   "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                opacity: expanded ? 0 : 1,
+                transform: expanded
+                  ? "scale(0.88) translateX(6px)"
+                  : "scale(1)",
+                pointerEvents: expanded ? "none" : "auto",
+                width: expanded ? 0 : "auto",
+                marginRight: expanded ? -6 : 0,
+                overflow: "hidden",
+                whiteSpace: "nowrap",
               }}
             >
               {PRICE_LABEL}
             </button>
-            <button
-              type="button"
-              onClick={() => setExpanded((e) => !e)}
-              aria-label={expanded ? "Hide features" : "Show features"}
-              aria-expanded={expanded}
-              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+            {/* Info / X indicator (not a separate button — the row is the button) */}
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors"
               style={{
                 color: "var(--ink-secondary)",
                 border: "1px solid var(--pill-border)",
               }}
             >
               {expanded ? <XIcon size={16} /> : <InfoIcon size={16} />}
-            </button>
+            </span>
           </div>
         </div>
 
-        {/* Expandable feature list with spring easing */}
+        {/* Expandable body */}
         <div
           style={{
-            maxHeight: expanded ? "640px" : "0px",
+            maxHeight: expanded ? "720px" : "0px",
             opacity: expanded ? 1 : 0,
             transition:
-              "max-height 420ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 240ms ease-out",
+              "max-height 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease-out",
             overflow: "hidden",
           }}
         >
@@ -179,10 +204,32 @@ export function PaywallCard({ onPurchase, onAlreadyPurchased }: Props) {
               ))}
             </ul>
 
+            {/* Full-width price CTA with hover lift */}
             <button
               type="button"
-              onClick={onAlreadyPurchased}
-              className="mt-5 text-[12px] underline underline-offset-4 transition-opacity hover:opacity-70"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePurchase();
+              }}
+              className="paywall-price-full mt-6 w-full rounded-full py-3.5 text-[15px] font-semibold transition-all active:scale-[0.98]"
+              style={{
+                background: "var(--ink)",
+                color: "var(--bg)",
+                fontFamily:
+                  "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                letterSpacing: "0.01em",
+              }}
+            >
+              {PRICE_LABEL}
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAlreadyPurchased?.();
+              }}
+              className="mt-3 w-full text-center text-[12px] underline underline-offset-4 transition-opacity hover:opacity-70"
               style={{
                 color: "var(--ink-secondary)",
                 fontFamily:

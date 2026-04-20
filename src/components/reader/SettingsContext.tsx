@@ -21,6 +21,8 @@ export type ReaderSettings = {
   fontFamily: ReadingFont;
   fontSize: number;
   readingWidth: ReadingWidth;
+  /** Optional override for the accent color. Null = theme default. Hex string. */
+  accentColor: string | null;
   scrollMode: ScrollMode;
   bionicReading: boolean;
   rsvpEnabled: boolean;
@@ -44,6 +46,7 @@ const DEFAULTS: ReaderSettings = {
   fontFamily: "serif",
   fontSize: 18,
   readingWidth: "medium",
+  accentColor: null,
   purchased: false,
   scrollMode: "scroll",
   bionicReading: false,
@@ -71,6 +74,10 @@ function sanitize(raw: Partial<ReaderSettings>): ReaderSettings {
     fontSize: clampSize(raw.fontSize ?? DEFAULTS.fontSize),
     readingWidth:
       (raw.readingWidth as ReadingWidth) ?? DEFAULTS.readingWidth,
+    accentColor:
+      typeof raw.accentColor === "string" && /^#[0-9a-f]{6}$/i.test(raw.accentColor)
+        ? raw.accentColor
+        : null,
     scrollMode: (raw.scrollMode as ScrollMode) ?? DEFAULTS.scrollMode,
     bionicReading: Boolean(raw.bionicReading ?? DEFAULTS.bionicReading),
     rsvpEnabled: Boolean(raw.rsvpEnabled ?? DEFAULTS.rsvpEnabled),
@@ -115,6 +122,22 @@ export function ReaderSettingsProvider({
       "data-bionic",
       settings.bionicReading ? "on" : "off",
     );
+    // Apply user-selected accent color (or clear to fall back to theme default)
+    if (settings.accentColor) {
+      root.style.setProperty("--accent", settings.accentColor);
+      root.style.setProperty(
+        "--accent-soft",
+        `color-mix(in srgb, ${settings.accentColor} 18%, transparent)`,
+      );
+      root.style.setProperty(
+        "--accent-ink",
+        `color-mix(in srgb, ${settings.accentColor} 80%, black 20%)`,
+      );
+    } else {
+      root.style.removeProperty("--accent");
+      root.style.removeProperty("--accent-soft");
+      root.style.removeProperty("--accent-ink");
+    }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch {

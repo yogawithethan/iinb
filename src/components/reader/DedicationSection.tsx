@@ -13,7 +13,7 @@ export function DedicationSection({ dedication }: { dedication: Dedication }) {
       style={{ scrollMarginTop: "120px" }}
     >
       <div
-        className="flex flex-col gap-3"
+        className="reader-dedication"
         style={{
           color: "var(--ink)",
           fontFamily: "var(--font-lora), ui-serif, Georgia, serif",

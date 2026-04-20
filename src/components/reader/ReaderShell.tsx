@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ReaderView } from "./ReaderView";
 import { Chrome } from "./Chrome";
 import { RsvpOverlay } from "./RsvpOverlay";
+import { PaywallSticky } from "./PaywallSticky";
+import { useReaderSettings } from "./SettingsContext";
 import type { ChapterMeta } from "@/content/chapters";
 import type { Part } from "@/content/parts";
 import type { ReaderStream } from "@/content/stream";
@@ -18,6 +20,8 @@ type Anchor = {
 
 export function ReaderShell({ stream }: Props) {
   const { nodes, chapters, parts } = stream;
+  const { purchased } = useReaderSettings();
+  const [paywallExpanded, setPaywallExpanded] = useState(false);
 
   const anchors: Anchor[] = useMemo(
     () =>
@@ -112,6 +116,11 @@ export function ReaderShell({ stream }: Props) {
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
 
+  const openPaywall = useCallback(() => {
+    setPaywallExpanded(true);
+    navigateTo("paywall");
+  }, [navigateTo]);
+
   return (
     <>
       <main className="reader-scroll min-h-[100dvh] w-full">
@@ -126,7 +135,14 @@ export function ReaderShell({ stream }: Props) {
         currentId={activeId}
         onNavigate={navigateTo}
         onNavigateParagraph={navigateParagraph}
+        onOpenPaywall={openPaywall}
       />
+      {!purchased && (
+        <PaywallSticky
+          expanded={paywallExpanded}
+          onToggle={() => setPaywallExpanded((v) => !v)}
+        />
+      )}
       <RsvpOverlay nodes={nodes} />
     </>
   );

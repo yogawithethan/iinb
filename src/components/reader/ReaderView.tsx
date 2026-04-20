@@ -5,15 +5,11 @@ import { useReaderSettings, type ReadingWidth } from "./SettingsContext";
 import { BlockRenderer } from "./BlockRenderer";
 import { PartTitleSection } from "./PartTitleSection";
 import { DedicationSection } from "./DedicationSection";
-import { PaywallCard } from "./PaywallCard";
 import { bionify } from "./bionic";
 import type { Chapter } from "@/content/chapters";
 import type { ReaderNode } from "@/content/stream";
 
-type Props = {
-  nodes: ReaderNode[];
-  onOpenLicense?: () => void;
-};
+type Props = { nodes: ReaderNode[] };
 
 const WIDTH_PX: Record<ReadingWidth, number> = {
   narrow: 560,
@@ -21,35 +17,34 @@ const WIDTH_PX: Record<ReadingWidth, number> = {
   wide: 820,
 };
 
-export function ReaderView({ nodes, onOpenLicense }: Props) {
+export function ReaderView({ nodes }: Props) {
   const { fontSize, readingWidth, bionicReading, purchased } =
     useReaderSettings();
 
-  // When not purchased, stop rendering at the first paid chapter.
-  const { visibleNodes, showPaywall } = useMemo(() => {
-    if (purchased) return { visibleNodes: nodes, showPaywall: false };
+  // When not purchased, stop rendering at the first paid chapter so the
+  // sticky PaywallSticky becomes the visual end-state.
+  const visibleNodes = useMemo(() => {
+    if (purchased) return nodes;
     const kept: ReaderNode[] = [];
-    let hitPaid = false;
     for (const n of nodes) {
-      if (n.kind === "chapter" && !n.chapter.isFree) {
-        hitPaid = true;
-        break;
-      }
-      if (n.kind === "part") {
-        // Skip part title pages too — they belong to paid content.
-        break;
-      }
+      if (n.kind === "chapter" && !n.chapter.isFree) break;
+      if (n.kind === "part") break;
       kept.push(n);
     }
-    return { visibleNodes: kept, showPaywall: hitPaid };
+    return kept;
   }, [nodes, purchased]);
+
+  // Leave extra bottom space for the sticky paywall so the last paragraph
+  // isn't hidden behind the fixed card.
+  const bottomPadding = purchased ? 180 : 300;
 
   return (
     <div
-      className="reader-prose mx-auto w-full px-6 pb-[180px] pt-[140px] md:px-10"
+      className="reader-prose mx-auto w-full px-6 pt-[140px] md:px-10"
       style={{
         fontSize: `${fontSize}px`,
         maxWidth: `${WIDTH_PX[readingWidth]}px`,
+        paddingBottom: `${bottomPadding}px`,
       }}
     >
       {visibleNodes.map((node, idx) => {
@@ -75,10 +70,6 @@ export function ReaderView({ nodes, onOpenLicense }: Props) {
           />
         );
       })}
-
-      {showPaywall && (
-        <PaywallCard onAlreadyPurchased={onOpenLicense} />
-      )}
     </div>
   );
 }

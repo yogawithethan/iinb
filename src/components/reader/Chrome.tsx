@@ -41,6 +41,7 @@ type ChromeProps = {
   currentId: string;
   onNavigate: (chapterId: string) => void;
   onNavigateParagraph: (anchor: string) => void;
+  onOpenPaywall: () => void;
 };
 
 type SettingsTab = "display" | "reading" | "audio";
@@ -66,6 +67,7 @@ export function Chrome({
   currentId,
   onNavigate,
   onNavigateParagraph,
+  onOpenPaywall,
 }: ChromeProps) {
   const isDesktop = useIsDesktop();
   const [visible, setVisible] = useState(true);
@@ -194,6 +196,10 @@ export function Chrome({
               currentId={currentId}
               onNavigate={(id) => {
                 onNavigate(id);
+                setTocOpen(false);
+              }}
+              onOpenPaywall={() => {
+                onOpenPaywall();
                 setTocOpen(false);
               }}
             />
