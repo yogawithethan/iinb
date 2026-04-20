@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CopyIcon, NoteIcon } from "./icons";
 
 type HighlightColor = "yellow" | "blue" | "green" | "pink";
@@ -22,55 +22,68 @@ function highlightsApiSupported(): boolean {
   );
 }
 
-function isWithinReader(node: Node | null): boolean {
-  while (node && node !== document.body) {
-    if (node instanceof HTMLElement && node.classList.contains("reader-prose")) {
-      return true;
-    }
-    node = node.parentNode;
-  }
-  return false;
+/** A selection counts if either endpoint is inside `.reader-prose`. */
+function selectionInsideReader(range: Range): boolean {
+  const root = document.querySelector(".reader-prose");
+  if (!root) return false;
+  return (
+    root.contains(range.startContainer) || root.contains(range.endContainer)
+  );
 }
 
 export function SelectionPopover() {
   const [pos, setPos] = useState<Pos | null>(null);
   const [apiOk, setApiOk] = useState(true);
+  /** The range captured at the moment the popover is shown. Survives the
+   * selection being blurred when the user clicks a popover button. */
+  const rangeRef = useRef<Range | null>(null);
 
   useEffect(() => {
     setApiOk(highlightsApiSupported());
   }, []);
 
-  const updateFromSelection = useCallback(() => {
+  const POPOVER_WIDTH = 260;
+
+  const syncFromSelection = useCallback(() => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount) {
+      rangeRef.current = null;
       setPos(null);
       return;
     }
     const range = sel.getRangeAt(0);
-    if (!isWithinReader(range.commonAncestorContainer)) {
+    if (!selectionInsideReader(range)) {
+      rangeRef.current = null;
       setPos(null);
       return;
     }
     const rect = range.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) {
+      rangeRef.current = null;
       setPos(null);
       return;
     }
-    // Center horizontally above the selection. Offset for popover height.
-    setPos({
-      top: rect.top + window.scrollY - 52,
-      left: rect.left + window.scrollX + rect.width / 2,
-    });
+    rangeRef.current = range.cloneRange();
+    const top = Math.max(12, rect.top + window.scrollY - 52);
+    const rawLeft = rect.left + window.scrollX + rect.width / 2;
+    const half = POPOVER_WIDTH / 2;
+    const minLeft = window.scrollX + half + 12;
+    const maxLeft = window.scrollX + window.innerWidth - half - 12;
+    const left = Math.max(minLeft, Math.min(maxLeft, rawLeft));
+    setPos({ top, left });
   }, []);
 
   useEffect(() => {
     function onPointerUp() {
-      // Wait a frame for the selection to finalize.
-      window.setTimeout(updateFromSelection, 10);
+      // Give the browser one frame to finalize the selection.
+      window.setTimeout(syncFromSelection, 10);
     }
     function onSelectionChange() {
       const sel = window.getSelection();
-      if (!sel || sel.isCollapsed) setPos(null);
+      if (!sel || sel.isCollapsed) {
+        rangeRef.current = null;
+        setPos(null);
+      }
     }
     function onScroll() {
       setPos(null);
@@ -83,13 +96,25 @@ export function SelectionPopover() {
       document.removeEventListener("selectionchange", onSelectionChange);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [updateFromSelection]);
+  }, [syncFromSelection]);
+
+  function dismiss() {
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    rangeRef.current = null;
+    setPos(null);
+  }
 
   function applyHighlight(color: HighlightColor) {
-    if (!apiOk) return;
-    const sel = window.getSelection();
-    if (!sel || !sel.rangeCount) return;
-    const range = sel.getRangeAt(0).cloneRange();
+    const range = rangeRef.current;
+    if (!range) return;
+    if (!apiOk) {
+      // eslint-disable-next-line no-alert
+      alert(
+        "Your browser doesn't support persistent highlights yet (CSS Highlight API). Upgrade Safari 17.2+ or Chrome 105+.",
+      );
+      return;
+    }
     const name = `iinb-hl-${color}`;
     const existing = CSS.highlights.get(name);
     if (existing) {
@@ -97,27 +122,25 @@ export function SelectionPopover() {
     } else {
       CSS.highlights.set(name, new Highlight(range));
     }
-    sel.removeAllRanges();
-    setPos(null);
+    dismiss();
   }
 
   async function copy() {
-    const sel = window.getSelection();
-    if (!sel) return;
-    const text = sel.toString();
+    const range = rangeRef.current;
+    if (!range) return;
+    const text = range.toString();
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      // clipboard may be blocked — fall through silently
+      // clipboard may be blocked — silent fallback
     }
-    sel.removeAllRanges();
-    setPos(null);
+    dismiss();
   }
 
   function addNote() {
-    const sel = window.getSelection();
-    if (!sel) return;
-    const text = sel.toString();
+    const range = rangeRef.current;
+    if (!range) return;
+    const text = range.toString();
     const preview = text.length > 40 ? `${text.slice(0, 40)}…` : text;
     const note = window.prompt(`Note for "${preview}"`);
     if (note) {
@@ -125,8 +148,7 @@ export function SelectionPopover() {
       // eslint-disable-next-line no-console
       console.info("Note saved:", { text, note });
     }
-    sel.removeAllRanges();
-    setPos(null);
+    dismiss();
   }
 
   if (!pos) return null;
@@ -140,8 +162,15 @@ export function SelectionPopover() {
         transform: "translateX(-50%)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.14)",
       }}
-      // Clicking the popover shouldn't blur the selection before our handler runs.
-      onMouseDown={(e) => e.preventDefault()}
+      // Cache the range on mousedown so the subsequent click can use it even
+      // though the browser will clear the live selection when focus shifts.
+      onMouseDown={(e) => {
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed && sel.rangeCount) {
+          rangeRef.current = sel.getRangeAt(0).cloneRange();
+        }
+        e.preventDefault();
+      }}
     >
       {COLORS.map((c) => (
         <button
