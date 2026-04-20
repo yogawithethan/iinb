@@ -5,7 +5,7 @@ import {
   type ReadingWidth,
   type Theme,
 } from "./SettingsContext";
-import { SectionLabel, ToggleRow } from "./SettingsPrimitives";
+import { LockedRow, SectionLabel, ToggleRow } from "./SettingsPrimitives";
 import { ColorPicker } from "./ColorPicker";
 import clsx from "clsx";
 
@@ -223,7 +223,7 @@ export function DisplaySettings() {
           >
             Accent color
           </h3>
-          {accentColor ? (
+          {purchased && accentColor ? (
             <button
               type="button"
               onClick={() => update({ accentColor: null })}
@@ -234,10 +234,17 @@ export function DisplaySettings() {
             </button>
           ) : null}
         </div>
-        <ColorPicker
-          value={currentAccent}
-          onChange={(hex) => update({ accentColor: hex })}
-        />
+        {purchased ? (
+          <ColorPicker
+            value={currentAccent}
+            onChange={(hex) => update({ accentColor: hex })}
+          />
+        ) : (
+          <LockedRow
+            label="Custom accent color"
+            description="Tint the app with any color you like."
+          />
+        )}
       </section>
 
       <section className="flex flex-col gap-2">

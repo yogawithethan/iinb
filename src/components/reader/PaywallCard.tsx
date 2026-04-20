@@ -121,8 +121,8 @@ export function PaywallCard({
               tabIndex={expanded ? -1 : 0}
               className="paywall-price-compact rounded-full px-4 py-2 text-[13px] font-medium transition-[opacity,transform,width,margin] duration-300 ease-out"
               style={{
-                background: "var(--ink)",
-                color: "var(--bg)",
+                background: "var(--accent)",
+                color: "#fff",
                 fontFamily:
                   "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
                 opacity: expanded ? 0 : 1,
@@ -213,8 +213,8 @@ export function PaywallCard({
               }}
               className="paywall-price-full mt-6 w-full rounded-full py-3.5 text-[15px] font-semibold transition-all active:scale-[0.98]"
               style={{
-                background: "var(--ink)",
-                color: "var(--bg)",
+                background: "var(--accent)",
+                color: "#fff",
                 fontFamily:
                   "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
                 letterSpacing: "0.01em",
