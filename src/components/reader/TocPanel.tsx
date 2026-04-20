@@ -94,9 +94,9 @@ export function TocPanel({
                         data-current={isCurrent}
                         className="toc-row flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
                         style={{
-                          background: isCurrent
-                            ? "var(--accent-soft)"
-                            : "transparent",
+                          // Only set background inline for the current row so
+                          // the .toc-row:hover CSS can take effect on others.
+                          ...(isCurrent && { background: "var(--accent-soft)" }),
                           color: isCurrent
                             ? "var(--accent-ink)"
                             : "var(--ink)",

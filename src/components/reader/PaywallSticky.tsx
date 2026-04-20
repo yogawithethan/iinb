@@ -20,24 +20,41 @@ export function PaywallSticky({ expanded, onToggle, onOpenLicense }: Props) {
   if (purchased) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[30]">
-      {/* Long, smooth fade so text disappears gradually behind the card
-          — no visible horizontal cutoff line. */}
-      <div
-        aria-hidden="true"
-        style={{
-          height: 110,
-          background: `linear-gradient(
-            to top,
-            var(--bg) 0%,
-            var(--bg) 30%,
-            color-mix(in srgb, var(--bg) 72%, transparent) 60%,
-            color-mix(in srgb, var(--bg) 36%, transparent) 82%,
-            color-mix(in srgb, var(--bg) 0%, transparent) 100%
-          )`,
-        }}
-      />
-      <div className="w-full" style={{ background: "var(--bg)" }}>
+    <>
+      {/* Blur backdrop while expanded — same pattern as settings/TOC.
+          Click anywhere outside the card to collapse. */}
+      {expanded && (
+        <div
+          aria-hidden="true"
+          onClick={onToggle}
+          className="pointer-events-auto fixed inset-0 z-[48] transition-opacity duration-[220ms]"
+          style={{
+            backdropFilter: "blur(14px) saturate(1.1)",
+            WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+            background: "color-mix(in srgb, var(--bg) 35%, transparent)",
+          }}
+        />
+      )}
+
+      {/* Paywall card — above the chrome (z-50) so its CTAs are clickable.
+          Sides are transparent so the corner bubbles (Play / Search / Share)
+          remain visible and tappable. */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[52]">
+        {/* Soft fade so text keeps going behind the card, no hard cut */}
+        <div
+          aria-hidden="true"
+          style={{
+            height: 110,
+            background: `linear-gradient(
+              to top,
+              var(--bg) 0%,
+              var(--bg) 30%,
+              color-mix(in srgb, var(--bg) 72%, transparent) 60%,
+              color-mix(in srgb, var(--bg) 36%, transparent) 82%,
+              color-mix(in srgb, var(--bg) 0%, transparent) 100%
+            )`,
+          }}
+        />
         <div
           className="pointer-events-auto mx-auto w-full px-6 md:px-10"
           style={{ maxWidth: `${WIDTH_PX[readingWidth]}px` }}
@@ -51,6 +68,6 @@ export function PaywallSticky({ expanded, onToggle, onOpenLicense }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
