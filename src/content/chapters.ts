@@ -168,7 +168,10 @@ function renderInlineWithFootnotes(
     const idx = parseInt(idxStr, 10);
     const fn = footnotes[idx];
     const textAttr = escapeAttr(fn.text);
-    return `<span class="footnote-ref" data-fn-num="${fn.num}" data-fn-text="${textAttr}" role="button" tabindex="0">${fn.num}</span>`;
+    // Render a dagger (†) so the marker reads as a footnote affordance
+    // rather than a stray number. The sequential position lives in the
+    // data attribute in case we ever surface a list.
+    return `<span class="footnote-ref" data-fn-num="${fn.num}" data-fn-text="${textAttr}" role="button" tabindex="0" aria-label="Footnote ${fn.num}">†</span>`;
   });
   return html;
 }

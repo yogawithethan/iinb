@@ -198,20 +198,37 @@ body {
   background-color: var(--accent-soft);
 }
 
-/* Inline footnotes — superscript marker, muted, no decoration. Prose font. */
+/* Inline footnotes — small colored pill with a dagger, obvious as an
+   affordance, unobtrusive in running prose. */
 .footnote-ref {
-  font-size: 0.72em;
-  vertical-align: super;
-  line-height: 0;
-  color: var(--ink-tertiary);
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: 0.18em;
+  width: 1.3em;
+  height: 1.3em;
+  margin: 0 0.2em 0 0.12em;
+  padding: 0 0.08em 0.08em;
+  font-size: 0.65em;
   font-family: inherit;
+  line-height: 1;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-radius: 9999px;
+  cursor: pointer;
   user-select: none;
-  margin-left: 1px;
-  transition: color 120ms ease-out;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    transform 150ms ease-out;
 }
 .footnote-ref:hover {
-  color: var(--ink-secondary);
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.footnote-ref:active {
+  transform: translateY(0);
 }
 
 /* Footnote text is just more prose — inherit everything, no background / border. */
