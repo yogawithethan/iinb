@@ -186,6 +186,14 @@ export function SpeakerIcon(p: IconProps) {
   );
 }
 
+export function CheckIcon(p: IconProps) {
+  return (
+    <Svg {...p} strokeWidth={2.2}>
+      <path d="M20 6 9 17l-5-5" />
+    </Svg>
+  );
+}
+
 export function NoteIcon(p: IconProps) {
   return (
     <Svg {...p}>

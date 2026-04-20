@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   useReaderSettings,
@@ -8,9 +8,13 @@ import {
   type Decade,
 } from "@/components/reader/SettingsContext";
 import {
-  EyeIcon,
+  BookmarkIcon,
+  CheckIcon,
+  HighlightIcon,
+  NoteIcon,
   PlayIcon,
   RefreshIcon,
+  SearchIcon,
   SparkleIcon,
   XIcon,
 } from "@/components/reader/icons";
@@ -19,9 +23,10 @@ type Step =
   | "entry"
   | "password"
   | "welcome"
+  | "unlocked"
   | "preferences"
   | "profile"
-  | "features";
+  | "tryit";
 
 type EntryTab = "license" | "login";
 
@@ -225,9 +230,16 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
           )}
           {step === "welcome" && (
             <WelcomeStep
-              onNext={() => setStep("preferences")}
+              onNext={() => setStep("unlocked")}
               onSkip={skipOnboarding}
               stepIndex={0}
+            />
+          )}
+          {step === "unlocked" && (
+            <UnlockedStep
+              onNext={() => setStep("preferences")}
+              onBack={() => setStep("welcome")}
+              stepIndex={1}
             />
           )}
           {step === "preferences" && (
@@ -236,24 +248,24 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
               fontSize={fontSize}
               onChange={(patch) => update(patch)}
               onNext={() => setStep("profile")}
-              onBack={() => setStep("welcome")}
-              stepIndex={1}
+              onBack={() => setStep("unlocked")}
+              stepIndex={2}
             />
           )}
           {step === "profile" && (
             <ProfileStep
               profile={refreshProfile}
               onChange={(next) => update({ refreshProfile: next })}
-              onNext={() => setStep("features")}
+              onNext={() => setStep("tryit")}
               onBack={() => setStep("preferences")}
-              stepIndex={2}
+              stepIndex={3}
             />
           )}
-          {step === "features" && (
-            <FeaturesStep
+          {step === "tryit" && (
+            <TryItStep
               onFinish={completeOnboarding}
               onBack={() => setStep("profile")}
-              stepIndex={3}
+              stepIndex={4}
             />
           )}
         </div>
@@ -442,7 +454,7 @@ function WelcomeStep({
 }) {
   return (
     <div className="flex flex-col items-center px-6 pb-6 pt-10 text-center">
-      <OnboardingDots total={4} active={stepIndex} />
+      <OnboardingDots total={5} active={stepIndex} />
       <h2
         className="mt-8 mb-2 text-[28px] leading-tight"
         style={{
@@ -509,7 +521,7 @@ function PreferencesStep({
 }) {
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
-      <OnboardingDots total={4} active={stepIndex} />
+      <OnboardingDots total={5} active={stepIndex} />
       <h2
         className="mt-6 mb-5 text-center text-[20px] font-medium"
         style={{
@@ -579,8 +591,17 @@ function PreferencesStep({
           A
         </span>
       </div>
-      <p className="mb-6 text-right text-[11px] tabular-nums" style={{ color: "var(--ink-tertiary)" }}>
+      <p className="mb-4 text-right text-[11px] tabular-nums" style={{ color: "var(--ink-tertiary)" }}>
         {fontSize}px
+      </p>
+
+      <p
+        className="mb-6 text-[11.5px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        Tip: each theme remembers its own accent color — so your
+        Light theme can be teal while Dark stays blue. Pick yours
+        later in <strong>Settings → Display → Accent color</strong>.
       </p>
 
       <FooterNav onBack={onBack} onNext={onNext} nextLabel="Next" />
@@ -631,7 +652,7 @@ function ProfileStep({
   }
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
-      <OnboardingDots total={4} active={stepIndex} />
+      <OnboardingDots total={5} active={stepIndex} />
       <h2
         className="mt-6 mb-1 text-center text-[20px] font-medium"
         style={{
@@ -693,7 +714,83 @@ function ProfileStep({
   );
 }
 
-function FeaturesStep({
+function UnlockedStep({
+  onNext,
+  onBack,
+  stepIndex,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  stepIndex: number;
+}) {
+  const unlocks = [
+    { icon: <PlayIcon />, label: "Author narration with karaoke sync" },
+    { icon: <SparkleIcon />, label: "AI Q&A grounded in the actual text" },
+    { icon: <RefreshIcon />, label: "Refresh — rewrite examples in your voice" },
+    {
+      icon: <HighlightIcon />,
+      label: "Highlights, notes, and a personal accent color per theme",
+    },
+  ];
+  return (
+    <div className="flex flex-col items-center px-6 pb-6 pt-10 text-center">
+      <OnboardingDots total={5} active={stepIndex} />
+
+      <div
+        className="mt-8 mb-6 flex h-16 w-16 items-center justify-center rounded-full"
+        style={{
+          background: "var(--accent-soft)",
+          color: "var(--accent-ink)",
+        }}
+      >
+        <CheckIcon size={28} />
+      </div>
+
+      <h2
+        className="mb-2 text-[24px] leading-tight"
+        style={{
+          color: "var(--ink)",
+          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+        }}
+      >
+        Everything is yours now
+      </h2>
+      <p
+        className="mb-6 max-w-[320px] text-[13px] leading-snug"
+        style={{ color: "var(--ink-secondary)" }}
+      >
+        All chapters, the author's audio, AI Q&A, and every reading tool
+        are unlocked. Here's a quick taste:
+      </p>
+
+      <ul className="mb-8 flex w-full flex-col gap-2.5 text-left">
+        {unlocks.map((u, i) => (
+          <li key={i} className="flex items-center gap-3">
+            <span
+              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+              style={{
+                background: "var(--accent-soft)",
+                color: "var(--accent-ink)",
+              }}
+            >
+              {u.icon}
+            </span>
+            <span
+              className="text-[13px]"
+              style={{ color: "var(--ink-secondary)" }}
+            >
+              {u.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <FooterNav onBack={onBack} onNext={onNext} nextLabel="Next" />
+    </div>
+  );
+}
+
+function TryItStep({
   onFinish,
   onBack,
   stepIndex,
@@ -702,31 +799,9 @@ function FeaturesStep({
   onBack: () => void;
   stepIndex: number;
 }) {
-  const items = [
-    {
-      title: "Refresh",
-      desc: "Rewrite illustrative examples in your voice by tapping the ↻ icon inline.",
-      icon: <RefreshIcon />,
-    },
-    {
-      title: "Listen",
-      desc: "Tap play to hear the author, with word-by-word karaoke highlighting.",
-      icon: <PlayIcon />,
-    },
-    {
-      title: "Absorb",
-      desc: "Bionic reading and rapid serial presentation for deeper focus.",
-      icon: <EyeIcon />,
-    },
-    {
-      title: "Ask",
-      desc: "Ask questions about what you're reading. Answers grounded in the book.",
-      icon: <SparkleIcon />,
-    },
-  ];
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
-      <OnboardingDots total={4} active={stepIndex} />
+      <OnboardingDots total={5} active={stepIndex} />
       <h2
         className="mt-6 mb-1 text-center text-[20px] font-medium"
         style={{
@@ -734,49 +809,210 @@ function FeaturesStep({
           fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
         }}
       >
-        This isn't a normal book
+        Three touches worth knowing
       </h2>
       <p
         className="mb-5 text-center text-[12px]"
         style={{ color: "var(--ink-tertiary)" }}
       >
-        Four new ways to read.
+        Try the glossary now, then the rest when you're reading.
       </p>
-      <ul className="mb-6 flex flex-col gap-3">
-        {items.map((it) => (
-          <li key={it.title} className="flex items-start gap-3">
+
+      <GlossaryDemoCard />
+      <HighlightsDemoCard />
+      <ShortcutsCard />
+
+      <FooterNav
+        onBack={onBack}
+        onNext={onFinish}
+        nextLabel="Start reading"
+        primary
+      />
+    </div>
+  );
+}
+
+function GlossaryDemoCard() {
+  const [showTip, setShowTip] = useState(false);
+  const ref = React.useRef<HTMLSpanElement | null>(null);
+  return (
+    <div
+      className="mb-3 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>Glossary</StepLabel>
+      <p
+        className="mt-1 text-[13.5px] leading-snug"
+        style={{
+          color: "var(--ink)",
+          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+        }}
+      >
+        Dashed underlines mark words explained in the glossary — like{" "}
+        <span
+          ref={ref}
+          role="button"
+          tabIndex={0}
+          onClick={() => setShowTip((v) => !v)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setShowTip((v) => !v);
+            }
+          }}
+          style={{
+            borderBottom: "1.5px dashed var(--accent)",
+            cursor: "pointer",
+          }}
+        >
+          anicca
+        </span>
+        . Tap it to see the meaning.
+      </p>
+      {showTip && (
+        <div
+          className="mt-2 rounded-lg px-3 py-2 text-[12px]"
+          style={{
+            background:
+              "color-mix(in srgb, var(--accent) 6%, var(--bg-soft))",
+            border: "1px solid var(--accent)",
+          }}
+        >
+          <div className="flex items-baseline gap-2">
             <span
-              className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
+              className="text-[14px] italic"
               style={{
-                background: "var(--accent-soft)",
-                color: "var(--accent-ink)",
+                color: "var(--ink)",
+                fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
               }}
             >
-              {it.icon}
+              anicca
             </span>
-            <div>
-              <div
-                className="text-[14px] font-semibold"
-                style={{
-                  color: "var(--ink)",
-                  fontFamily:
-                    "var(--font-lora), ui-serif, Georgia, serif",
-                }}
-              >
-                {it.title}
-              </div>
-              <div
-                className="mt-0.5 text-[12.5px] leading-snug"
-                style={{ color: "var(--ink-secondary)" }}
-              >
-                {it.desc}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <FooterNav onBack={onBack} onNext={onFinish} nextLabel="Start reading" primary />
+            <span
+              className="text-[11px]"
+              style={{ color: "var(--ink-tertiary)" }}
+            >
+              ah-NEE-chah · Pali
+            </span>
+          </div>
+          <p
+            className="mt-1 leading-snug"
+            style={{ color: "var(--ink-secondary)" }}
+          >
+            Impermanence — the characteristic of everything arising and
+            passing away.
+          </p>
+        </div>
+      )}
+      <p
+        className="mt-2 text-[11px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        Browse every term under the bookmark bubble → Glossary tab.
+      </p>
     </div>
+  );
+}
+
+function HighlightsDemoCard() {
+  return (
+    <div
+      className="mb-3 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>Highlights & notes</StepLabel>
+      <p
+        className="mt-1 text-[13px] leading-snug"
+        style={{ color: "var(--ink-secondary)" }}
+      >
+        Select any passage and a small popover appears. Tap{" "}
+        <InlinePill bg="var(--accent-soft)" color="var(--accent-ink)">
+          <HighlightIcon size={12} />
+        </InlinePill>{" "}
+        to highlight it, <InlinePill><NoteIcon size={12} /></InlinePill> to
+        attach a note, or <InlinePill><span style={{ fontSize: 11 }}>⧉</span></InlinePill>{" "}
+        to copy it with attribution. Everything lives under the{" "}
+        <InlinePill><BookmarkIcon size={12} /></InlinePill> bubble.
+      </p>
+    </div>
+  );
+}
+
+function ShortcutsCard() {
+  return (
+    <div
+      className="mb-5 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>A few more</StepLabel>
+      <ul
+        className="mt-1 flex flex-col gap-1.5 text-[12.5px]"
+        style={{ color: "var(--ink-secondary)" }}
+      >
+        <li className="flex items-center gap-2">
+          <InlinePill>
+            <SearchIcon size={12} />
+          </InlinePill>
+          <span>
+            <Kbd>⌘F</Kbd> or the magnifying glass searches the whole book.
+          </span>
+        </li>
+        <li className="flex items-center gap-2">
+          <InlinePill>
+            <SparkleIcon size={12} />
+          </InlinePill>
+          <span>Tap the sparkle bubble to ask Claude about the book.</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <InlinePill>
+            <RefreshIcon size={12} />
+          </InlinePill>
+          <span>
+            Inline refresh icons rewrite passages using your profile.
+          </span>
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+function InlinePill({
+  children,
+  bg,
+  color,
+}: {
+  children: React.ReactNode;
+  bg?: string;
+  color?: string;
+}) {
+  return (
+    <span
+      className="inline-flex h-5 w-5 items-center justify-center rounded-full align-middle"
+      style={{
+        background:
+          bg ?? "color-mix(in srgb, var(--ink-tertiary) 14%, transparent)",
+        color: color ?? "var(--ink-secondary)",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd
+      className="rounded px-1.5 py-0.5 text-[11px]"
+      style={{
+        background:
+          "color-mix(in srgb, var(--ink-tertiary) 14%, transparent)",
+        color: "var(--ink)",
+        fontFamily:
+          "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+      }}
+    >
+      {children}
+    </kbd>
   );
 }
 
