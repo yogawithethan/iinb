@@ -17,10 +17,12 @@ function highlightsApiSupported(): boolean {
   );
 }
 
-/** A selection counts if either endpoint is inside `.reader-prose`. */
+/** A selection counts if either endpoint is inside `.reader-prose`.
+ * Falls through to true if the reader element isn't found yet (edge case
+ * during hydration). */
 function selectionInsideReader(range: Range): boolean {
   const root = document.querySelector(".reader-prose");
-  if (!root) return false;
+  if (!root) return true;
   return (
     root.contains(range.startContainer) || root.contains(range.endContainer)
   );
@@ -80,7 +82,10 @@ export function SelectionPopover() {
   }, []);
 
   useEffect(() => {
-    function onPointerUp() {
+    // Listen to every release event the browser might use. Whichever fires
+    // first triggers the sync — the others become no-ops because the
+    // selection is already resolved.
+    function onUp() {
       window.setTimeout(syncFromSelection, 10);
     }
     function onSelectionChange() {
@@ -90,16 +95,17 @@ export function SelectionPopover() {
         setPos(null);
       }
     }
-    function onScroll() {
-      setPos(null);
-    }
-    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchend", onUp);
+    document.addEventListener("keyup", onUp);
     document.addEventListener("selectionchange", onSelectionChange);
-    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchend", onUp);
+      document.removeEventListener("keyup", onUp);
       document.removeEventListener("selectionchange", onSelectionChange);
-      window.removeEventListener("scroll", onScroll);
     };
   }, [syncFromSelection]);
 
