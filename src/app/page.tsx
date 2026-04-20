@@ -1,7 +1,7 @@
 import { ReaderShell } from "@/components/reader/ReaderShell";
-import { getAllChapters } from "@/content/chapters";
+import { getReaderStream } from "@/content/stream";
 
 export default async function Home() {
-  const chapters = await getAllChapters();
-  return <ReaderShell chapters={chapters} />;
+  const stream = await getReaderStream();
+  return <ReaderShell stream={stream} />;
 }

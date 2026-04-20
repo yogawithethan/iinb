@@ -11,6 +11,7 @@ import {
 
 export type Theme = "light" | "dark" | "sepia" | "oled";
 export type ReadingFont = "serif" | "sans";
+export type ReadingWidth = "narrow" | "medium" | "wide";
 export type ScrollMode = "scroll" | "page-turn";
 export type SleepTimer = 15 | 30 | 60 | "end" | null;
 export type SkipInterval = 10 | 15 | 30 | 45;
@@ -19,6 +20,7 @@ export type ReaderSettings = {
   theme: Theme;
   fontFamily: ReadingFont;
   fontSize: number;
+  readingWidth: ReadingWidth;
   scrollMode: ScrollMode;
   bionicReading: boolean;
   rsvpEnabled: boolean;
@@ -39,6 +41,7 @@ const DEFAULTS: ReaderSettings = {
   theme: "light",
   fontFamily: "serif",
   fontSize: 18,
+  readingWidth: "medium",
   scrollMode: "scroll",
   bionicReading: false,
   rsvpEnabled: false,
@@ -63,6 +66,8 @@ function sanitize(raw: Partial<ReaderSettings>): ReaderSettings {
     theme: (raw.theme as Theme) ?? DEFAULTS.theme,
     fontFamily: (raw.fontFamily as ReadingFont) ?? DEFAULTS.fontFamily,
     fontSize: clampSize(raw.fontSize ?? DEFAULTS.fontSize),
+    readingWidth:
+      (raw.readingWidth as ReadingWidth) ?? DEFAULTS.readingWidth,
     scrollMode: (raw.scrollMode as ScrollMode) ?? DEFAULTS.scrollMode,
     bionicReading: Boolean(raw.bionicReading ?? DEFAULTS.bionicReading),
     rsvpEnabled: Boolean(raw.rsvpEnabled ?? DEFAULTS.rsvpEnabled),

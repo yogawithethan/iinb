@@ -1,28 +1,44 @@
 "use client";
 
-import { useReaderSettings } from "./SettingsContext";
+import { useReaderSettings, type ReadingWidth } from "./SettingsContext";
 import { BlockRenderer } from "./BlockRenderer";
+import { PartTitleSection } from "./PartTitleSection";
 import { bionify } from "./bionic";
 import type { Chapter } from "@/content/chapters";
+import type { ReaderNode } from "@/content/stream";
 
-type Props = { chapters: Chapter[] };
+type Props = { nodes: ReaderNode[] };
 
-export function ReaderView({ chapters }: Props) {
-  const { fontSize, bionicReading } = useReaderSettings();
+const WIDTH_PX: Record<ReadingWidth, number> = {
+  narrow: 560,
+  medium: 680,
+  wide: 820,
+};
+
+export function ReaderView({ nodes }: Props) {
+  const { fontSize, readingWidth, bionicReading } = useReaderSettings();
 
   return (
     <div
-      className="reader-prose mx-auto w-full max-w-[680px] px-6 pb-[180px] pt-[140px] md:px-10"
-      style={{ fontSize: `${fontSize}px` }}
+      className="reader-prose mx-auto w-full px-6 pb-[180px] pt-[140px] md:px-10"
+      style={{
+        fontSize: `${fontSize}px`,
+        maxWidth: `${WIDTH_PX[readingWidth]}px`,
+      }}
     >
-      {chapters.map((chapter, idx) => (
-        <ChapterSection
-          key={chapter.id}
-          chapter={chapter}
-          isFirst={idx === 0}
-          bionicReading={bionicReading}
-        />
-      ))}
+      {nodes.map((node, idx) => {
+        if (node.kind === "part") {
+          return <PartTitleSection key={`part-${node.part.id}`} part={node.part} />;
+        }
+        return (
+          <ChapterSection
+            key={`ch-${node.chapter.id}`}
+            chapter={node.chapter}
+            isFirst={idx === 0}
+            bionicReading={bionicReading}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -40,6 +56,7 @@ function ChapterSection({
     <section
       id={chapter.id}
       data-chapter-anchor={chapter.id}
+      data-anchor-kind="chapter"
       className={isFirst ? "" : "mt-24"}
       style={{ scrollMarginTop: "120px" }}
     >
@@ -73,11 +90,12 @@ function ChapterSection({
         <EmptyState chapter={chapter} />
       ) : (
         chapter.blocks.map((block, i) => {
+          const anchor = `${chapter.id}::${i}`;
           const transformed =
             bionicReading && block.type === "paragraph"
               ? { ...block, html: bionify(block.html) }
               : block;
-          return <BlockRenderer key={i} block={transformed} />;
+          return <BlockRenderer key={i} block={transformed} anchor={anchor} />;
         })
       )}
     </section>

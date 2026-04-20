@@ -3,40 +3,78 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ReaderView } from "./ReaderView";
 import { Chrome } from "./Chrome";
-import type { Chapter, ChapterMeta } from "@/content/chapters";
+import { RsvpOverlay } from "./RsvpOverlay";
+import type { ChapterMeta } from "@/content/chapters";
+import type { Part } from "@/content/parts";
+import type { ReaderStream } from "@/content/stream";
 
-type Props = { chapters: Chapter[] };
+type Props = { stream: ReaderStream };
 
-export function ReaderShell({ chapters }: Props) {
+type Anchor = {
+  id: string;
+  title: string;
+  subtitle: string;
+};
+
+export function ReaderShell({ stream }: Props) {
+  const { nodes, chapters, parts } = stream;
+
+  const anchors: Anchor[] = useMemo(
+    () =>
+      nodes.map((n) => {
+        if (n.kind === "part") {
+          return {
+            id: n.part.id,
+            title: `${n.part.numeral} · ${n.part.title}`,
+            subtitle: "",
+          };
+        }
+        return {
+          id: n.chapter.id,
+          title: n.chapter.title,
+          subtitle: n.chapter.subtitle,
+        };
+      }),
+    [nodes],
+  );
+
   const [activeId, setActiveId] = useState<string>(
-    () => chapters[0]?.id ?? "",
+    () => anchors[0]?.id ?? "",
   );
 
   const chapterMetas: ChapterMeta[] = useMemo(
-    () =>
-      chapters.map(({ blocks: _b, isEmpty: _e, ...meta }) => meta),
+    () => chapters.map(({ blocks: _b, isEmpty: _e, ...meta }) => meta),
     [chapters],
   );
 
-  // Track which chapter anchor is currently nearest the top of the viewport.
+  const partMetas = useMemo(
+    () =>
+      parts.map((p) => ({
+        id: p.id,
+        order: p.order,
+        numeral: p.numeral,
+        title: p.title,
+        matchesChapterPart: p.matchesChapterPart,
+      })),
+    [parts],
+  );
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     function update() {
-      const anchors = Array.from(
+      const els = Array.from(
         document.querySelectorAll<HTMLElement>("[data-chapter-anchor]"),
       );
-      if (!anchors.length) return;
+      if (!els.length) return;
       const threshold = window.scrollY + 140;
-      let best: HTMLElement | null = anchors[0];
-      for (const a of anchors) {
-        if (a.offsetTop <= threshold) best = a;
+      let best: HTMLElement = els[0];
+      for (const el of els) {
+        if (el.offsetTop <= threshold) best = el;
         else break;
       }
-      const id = best?.dataset.chapterAnchor;
+      const id = best.dataset.chapterAnchor;
       if (id) setActiveId((prev) => (prev === id ? prev : id));
     }
-
     update();
     let frame = 0;
     function onScroll() {
@@ -53,30 +91,31 @@ export function ReaderShell({ chapters }: Props) {
       window.removeEventListener("resize", onScroll);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, [chapters.length]);
+  }, [anchors.length]);
 
-  const active = chapters.find((c) => c.id === activeId) ?? chapters[0];
+  const active = anchors.find((a) => a.id === activeId) ?? anchors[0];
 
   const navigateTo = useCallback((id: string) => {
     const el = document.querySelector<HTMLElement>(
       `[data-chapter-anchor="${CSS.escape(id)}"]`,
     );
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   return (
     <>
       <main className="reader-scroll min-h-[100dvh] w-full">
-        <ReaderView chapters={chapters} />
+        <ReaderView nodes={nodes} />
       </main>
       <Chrome
         chapterTitle={active?.title ?? ""}
         chapterSubtitle={active?.subtitle ?? ""}
         chapters={chapterMetas}
+        parts={partMetas}
         currentId={activeId}
         onNavigate={navigateTo}
       />
+      <RsvpOverlay nodes={nodes} />
     </>
   );
 }

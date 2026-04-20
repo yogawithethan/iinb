@@ -1,31 +1,38 @@
 "use client";
 
 import type { ChapterMeta } from "@/content/chapters";
+import type { PartMeta } from "./Chrome";
 
 type Props = {
   chapters: ChapterMeta[];
+  parts: PartMeta[];
   currentId: string;
-  onNavigate: (chapterId: string) => void;
-  onClose: () => void;
+  onNavigate: (id: string) => void;
 };
 
-function groupByPart(chapters: ChapterMeta[]) {
-  const groups: { part: string; items: ChapterMeta[] }[] = [];
+type Group = { part: PartMeta | null; partLabel: string; items: ChapterMeta[] };
+
+function buildGroups(chapters: ChapterMeta[], parts: PartMeta[]): Group[] {
+  const groups: Group[] = [];
   for (const c of chapters) {
     const key = c.part ?? "";
-    const existing = groups.find((g) => g.part === key);
-    if (existing) existing.items.push(c);
-    else groups.push({ part: key, items: [c] });
+    let group = groups.find((g) => g.partLabel === key);
+    if (!group) {
+      const part = parts.find((p) => p.matchesChapterPart === key) ?? null;
+      group = { part, partLabel: key, items: [] };
+      groups.push(group);
+    }
+    group.items.push(c);
   }
   return groups;
 }
 
-export function TocPanel({ chapters, currentId, onNavigate }: Props) {
-  const groups = groupByPart(chapters);
+export function TocPanel({ chapters, parts, currentId, onNavigate }: Props) {
+  const groups = buildGroups(chapters, parts);
 
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-40 overflow-y-auto"
+      className="h-full w-full overflow-y-auto"
       style={{ background: "var(--bg)" }}
     >
       <div className="mx-auto max-w-[680px] px-6 pb-[140px] pt-[120px] md:px-10">
@@ -41,13 +48,22 @@ export function TocPanel({ chapters, currentId, onNavigate }: Props) {
 
         <div className="space-y-7">
           {groups.map((g, gi) => (
-            <section key={g.part || `free-${gi}`}>
+            <section key={g.partLabel || `free-${gi}`}>
               {g.part ? (
+                <button
+                  type="button"
+                  onClick={() => onNavigate(g.part!.id)}
+                  className="mb-3 block w-full text-left text-[11px] font-medium uppercase tracking-[0.14em] transition-colors hover:opacity-80"
+                  style={{ color: "var(--ink-tertiary)" }}
+                >
+                  {g.part.numeral} · {g.part.title}
+                </button>
+              ) : g.partLabel ? (
                 <h3
                   className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em]"
                   style={{ color: "var(--ink-tertiary)" }}
                 >
-                  {g.part}
+                  {g.partLabel}
                 </h3>
               ) : null}
               <ul className="space-y-1">
@@ -58,7 +74,7 @@ export function TocPanel({ chapters, currentId, onNavigate }: Props) {
                       <button
                         type="button"
                         onClick={() => onNavigate(c.id)}
-                        className="flex w-full items-start justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors"
+                        className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors"
                         style={{
                           background: isCurrent
                             ? "var(--accent-soft)"
@@ -93,8 +109,8 @@ export function TocPanel({ chapters, currentId, onNavigate }: Props) {
                         </span>
                         {!c.isFree ? (
                           <svg
-                            width="12"
-                            height="12"
+                            width="13"
+                            height="13"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -105,7 +121,6 @@ export function TocPanel({ chapters, currentId, onNavigate }: Props) {
                             style={{
                               color: "var(--ink-tertiary)",
                               flexShrink: 0,
-                              marginTop: 4,
                             }}
                           >
                             <rect x="3" y="11" width="18" height="11" rx="2" />

@@ -1,19 +1,29 @@
 import type { ChapterBlock } from "@/content/chapters";
 
-export function BlockRenderer({ block }: { block: ChapterBlock }) {
+type Props = { block: ChapterBlock; anchor?: string };
+
+export function BlockRenderer({ block, anchor }: Props) {
   switch (block.type) {
     case "heading": {
-      if (block.level === 1)
-        return <h1 dangerouslySetInnerHTML={{ __html: block.html }} />;
-      if (block.level === 2)
-        return <h2 dangerouslySetInnerHTML={{ __html: block.html }} />;
-      return <h3 dangerouslySetInnerHTML={{ __html: block.html }} />;
+      const common = {
+        "data-p-anchor": anchor,
+        dangerouslySetInnerHTML: { __html: block.html },
+      };
+      if (block.level === 1) return <h1 {...common} />;
+      if (block.level === 2) return <h2 {...common} />;
+      return <h3 {...common} />;
     }
     case "paragraph":
-      return <p dangerouslySetInnerHTML={{ __html: block.html }} />;
+      return (
+        <p
+          data-p-anchor={anchor}
+          dangerouslySetInnerHTML={{ __html: block.html }}
+        />
+      );
     case "blockquote":
       return (
         <blockquote
+          data-p-anchor={anchor}
           className="reader-blockquote"
           dangerouslySetInnerHTML={{ __html: block.html }}
         />

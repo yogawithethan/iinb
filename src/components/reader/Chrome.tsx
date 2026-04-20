@@ -6,6 +6,7 @@ import { DisplaySettings } from "./DisplaySettings";
 import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
+import { useOpenableState } from "@/hooks/useOpenableState";
 import {
   BookIcon,
   BookmarkIcon,
@@ -21,10 +22,19 @@ import {
 } from "./icons";
 import type { ChapterMeta } from "@/content/chapters";
 
+export type PartMeta = {
+  id: string;
+  order: number;
+  numeral: string;
+  title: string;
+  matchesChapterPart: string;
+};
+
 type ChromeProps = {
   chapterTitle: string;
   chapterSubtitle: string;
   chapters: ChapterMeta[];
+  parts: PartMeta[];
   currentId: string;
   onNavigate: (chapterId: string) => void;
 };
@@ -47,6 +57,7 @@ export function Chrome({
   chapterTitle,
   chapterSubtitle,
   chapters,
+  parts,
   currentId,
   onNavigate,
 }: ChromeProps) {
@@ -58,10 +69,12 @@ export function Chrome({
   const [bookmarked, setBookmarked] = useState(false);
   const hideTimer = useRef<number | null>(null);
 
+  const settingsAnim = useOpenableState(settingsOpen, 200);
+  const tocAnim = useOpenableState(tocOpen, 250);
+
   const effectiveVisible =
     isDesktop || visible || settingsOpen || tocOpen;
 
-  // Scroll-to-dismiss (mobile only, and not while a panel is open)
   useEffect(() => {
     if (isDesktop || settingsOpen || tocOpen) return;
     function onScroll() {
@@ -71,7 +84,6 @@ export function Chrome({
     return () => window.removeEventListener("scroll", onScroll);
   }, [isDesktop, settingsOpen, tocOpen]);
 
-  // Auto-hide after inactivity (mobile only)
   useEffect(() => {
     if (isDesktop || !visible || settingsOpen || tocOpen) return;
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
@@ -112,24 +124,32 @@ export function Chrome({
     }
   }
 
-  const topPad = settingsOpen ? "min-h-[440px]" : "min-h-[140px]";
+  const topPad = settingsOpen ? "min-h-[500px]" : "min-h-[140px]";
 
   return (
     <>
-      {/* TOC full-page takeover (below chrome so bubbles stay tappable) */}
-      {tocOpen && (
-        <TocPanel
-          chapters={chapters}
-          currentId={currentId}
-          onNavigate={(id) => {
-            onNavigate(id);
-            setTocOpen(false);
+      {tocAnim.mounted && (
+        <div
+          className="pointer-events-auto fixed inset-0 z-40 transition-[opacity,transform] duration-[250ms] ease-out"
+          style={{
+            opacity: tocAnim.animate ? 1 : 0,
+            transform: tocAnim.animate
+              ? "translateY(0)"
+              : "translateY(12px)",
           }}
-          onClose={() => setTocOpen(false)}
-        />
+        >
+          <TocPanel
+            chapters={chapters}
+            parts={parts}
+            currentId={currentId}
+            onNavigate={(id) => {
+              onNavigate(id);
+              setTocOpen(false);
+            }}
+          />
+        </div>
       )}
 
-      {/* Settings backdrop: blurs the page and closes on outside click */}
       {settingsOpen && (
         <div
           aria-hidden="true"
@@ -139,23 +159,22 @@ export function Chrome({
             backdropFilter: "blur(14px) saturate(1.1)",
             WebkitBackdropFilter: "blur(14px) saturate(1.1)",
             background: "color-mix(in srgb, var(--bg) 35%, transparent)",
+            opacity: settingsAnim.animate ? 1 : 0,
           }}
         />
       )}
 
-      {/* Chrome stage (always on top) */}
       <div
         aria-hidden={effectiveVisible ? "false" : "true"}
         className="pointer-events-none fixed inset-0 z-50"
       >
-        {/* TOP MASK + bubbles */}
+        {/* TOP MASK */}
         <div
           onClick={handleStageClick}
           className={`pointer-events-auto absolute inset-x-0 top-0 ${topPad} mask-top transition-[min-height,opacity] duration-300 ease-out`}
           style={{ opacity: effectiveVisible ? 1 : 0 }}
         >
-          <div className="relative mx-auto flex h-[88px] max-w-[720px] items-start justify-between px-4 pt-4 md:px-6">
-            {/* Top-left */}
+          <div className="relative flex h-[88px] w-full items-start justify-between px-4 pt-4 md:px-8 md:pt-6 lg:px-12">
             <div className="flex items-center gap-2">
               <GlassBubble
                 label={tocOpen ? "Close contents" : "Table of contents"}
@@ -174,8 +193,7 @@ export function Chrome({
               </GlassBubble>
             </div>
 
-            {/* Chapter title center */}
-            <div className="pointer-events-none absolute left-1/2 top-5 hidden -translate-x-1/2 text-center sm:block">
+            <div className="pointer-events-none absolute left-1/2 top-5 hidden -translate-x-1/2 text-center sm:block md:top-7">
               <div
                 className="text-[14px] font-medium leading-tight"
                 style={{ color: "var(--ink)" }}
@@ -192,7 +210,6 @@ export function Chrome({
               ) : null}
             </div>
 
-            {/* Top-right */}
             <div className="flex items-center gap-2">
               <GlassBubble
                 label={settingsOpen ? "Close settings" : "Open settings"}
@@ -212,10 +229,19 @@ export function Chrome({
             </div>
           </div>
 
-          {/* Settings capsule */}
-          {settingsOpen && (
-            <div className="mx-auto max-w-[420px] px-4 pb-4">
-              <div className="glass-capsule mx-auto mt-1 overflow-hidden rounded-[22px]">
+          {settingsAnim.mounted && (
+            <div className="flex w-full justify-center px-4 pb-4 md:justify-end md:px-8 lg:px-12">
+              <div
+                className="glass-capsule w-full max-w-[420px] overflow-hidden rounded-[22px] transition-[opacity,transform] duration-200 ease-out"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  opacity: settingsAnim.animate ? 1 : 0,
+                  transform: settingsAnim.animate
+                    ? "scale(1) translateY(0)"
+                    : "scale(0.95) translateY(-8px)",
+                  transformOrigin: isDesktop ? "top right" : "top center",
+                }}
+              >
                 <div
                   className="flex items-center justify-center gap-2 px-3 py-3"
                   style={{ borderBottom: "1px solid var(--card-border)" }}
@@ -249,13 +275,13 @@ export function Chrome({
           )}
         </div>
 
-        {/* BOTTOM MASK + bubbles */}
+        {/* BOTTOM MASK */}
         <div
           onClick={handleStageClick}
           className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom transition-opacity duration-300 ease-out"
           style={{ opacity: effectiveVisible ? 1 : 0 }}
         >
-          <div className="mx-auto flex h-[88px] max-w-[720px] items-end justify-between px-4 pb-4 md:px-6">
+          <div className="flex h-[88px] w-full items-end justify-between px-4 pb-4 md:px-8 md:pb-6 lg:px-12">
             <div className="flex items-center gap-2">
               <GlassBubble label="Play narration" size="lg" onClick={() => {}}>
                 <PlayIcon />
@@ -308,4 +334,3 @@ function SubTab({
     </button>
   );
 }
-

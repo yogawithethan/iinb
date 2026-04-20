@@ -122,6 +122,27 @@ body {
   font-weight: 700;
 }
 
+/* Part title pages: epigraph blockquote — quote + attribution stacked */
+[data-anchor-kind="part"] blockquote {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-style: italic;
+  text-align: center;
+  color: var(--ink-secondary);
+}
+[data-anchor-kind="part"] blockquote p {
+  margin: 0;
+  line-height: 1.5;
+}
+[data-anchor-kind="part"] blockquote p + p {
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  color: var(--ink-tertiary);
+  font-style: normal;
+  letter-spacing: 0.01em;
+}
+
 /* Anchor scroll offset so clicking a TOC item doesn't slide under the chrome */
 .reader-prose [data-chapter-anchor] {
   scroll-margin-top: 120px;

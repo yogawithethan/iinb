@@ -1,6 +1,10 @@
 "use client";
 
-import { useReaderSettings, type Theme } from "./SettingsContext";
+import {
+  useReaderSettings,
+  type ReadingWidth,
+  type Theme,
+} from "./SettingsContext";
 import clsx from "clsx";
 
 const THEME_CARDS: { id: Theme; label: string; bg: string; ink: string }[] = [
@@ -10,8 +14,15 @@ const THEME_CARDS: { id: Theme; label: string; bg: string; ink: string }[] = [
   { id: "oled", label: "OLED", bg: "#000000", ink: "#f2f2f2" },
 ];
 
+const WIDTH_OPTIONS: { id: ReadingWidth; label: string }[] = [
+  { id: "narrow", label: "Narrow" },
+  { id: "medium", label: "Medium" },
+  { id: "wide", label: "Wide" },
+];
+
 export function DisplaySettings() {
-  const { theme, fontFamily, fontSize, update } = useReaderSettings();
+  const { theme, fontFamily, fontSize, readingWidth, update } =
+    useReaderSettings();
 
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
@@ -109,6 +120,41 @@ export function DisplaySettings() {
           >
             A
           </span>
+        </div>
+      </section>
+
+      <section>
+        <h3
+          className="mb-2 text-[11px] font-medium uppercase tracking-[0.08em]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          Reading width
+        </h3>
+        <div className="grid grid-cols-3 gap-2">
+          {WIDTH_OPTIONS.map((w) => {
+            const selected = readingWidth === w.id;
+            return (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => update({ readingWidth: w.id })}
+                aria-pressed={selected}
+                className="rounded-[12px] px-3 py-2 text-[13px] transition-all active:scale-[0.98]"
+                style={{
+                  border: selected
+                    ? "1.5px solid var(--accent)"
+                    : "1px solid var(--pill-border)",
+                  background: selected ? "var(--accent-soft)" : "transparent",
+                  color: selected
+                    ? "var(--accent-ink)"
+                    : "var(--ink-secondary)",
+                  fontWeight: selected ? 600 : 500,
+                }}
+              >
+                {w.label}
+              </button>
+            );
+          })}
         </div>
       </section>
 
