@@ -47,10 +47,10 @@ export function PaywallSticky({
         />
       )}
 
-      {/* Paywall card — above the chrome (z-50) so its CTAs are clickable.
-          Sides are transparent so the corner bubbles (Play / Search / Share)
-          remain visible and tappable. When a popover is open we fade this
-          out so it doesn't peek through behind the popover's backdrop. */}
+      {/* Paywall — fixed at the viewport bottom. No top fade: text scrolls
+          cleanly behind the card's top edge and the card's own bg-soft
+          boundary does the visual separation. Sides stay transparent so
+          the corner chrome bubbles remain visible beside the card. */}
       <div
         className="pointer-events-none fixed inset-x-0 bottom-0 z-[52]"
         style={{
@@ -58,21 +58,6 @@ export function PaywallSticky({
           transition: "opacity 220ms ease-out",
         }}
       >
-        {/* Soft fade so text keeps going behind the card, no hard cut */}
-        <div
-          aria-hidden="true"
-          style={{
-            height: 110,
-            background: `linear-gradient(
-              to top,
-              var(--bg) 0%,
-              var(--bg) 30%,
-              color-mix(in srgb, var(--bg) 72%, transparent) 60%,
-              color-mix(in srgb, var(--bg) 36%, transparent) 82%,
-              color-mix(in srgb, var(--bg) 0%, transparent) 100%
-            )`,
-          }}
-        />
         <div
           className={`${hidden ? "pointer-events-none" : "pointer-events-auto"} mx-auto w-full px-6 md:px-10`}
           style={{ maxWidth: `${WIDTH_PX[readingWidth]}px` }}
