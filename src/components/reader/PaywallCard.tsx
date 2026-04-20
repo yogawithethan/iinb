@@ -152,19 +152,27 @@ export function PaywallCard({
           </div>
         </div>
 
-        {/* Expandable body */}
+        {/* Expandable body — grid trick animates based on actual content
+            height (no max-height guessing, no pop-in at the end). */}
         <div
           style={{
-            maxHeight: expanded ? "720px" : "0px",
+            display: "grid",
+            gridTemplateRows: expanded ? "1fr" : "0fr",
             opacity: expanded ? 1 : 0,
             transition:
-              "max-height 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease-out",
-            overflow: "hidden",
+              "grid-template-rows 440ms cubic-bezier(0.4, 0, 0.2, 1), opacity 320ms cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
           <div
             className="px-4 pb-5 pt-1 sm:px-5"
-            style={{ borderTop: "1px solid var(--card-border)" }}
+            style={{
+              minHeight: 0,
+              overflow: "hidden",
+              borderTop: expanded
+                ? "1px solid var(--card-border)"
+                : "1px solid transparent",
+              transition: "border-color 240ms ease-out",
+            }}
           >
             <ul className="flex flex-col gap-4 pt-4">
               {FEATURES.map((f) => (

@@ -36,7 +36,7 @@ export function ReaderView({ nodes }: Props) {
 
   // Leave extra bottom space for the sticky paywall so the last paragraph
   // isn't hidden behind the fixed card.
-  const bottomPadding = purchased ? 180 : 300;
+  const bottomPadding = purchased ? 180 : 200;
 
   return (
     <div

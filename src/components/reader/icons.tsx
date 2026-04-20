@@ -166,3 +166,21 @@ export function LockIcon(p: IconProps) {
     </Svg>
   );
 }
+
+export function NoteIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M14 3h-9a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9" />
+      <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </Svg>
+  );
+}
+
+export function CopyIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="9" y="9" width="12" height="12" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </Svg>
+  );
+}

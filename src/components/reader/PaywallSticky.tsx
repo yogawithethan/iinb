@@ -2,6 +2,7 @@
 
 import { useReaderSettings, type ReadingWidth } from "./SettingsContext";
 import { PaywallCard } from "./PaywallCard";
+import { useOpenableState } from "@/hooks/useOpenableState";
 
 const WIDTH_PX: Record<ReadingWidth, number> = {
   narrow: 560,
@@ -17,21 +18,24 @@ type Props = {
 
 export function PaywallSticky({ expanded, onToggle, onOpenLicense }: Props) {
   const { purchased, readingWidth } = useReaderSettings();
+  const backdropAnim = useOpenableState(expanded, 360);
   if (purchased) return null;
 
   return (
     <>
-      {/* Blur backdrop while expanded — same pattern as settings/TOC.
-          Click anywhere outside the card to collapse. */}
-      {expanded && (
+      {/* Blur backdrop — fades in/out smoothly. Click to collapse. */}
+      {backdropAnim.mounted && (
         <div
           aria-hidden="true"
           onClick={onToggle}
-          className="pointer-events-auto fixed inset-0 z-[48] transition-opacity duration-[220ms]"
+          className="pointer-events-auto fixed inset-0 z-[48]"
           style={{
-            backdropFilter: "blur(14px) saturate(1.1)",
-            WebkitBackdropFilter: "blur(14px) saturate(1.1)",
-            background: "color-mix(in srgb, var(--bg) 35%, transparent)",
+            backdropFilter: "blur(16px) saturate(1.1)",
+            WebkitBackdropFilter: "blur(16px) saturate(1.1)",
+            background: "color-mix(in srgb, var(--bg) 30%, transparent)",
+            opacity: backdropAnim.animate ? 1 : 0,
+            transition:
+              "opacity 340ms cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 340ms cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
       )}
