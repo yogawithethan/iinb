@@ -9,6 +9,7 @@ import { SelectionPopover } from "./SelectionPopover";
 import { HighlightsProvider } from "./HighlightsContext";
 import { GlossaryProvider } from "./GlossaryContext";
 import { FootnoteController } from "./FootnoteController";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { useReaderSettings } from "./SettingsContext";
 import type { ChapterMeta } from "@/content/chapters";
 import type { Part } from "@/content/parts";
@@ -27,6 +28,26 @@ export function ReaderShell({ stream }: Props) {
   const { purchased } = useReaderSettings();
   const [paywallExpanded, setPaywallExpanded] = useState(false);
   const [anyPanelOpen, setAnyPanelOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "license">("license");
+
+  // Dev test mode: `?reset=1` clears all reader state and reloads clean,
+  // so the onboarding flow can be rehearsed repeatedly with
+  // IINB-TEST-2026 as the test license.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("reset") === "1") {
+      try {
+        localStorage.removeItem("iinb:reader-settings:v2");
+      } catch {
+        /* ignore */
+      }
+      url.searchParams.delete("reset");
+      window.history.replaceState({}, "", url.pathname + url.search);
+      window.location.reload();
+    }
+  }, []);
 
   // Collapse the paywall whenever a popover opens so the two don't stack.
   useEffect(() => {
@@ -154,9 +175,18 @@ export function ReaderShell({ stream }: Props) {
         <PaywallSticky
           expanded={paywallExpanded}
           onToggle={() => setPaywallExpanded((v) => !v)}
-          hidden={anyPanelOpen}
+          hidden={anyPanelOpen || authOpen}
+          onOpenLicense={() => {
+            setAuthMode("license");
+            setAuthOpen(true);
+          }}
         />
       )}
+      <AuthModal
+        open={authOpen}
+        initialMode={authMode}
+        onClose={() => setAuthOpen(false)}
+      />
       <RsvpOverlay nodes={nodes} />
       <SelectionPopover />
       <FootnoteController />

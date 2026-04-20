@@ -15,6 +15,13 @@ export type ReadingWidth = "narrow" | "medium" | "wide";
 export type ScrollMode = "scroll" | "page-turn";
 export type SleepTimer = 15 | 30 | 60 | "end" | null;
 export type SkipInterval = 10 | 15 | 30 | 45;
+export type Decade = "70s" | "80s" | "90s" | "00s" | "10s";
+
+export type RefreshProfile = {
+  decade: Decade | null;
+  humor: string[];
+  culture: string[];
+};
 
 export type ReaderSettings = {
   theme: Theme;
@@ -33,6 +40,12 @@ export type ReaderSettings = {
   skipInterval: SkipInterval;
   /** Dev flag that simulates a logged-in, purchased reader. */
   purchased: boolean;
+  /** True once the reader has completed the post-purchase onboarding. */
+  onboarded: boolean;
+  /** Email the reader signed up with (informational). */
+  userEmail: string | null;
+  /** Personalization inputs for the refresh mechanic. */
+  refreshProfile: RefreshProfile;
 };
 
 const ALL_THEMES: readonly Theme[] = ["light", "dark", "sepia", "oled"];
@@ -50,6 +63,9 @@ const DEFAULTS: ReaderSettings = {
   readingWidth: "medium",
   accentByTheme: { light: null, dark: null, sepia: null, oled: null },
   purchased: false,
+  onboarded: false,
+  userEmail: null,
+  refreshProfile: { decade: null, humor: [], culture: [] },
   scrollMode: "scroll",
   bionicReading: false,
   rsvpEnabled: false,
@@ -122,7 +138,30 @@ function sanitize(
     sleepTimer: (raw.sleepTimer as SleepTimer) ?? DEFAULTS.sleepTimer,
     skipInterval: (raw.skipInterval as SkipInterval) ?? DEFAULTS.skipInterval,
     purchased: Boolean(raw.purchased ?? DEFAULTS.purchased),
+    onboarded: Boolean(raw.onboarded ?? DEFAULTS.onboarded),
+    userEmail:
+      typeof raw.userEmail === "string" && raw.userEmail.trim().length > 0
+        ? raw.userEmail
+        : null,
+    refreshProfile: sanitizeRefreshProfile(raw.refreshProfile),
   };
+}
+
+function sanitizeRefreshProfile(raw: unknown): RefreshProfile {
+  const decades: Decade[] = ["70s", "80s", "90s", "00s", "10s"];
+  const out: RefreshProfile = { decade: null, humor: [], culture: [] };
+  if (!raw || typeof raw !== "object") return out;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.decade === "string" && decades.includes(r.decade as Decade)) {
+    out.decade = r.decade as Decade;
+  }
+  if (Array.isArray(r.humor)) {
+    out.humor = r.humor.filter((x): x is string => typeof x === "string");
+  }
+  if (Array.isArray(r.culture)) {
+    out.culture = r.culture.filter((x): x is string => typeof x === "string");
+  }
+  return out;
 }
 
 export function ReaderSettingsProvider({
