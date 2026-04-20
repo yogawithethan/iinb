@@ -1,14 +1,16 @@
 import { Chrome } from "@/components/reader/Chrome";
 import { ReaderView } from "@/components/reader/ReaderView";
-import { chapter0 } from "@/content/chapter0";
+import { getFirstChapter } from "@/content/chapters";
 
-export default function Home() {
+export default async function Home() {
+  const chapter = await getFirstChapter();
+
   return (
     <main className="reader-scroll min-h-[100dvh] w-full">
-      <ReaderView chapter={chapter0} />
+      <ReaderView chapter={chapter} />
       <Chrome
-        chapterTitle={chapter0.title}
-        chapterSubtitle={chapter0.subtitle}
+        chapterTitle={chapter.title}
+        chapterSubtitle={chapter.subtitle}
       />
     </main>
   );
