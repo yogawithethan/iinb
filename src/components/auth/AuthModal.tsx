@@ -574,8 +574,16 @@ function PreferencesStep({
         })}
       </div>
 
-      <StepLabel>Text size</StepLabel>
-      <div className="mb-2 flex items-center gap-3">
+      <div className="mb-2 flex items-center justify-between">
+        <StepLabel>Text size</StepLabel>
+        <span
+          className="text-[11px] tabular-nums"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          {fontSize}px
+        </span>
+      </div>
+      <div className="mb-3 flex items-center gap-3">
         <span className="font-serif" style={{ color: "var(--ink-secondary)", fontSize: 13 }}>
           A
         </span>
@@ -591,9 +599,28 @@ function PreferencesStep({
           A
         </span>
       </div>
-      <p className="mb-4 text-right text-[11px] tabular-nums" style={{ color: "var(--ink-tertiary)" }}>
-        {fontSize}px
-      </p>
+
+      {/* Live preview — scales with the slider in real time */}
+      <div
+        className="mb-4 rounded-xl px-3 py-3"
+        style={{
+          background: "var(--bg-soft)",
+          border: "1px solid var(--pill-border)",
+        }}
+      >
+        <p
+          style={{
+            color: "var(--ink)",
+            fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+            fontSize: `${fontSize}px`,
+            lineHeight: 1.75,
+            transition: "font-size 120ms ease-out",
+          }}
+        >
+          The child hesitates before realizing that, actually, the decision
+          has already been made and the journey already begun.
+        </p>
+      </div>
 
       <p
         className="mb-6 text-[11.5px] leading-snug"
@@ -915,6 +942,104 @@ function GlossaryDemoCard() {
 }
 
 function HighlightsDemoCard() {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const rangeRef = React.useRef<Range | null>(null);
+  const [popover, setPopover] = useState<{ top: number; left: number } | null>(
+    null,
+  );
+  const [didHighlight, setDidHighlight] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    function sync() {
+      const sel = window.getSelection();
+      const container = containerRef.current;
+      if (!container || !sel || sel.isCollapsed || !sel.rangeCount) {
+        setPopover(null);
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      if (!container.contains(range.commonAncestorContainer)) {
+        setPopover(null);
+        return;
+      }
+      const rect = range.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) {
+        setPopover(null);
+        return;
+      }
+      rangeRef.current = range.cloneRange();
+      setPopover({
+        top: rect.top + window.scrollY - 44,
+        left: rect.left + window.scrollX + rect.width / 2,
+      });
+    }
+    function onUp() {
+      window.setTimeout(sync, 10);
+    }
+    function onSelChange() {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) setPopover(null);
+    }
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchend", onUp);
+    document.addEventListener("selectionchange", onSelChange);
+    return () => {
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchend", onUp);
+      document.removeEventListener("selectionchange", onSelChange);
+    };
+  }, []);
+
+  function applyHighlight(range: Range) {
+    if (typeof CSS === "undefined" || !("highlights" in CSS)) return;
+    const name = "iinb-highlight";
+    const existing = CSS.highlights.get(name);
+    if (existing) existing.add(range);
+    else CSS.highlights.set(name, new Highlight(range));
+  }
+
+  function dismiss() {
+    window.getSelection()?.removeAllRanges();
+    rangeRef.current = null;
+    setPopover(null);
+  }
+
+  function highlight() {
+    const r = rangeRef.current;
+    if (!r) return;
+    applyHighlight(r);
+    setDidHighlight(true);
+    dismiss();
+  }
+
+  function addNote() {
+    const r = rangeRef.current;
+    if (!r) return;
+    const n = window.prompt(`Note for "${r.toString().slice(0, 40)}…"`);
+    if (n && n.trim()) {
+      applyHighlight(r);
+      setDidHighlight(true);
+      setNote(n.trim());
+    }
+    dismiss();
+  }
+
+  async function copy() {
+    const r = rangeRef.current;
+    if (!r) return;
+    try {
+      await navigator.clipboard.writeText(
+        `${r.toString()}\n\n— Ignorance is not Bliss by Ethan Hill`,
+      );
+    } catch {
+      /* ignore */
+    }
+    dismiss();
+  }
+
   return (
     <div
       className="mb-3 rounded-xl px-3 py-3"
@@ -922,18 +1047,95 @@ function HighlightsDemoCard() {
     >
       <StepLabel>Highlights & notes</StepLabel>
       <p
-        className="mt-1 text-[13px] leading-snug"
-        style={{ color: "var(--ink-secondary)" }}
+        className="mt-2 mb-1 text-[11px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
       >
-        Select any passage and a small popover appears. Tap{" "}
-        <InlinePill bg="var(--accent-soft)" color="var(--accent-ink)">
-          <HighlightIcon size={12} />
-        </InlinePill>{" "}
-        to highlight it, <InlinePill><NoteIcon size={12} /></InlinePill> to
-        attach a note, or <InlinePill><span style={{ fontSize: 11 }}>⧉</span></InlinePill>{" "}
-        to copy it with attribution. Everything lives under the{" "}
-        <InlinePill><BookmarkIcon size={12} /></InlinePill> bubble.
+        Drag to select any words below.
       </p>
+      <div
+        ref={containerRef}
+        className="mt-1 select-text"
+        style={{
+          color: "var(--ink)",
+          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+          fontSize: 14,
+          lineHeight: 1.65,
+        }}
+      >
+        The visitor talks with born conviction: &ldquo;There is a great city
+        — to the East — atop a high mountain. The city is called Bliss.&rdquo;
+      </div>
+      {didHighlight && (
+        <div
+          className="mt-2 rounded-lg px-2.5 py-1.5 text-[11.5px]"
+          style={{
+            background:
+              "color-mix(in srgb, var(--accent) 6%, var(--bg-soft))",
+            border: "1px solid var(--accent)",
+            color: "var(--ink-secondary)",
+          }}
+        >
+          ✓ Saved. All your highlights + notes live under the{" "}
+          <InlinePill>
+            <BookmarkIcon size={12} />
+          </InlinePill>{" "}
+          bubble.
+          {note ? (
+            <span className="mt-1 block italic">Your note: &ldquo;{note}&rdquo;</span>
+          ) : null}
+        </div>
+      )}
+      {popover &&
+        createPortal(
+          <div
+            className="glass-capsule pointer-events-auto fixed z-[90] flex items-center gap-1 rounded-full px-2 py-1.5"
+            style={{
+              top: popover.top,
+              left: popover.left,
+              transform: "translateX(-50%)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+            }}
+            onMouseDown={(e) => {
+              const sel = window.getSelection();
+              if (sel && !sel.isCollapsed && sel.rangeCount) {
+                rangeRef.current = sel.getRangeAt(0).cloneRange();
+              }
+              e.preventDefault();
+            }}
+          >
+            <button
+              type="button"
+              onClick={highlight}
+              aria-label="Highlight"
+              className="flex h-8 w-8 items-center justify-center rounded-full"
+              style={{
+                color: "var(--accent-ink)",
+                background: "var(--accent-soft)",
+              }}
+            >
+              <HighlightIcon size={15} />
+            </button>
+            <button
+              type="button"
+              onClick={addNote}
+              aria-label="Add note"
+              className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full"
+              style={{ color: "var(--ink)" }}
+            >
+              <NoteIcon size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={copy}
+              aria-label="Copy"
+              className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full"
+              style={{ color: "var(--ink)" }}
+            >
+              <span style={{ fontSize: 14 }}>⧉</span>
+            </button>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
