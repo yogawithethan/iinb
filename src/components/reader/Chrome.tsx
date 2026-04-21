@@ -8,6 +8,7 @@ import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
 import { SearchPanel } from "./SearchPanel";
 import { HighlightsPanel } from "./HighlightsPanel";
+import { AiPanel } from "./AiPanel";
 import { PaywallProvider } from "./PaywallContext";
 import { useOpenableState } from "@/hooks/useOpenableState";
 import { useReaderSettings } from "./SettingsContext";
@@ -107,17 +108,21 @@ export function Chrome({
   const tocAnim = useOpenableState(tocOpen, 250);
   const searchAnim = useOpenableState(searchOpen, 220);
   const bookmarksAnim = useOpenableState(bookmarksOpen, 250);
-  const anyPanelOpen = settingsOpen || tocOpen || searchOpen || bookmarksOpen;
+  const aiAnim = useOpenableState(aiOpen, 240);
+  const anyPanelOpen =
+    settingsOpen || tocOpen || searchOpen || bookmarksOpen || aiOpen;
   const anyPanelMounted =
     settingsAnim.mounted ||
     tocAnim.mounted ||
     searchAnim.mounted ||
-    bookmarksAnim.mounted;
+    bookmarksAnim.mounted ||
+    aiAnim.mounted;
   const anyPanelAnimating =
     settingsAnim.animate ||
     tocAnim.animate ||
     searchAnim.animate ||
-    bookmarksAnim.animate;
+    bookmarksAnim.animate ||
+    aiAnim.animate;
 
   const effectiveVisible = isDesktop || visible || anyPanelOpen;
 
@@ -154,8 +159,16 @@ export function Chrome({
         }
       } else if (mod && k === "k") {
         e.preventDefault();
-        setAiOpen((v) => !v);
-        setVisible(true);
+        if (aiOpen) {
+          setAiOpen(false);
+        } else {
+          setAiOpen(true);
+          setSettingsOpen(false);
+          setTocOpen(false);
+          setSearchOpen(false);
+          setBookmarksOpen(false);
+          setVisible(true);
+        }
       } else if (mod && k === "l") {
         e.preventDefault();
         setAudioPlaying((v) => !v);
@@ -194,6 +207,20 @@ export function Chrome({
     setTocOpen(false);
     setSearchOpen(false);
     setBookmarksOpen(false);
+    setAiOpen(false);
+  }
+
+  function toggleAi() {
+    if (aiOpen) {
+      setAiOpen(false);
+    } else {
+      setAiOpen(true);
+      setSettingsOpen(false);
+      setTocOpen(false);
+      setSearchOpen(false);
+      setBookmarksOpen(false);
+      setVisible(true);
+    }
   }
 
   function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -239,6 +266,7 @@ export function Chrome({
       setSettingsOpen(false);
       setTocOpen(false);
       setBookmarksOpen(false);
+      setAiOpen(false);
       setVisible(true);
     }
   }
@@ -251,6 +279,7 @@ export function Chrome({
       setSettingsOpen(false);
       setTocOpen(false);
       setSearchOpen(false);
+      setAiOpen(false);
       setVisible(true);
     }
   }
@@ -322,6 +351,29 @@ export function Chrome({
             }}
           >
             <HighlightsPanel onClose={() => setBookmarksOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Ask (AI) popover — anchored top-right on desktop, centered on mobile */}
+      {aiAnim.mounted && (
+        <div className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-end md:px-8 lg:px-12">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="glass-capsule pointer-events-auto flex w-full max-w-[480px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
+            style={{
+              height: "min(calc(100vh - 140px), 640px)",
+              opacity: aiAnim.animate ? 1 : 0,
+              transform: aiAnim.animate
+                ? "scale(1) translateY(0)"
+                : "scale(0.95) translateY(-8px)",
+              transformOrigin: isDesktop ? "top right" : "top center",
+            }}
+          >
+            <AiPanel
+              chapterTitle={chapterTitle}
+              onClose={() => setAiOpen(false)}
+            />
           </div>
         </div>
       )}
@@ -470,7 +522,7 @@ export function Chrome({
               <GlassBubble
                 label={aiOpen ? "Close ask" : "Ask the book (⌘K)"}
                 active={aiOpen}
-                onClick={() => setAiOpen((v) => !v)}
+                onClick={toggleAi}
               >
                 {aiOpen ? <XIcon /> : <SparkleIcon />}
               </GlassBubble>

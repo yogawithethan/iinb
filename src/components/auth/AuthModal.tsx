@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   useReaderSettings,
@@ -207,6 +207,7 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
         )}
 
         <div className="overflow-y-auto">
+          <StepTransition stepKey={step}>
           {step === "entry" && (
             <EntryStep
               tab={tab}
@@ -288,10 +289,67 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
               stepIndex={5}
             />
           )}
+          </StepTransition>
         </div>
       </div>
     </div>,
     document.body,
+  );
+}
+
+/* ---------------- Step transition ---------------- */
+
+/**
+ * Gentle fade + translate between onboarding steps. When `stepKey` changes,
+ * the outgoing step fades + slides a few pixels, and the new one eases in.
+ * Uses spring-ish easing (cubic-bezier(.34, 1.24, .64, 1)) so steps feel
+ * like they're settling into place rather than clicking through.
+ */
+function StepTransition({
+  stepKey,
+  children,
+}: {
+  stepKey: string;
+  children: React.ReactNode;
+}) {
+  const [renderedKey, setRenderedKey] = useState(stepKey);
+  const [renderedChildren, setRenderedChildren] = useState(children);
+  const [entering, setEntering] = useState(false);
+  const firstRun = useRef(true);
+
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    if (stepKey === renderedKey) {
+      // content may have changed without the key — refresh
+      setRenderedChildren(children);
+      return;
+    }
+    // Key changed — swap content and run enter animation.
+    setEntering(true);
+    setRenderedKey(stepKey);
+    setRenderedChildren(children);
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setEntering(false));
+    });
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepKey, children]);
+
+  return (
+    <div
+      key={renderedKey}
+      style={{
+        opacity: entering ? 0 : 1,
+        transform: entering ? "translateY(8px)" : "translateY(0)",
+        transition:
+          "opacity 260ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.34, 1.24, 0.64, 1)",
+      }}
+    >
+      {renderedChildren}
+    </div>
   );
 }
 
@@ -1101,7 +1159,9 @@ function TryItStep({
       </p>
 
       <GlossaryDemoCard />
+      <FootnoteDemoCard />
       <HighlightsDemoCard />
+      <AiDemoCard />
       <ShortcutsCard />
 
       <FooterNav
@@ -1391,6 +1451,88 @@ function HighlightsDemoCard() {
           </div>,
           document.body,
         )}
+    </div>
+  );
+}
+
+function FootnoteDemoCard() {
+  // The global FootnoteController (mounted in ReaderShell) listens for clicks
+  // on any .footnote-ref span and handles the open/type/close. All we need to
+  // do here is drop a span with the right class + data-fn-text in the DOM.
+  return (
+    <div
+      className="mb-3 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>Footnotes</StepLabel>
+      <p
+        className="mt-2 text-[11px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        Tap the dagger. The footnote types itself out inline — no modal,
+        no popup.
+      </p>
+      <p
+        className="mt-2 text-[13.5px] leading-relaxed"
+        style={{
+          color: "var(--ink)",
+          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+        }}
+      >
+        Occasionally the author slips in a small aside
+        <span
+          className="footnote-ref"
+          data-fn-num={1}
+          data-fn-text="like this one — a thought too tangential for the main sentence, too juicy to leave out."
+          role="button"
+          tabIndex={0}
+          aria-label="Footnote 1"
+        >
+          †
+        </span>
+        — a thought that doesn&rsquo;t quite fit in the sentence. Click × or
+        Escape to collapse.
+      </p>
+    </div>
+  );
+}
+
+function AiDemoCard() {
+  return (
+    <div
+      className="mb-3 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>Ask the book</StepLabel>
+      <p
+        className="mt-2 text-[11px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        Tap <InlinePill><SparkleIcon size={12} /></InlinePill> or press{" "}
+        <Kbd>⌘K</Kbd>. Answers come grounded in the actual text.
+      </p>
+      <div className="mt-3 flex flex-col gap-2">
+        <div
+          className="self-end max-w-[88%] rounded-2xl px-3 py-2 text-[12.5px]"
+          style={{ background: "var(--accent)", color: "#fff" }}
+        >
+          What is anicca?
+        </div>
+        <div
+          className="self-start max-w-[88%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug"
+          style={{
+            background: "var(--bg-soft)",
+            color: "var(--ink)",
+            border: "1px solid var(--card-border)",
+            fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+          }}
+        >
+          Anicca is the Pāli word for impermanence — the quality of every
+          experience constantly arising and passing. In the book&rsquo;s
+          framing, it&rsquo;s less a bleak fact than a kind of relief: what
+          troubles you is already on its way elsewhere.
+        </div>
+      </div>
     </div>
   );
 }
