@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import clsx from "clsx";
+import { LockIcon } from "./icons";
 
 type Size = "sm" | "md" | "lg";
 
@@ -16,6 +17,7 @@ type Props = {
   onClick?: () => void;
   active?: boolean;
   dimmed?: boolean;
+  locked?: boolean;
   size?: Size;
   children: React.ReactNode;
   className?: string;
@@ -23,7 +25,16 @@ type Props = {
 
 export const GlassBubble = forwardRef<HTMLButtonElement, Props>(
   function GlassBubble(
-    { label, onClick, active, dimmed, size = "md", children, className },
+    {
+      label,
+      onClick,
+      active,
+      dimmed,
+      locked,
+      size = "md",
+      children,
+      className,
+    },
     ref,
   ) {
     return (
@@ -34,7 +45,7 @@ export const GlassBubble = forwardRef<HTMLButtonElement, Props>(
         aria-pressed={active}
         onClick={onClick}
         className={clsx(
-          "glass-bubble pointer-events-auto flex items-center justify-center rounded-full transition-all duration-200",
+          "glass-bubble pointer-events-auto relative flex items-center justify-center rounded-full transition-all duration-200",
           "hover:scale-[1.04] active:scale-95",
           sizeMap[size],
           active && "bubble-active",
@@ -53,6 +64,20 @@ export const GlassBubble = forwardRef<HTMLButtonElement, Props>(
         }
       >
         {children}
+        {locked && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-0.5 -right-0.5 flex h-[13px] w-[13px] items-center justify-center rounded-full"
+            style={{
+              background: "var(--accent)",
+              color: "#fff",
+              border: "1.5px solid var(--bg)",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+            }}
+          >
+            <LockIcon size={7} />
+          </span>
+        )}
       </button>
     );
   },

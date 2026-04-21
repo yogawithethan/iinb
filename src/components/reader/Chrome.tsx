@@ -159,6 +159,10 @@ export function Chrome({
         }
       } else if (mod && k === "k") {
         e.preventDefault();
+        if (!purchased) {
+          onOpenPaywall();
+          return;
+        }
         if (aiOpen) {
           setAiOpen(false);
         } else {
@@ -171,6 +175,10 @@ export function Chrome({
         }
       } else if (mod && k === "l") {
         e.preventDefault();
+        if (!purchased) {
+          onOpenPaywall();
+          return;
+        }
         setAudioPlaying((v) => !v);
         setVisible(true);
       } else if (e.key === "Escape") {
@@ -520,9 +528,16 @@ export function Chrome({
                 {settingsOpen ? <XIcon /> : <GearIcon />}
               </GlassBubble>
               <GlassBubble
-                label={aiOpen ? "Close ask" : "Ask the book (⌘K)"}
+                label={
+                  !purchased
+                    ? "Ask the book — premium"
+                    : aiOpen
+                      ? "Close ask"
+                      : "Ask the book (⌘K)"
+                }
                 active={aiOpen}
-                onClick={toggleAi}
+                locked={!purchased}
+                onClick={() => (purchased ? toggleAi() : onOpenPaywall())}
               >
                 {aiOpen ? <XIcon /> : <SparkleIcon />}
               </GlassBubble>
@@ -548,12 +563,19 @@ export function Chrome({
             <div className="flex items-center gap-2">
               <GlassBubble
                 label={
-                  audioPlaying ? "Pause narration (⌘L)" : "Play narration (⌘L)"
+                  !purchased
+                    ? "Narration — premium"
+                    : audioPlaying
+                      ? "Pause narration (⌘L)"
+                      : "Play narration (⌘L)"
                 }
                 size="lg"
-                active={audioPlaying}
+                active={audioPlaying && purchased}
+                locked={!purchased}
                 dimmed={anyPanelOpen}
-                onClick={() => setAudioPlaying((v) => !v)}
+                onClick={() =>
+                  purchased ? setAudioPlaying((v) => !v) : onOpenPaywall()
+                }
               >
                 <PlayIcon />
               </GlassBubble>
