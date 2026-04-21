@@ -85,6 +85,10 @@ export function Chrome({
   const [tocOpen, setTocOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
+  /** Toggled by the sparkle bubble / ⌘K. Real AI panel TBD. */
+  const [aiOpen, setAiOpen] = useState(false);
+  /** Toggled by the play bubble / ⌘L. Real audio engine TBD. */
+  const [audioPlaying, setAudioPlaying] = useState(false);
   const hideTimer = useRef<number | null>(null);
 
   const paywallValue = useMemo(
@@ -121,10 +125,23 @@ export function Chrome({
     onPanelStateChange?.(anyPanelOpen);
   }, [anyPanelOpen, onPanelStateChange]);
 
-  // ⌘F / Ctrl+F opens the search popover instead of the browser's find bar.
+  // Reader-wide keyboard shortcuts. ⌘F / ⌘K / ⌘L preempt the browser
+  // defaults so the in-app versions fire instead.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+      // Skip when focus is inside a form field so the user can still type.
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest(
+          "input, textarea, select, [contenteditable='true']",
+        )
+      ) {
+        return;
+      }
+      const mod = e.metaKey || e.ctrlKey;
+      const k = e.key.toLowerCase();
+
+      if (mod && k === "f") {
         e.preventDefault();
         if (searchOpen) {
           setSearchOpen(false);
@@ -135,14 +152,24 @@ export function Chrome({
           setBookmarksOpen(false);
           setVisible(true);
         }
-      } else if (e.key === "Escape" && anyPanelOpen) {
-        closeAllPanels();
+      } else if (mod && k === "k") {
+        e.preventDefault();
+        setAiOpen((v) => !v);
+        setVisible(true);
+      } else if (mod && k === "l") {
+        e.preventDefault();
+        setAudioPlaying((v) => !v);
+        setVisible(true);
+      } else if (e.key === "Escape") {
+        if (anyPanelOpen) closeAllPanels();
+        if (audioPlaying) setAudioPlaying(false);
+        if (aiOpen) setAiOpen(false);
       }
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchOpen, anyPanelOpen]);
+  }, [searchOpen, anyPanelOpen, aiOpen, audioPlaying]);
 
   useEffect(() => {
     if (isDesktop || anyPanelOpen) return;
@@ -441,12 +468,11 @@ export function Chrome({
                 {settingsOpen ? <XIcon /> : <GearIcon />}
               </GlassBubble>
               <GlassBubble
-                label="Ask the book (AI)"
-                onClick={() => {
-                  /* AI takeover — future */
-                }}
+                label={aiOpen ? "Close ask" : "Ask the book (⌘K)"}
+                active={aiOpen}
+                onClick={() => setAiOpen((v) => !v)}
               >
-                <SparkleIcon />
+                {aiOpen ? <XIcon /> : <SparkleIcon />}
               </GlassBubble>
             </div>
           </div>
@@ -469,10 +495,13 @@ export function Chrome({
           >
             <div className="flex items-center gap-2">
               <GlassBubble
-                label="Play narration"
+                label={
+                  audioPlaying ? "Pause narration (⌘L)" : "Play narration (⌘L)"
+                }
                 size="lg"
+                active={audioPlaying}
                 dimmed={anyPanelOpen}
-                onClick={() => {}}
+                onClick={() => setAudioPlaying((v) => !v)}
               >
                 <PlayIcon />
               </GlassBubble>

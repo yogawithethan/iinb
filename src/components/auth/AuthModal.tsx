@@ -1401,32 +1401,37 @@ function ShortcutsCard() {
       className="mb-5 rounded-xl px-3 py-3"
       style={{ border: "1px solid var(--pill-border)" }}
     >
-      <StepLabel>A few more</StepLabel>
+      <StepLabel>Keyboard shortcuts</StepLabel>
       <ul
-        className="mt-1 flex flex-col gap-1.5 text-[12.5px]"
+        className="mt-2 flex flex-col gap-2 text-[12.5px]"
         style={{ color: "var(--ink-secondary)" }}
       >
         <li className="flex items-center gap-2">
           <InlinePill>
             <SearchIcon size={12} />
           </InlinePill>
-          <span>
-            <Kbd>⌘F</Kbd> or the magnifying glass searches the whole book.
-          </span>
+          <span className="flex-1">Search the whole book</span>
+          <Kbd>⌘F</Kbd>
         </li>
         <li className="flex items-center gap-2">
           <InlinePill>
             <SparkleIcon size={12} />
           </InlinePill>
-          <span>Tap the sparkle bubble to ask Claude about the book.</span>
+          <span className="flex-1">Ask Claude about the book</span>
+          <Kbd>⌘K</Kbd>
         </li>
         <li className="flex items-center gap-2">
           <InlinePill>
-            <RefreshIcon size={12} />
+            <PlayIcon size={12} />
           </InlinePill>
-          <span>
-            Inline refresh icons rewrite passages using your profile.
-          </span>
+          <span className="flex-1">Play / pause narration</span>
+          <Kbd>⌘L</Kbd>
+        </li>
+        <li
+          className="mt-1 text-[11px]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          Press <Kbd>Esc</Kbd> to close any open panel.
         </li>
       </ul>
     </div>

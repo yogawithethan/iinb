@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { GlossaryEntry } from "@/content/glossary";
 import type { ChapterMeta } from "@/content/chapters";
 import { GlossaryExpandedCard } from "./GlossaryExpandedCard";
+import { useOpenableState } from "@/hooks/useOpenableState";
 
 type Props = {
   entries: GlossaryEntry[];
@@ -43,28 +44,24 @@ function groupByChapter(
 export function GlossaryList({ entries, chapters }: Props) {
   const [expandedTerm, setExpandedTerm] = useState<string | null>(null);
   const rowRefs = useRef(new Map<string, HTMLElement>());
-  const groups = groupByChapter(entries, chapters);
-
-  const toggle = useCallback(
-    (term: string) => {
-      setExpandedTerm((current) =>
-        current?.toLowerCase() === term.toLowerCase() ? null : term,
-      );
-    },
-    [],
+  const groups = useMemo(
+    () => groupByChapter(entries, chapters),
+    [entries, chapters],
   );
 
-  const switchTo = useCallback(
-    (term: string) => {
-      setExpandedTerm(term);
-      // Scroll the target row into view after the layout settles.
-      requestAnimationFrame(() => {
-        const row = rowRefs.current.get(term.toLowerCase());
-        row?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      });
-    },
-    [],
-  );
+  const toggle = useCallback((term: string) => {
+    setExpandedTerm((current) =>
+      current?.toLowerCase() === term.toLowerCase() ? null : term,
+    );
+  }, []);
+
+  const switchTo = useCallback((term: string) => {
+    setExpandedTerm(term);
+    requestAnimationFrame(() => {
+      const row = rowRefs.current.get(term.toLowerCase());
+      row?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }, []);
 
   if (entries.length === 0) {
     return (
@@ -88,81 +85,113 @@ export function GlossaryList({ entries, chapters }: Props) {
             {g.label}
           </h3>
           <ul className="space-y-0.5">
-            {g.items.map((e) => {
-              const isExpanded = expandedTerm?.toLowerCase() === e.term.toLowerCase();
-              return (
-                <li
-                  key={e.term}
-                  ref={(el) => {
-                    if (el) rowRefs.current.set(e.term.toLowerCase(), el);
-                    else rowRefs.current.delete(e.term.toLowerCase());
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggle(e.term)}
-                    aria-expanded={isExpanded}
-                    className="toc-row flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
-                    style={{
-                      ...(isExpanded && {
-                        background: "var(--accent-soft)",
-                      }),
-                    }}
-                  >
-                    <span
-                      className="text-[17px] italic"
-                      style={{
-                        color: isExpanded
-                          ? "var(--accent-ink)"
-                          : "var(--ink)",
-                        fontFamily:
-                          "var(--font-lora), ui-serif, Georgia, serif",
-                      }}
-                    >
-                      {e.display}
-                    </span>
-                    <span
-                      className="text-[11px] font-medium uppercase tracking-[0.08em]"
-                      style={{
-                        color: isExpanded
-                          ? "var(--accent-ink)"
-                          : "var(--ink-tertiary)",
-                        fontFamily:
-                          "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
-                        opacity: isExpanded ? 0.85 : 1,
-                      }}
-                    >
-                      {e.lang}
-                    </span>
-                  </button>
-
-                  {/* Grid-row trick: animates on actual card height. */}
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateRows: isExpanded ? "1fr" : "0fr",
-                      opacity: isExpanded ? 1 : 0,
-                      transition: isExpanded
-                        ? "grid-template-rows 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)"
-                        : "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1), opacity 180ms ease-out",
-                    }}
-                  >
-                    <div style={{ minHeight: 0, overflow: "hidden" }}>
-                      {isExpanded && (
-                        <GlossaryExpandedCard
-                          entry={e}
-                          entries={entries}
-                          onSwitchTo={switchTo}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
+            {g.items.map((e) => (
+              <GlossaryRow
+                key={e.term}
+                entry={e}
+                entries={entries}
+                isExpanded={
+                  expandedTerm?.toLowerCase() === e.term.toLowerCase()
+                }
+                onToggle={() => toggle(e.term)}
+                onSwitchTo={switchTo}
+                registerRef={(el) => {
+                  const key = e.term.toLowerCase();
+                  if (el) rowRefs.current.set(key, el);
+                  else rowRefs.current.delete(key);
+                }}
+              />
+            ))}
           </ul>
         </section>
       ))}
     </div>
+  );
+}
+
+function GlossaryRow({
+  entry,
+  entries,
+  isExpanded,
+  onToggle,
+  onSwitchTo,
+  registerRef,
+}: {
+  entry: GlossaryEntry;
+  entries: GlossaryEntry[];
+  isExpanded: boolean;
+  onToggle: () => void;
+  onSwitchTo: (term: string) => void;
+  registerRef: (el: HTMLElement | null) => void;
+}) {
+  const anim = useOpenableState(isExpanded, 320);
+
+  return (
+    <li ref={registerRef}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        className="toc-row flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition-colors"
+        style={{
+          ...(isExpanded && { background: "var(--accent-soft)" }),
+        }}
+      >
+        <span
+          className="text-[17px] italic"
+          style={{
+            color: isExpanded ? "var(--accent-ink)" : "var(--ink)",
+            fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+          }}
+        >
+          {entry.display}
+        </span>
+        <span
+          className="text-[11px] font-medium uppercase tracking-[0.08em]"
+          style={{
+            color: isExpanded
+              ? "var(--accent-ink)"
+              : "var(--ink-tertiary)",
+            fontFamily:
+              "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+            opacity: isExpanded ? 0.85 : 1,
+          }}
+        >
+          {entry.lang}
+        </span>
+      </button>
+
+      {/* Expansion — grid-rows grows from 0fr → 1fr so items below
+          flow down naturally at the card's real height. */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateRows: anim.animate ? "1fr" : "0fr",
+          transition:
+            "grid-template-rows 380ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      >
+        <div style={{ minHeight: 0, overflow: "hidden" }}>
+          {anim.mounted && (
+            <div
+              style={{
+                opacity: anim.animate ? 1 : 0,
+                transform: anim.animate
+                  ? "translateY(0)"
+                  : "translateY(-6px)",
+                transition:
+                  "opacity 260ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1)",
+              }}
+            >
+              <GlossaryExpandedCard
+                entry={entry}
+                entries={entries}
+                onSwitchTo={onSwitchTo}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
   );
 }
