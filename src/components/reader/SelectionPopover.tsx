@@ -17,15 +17,31 @@ function highlightsApiSupported(): boolean {
   );
 }
 
-/** A selection counts if either endpoint is inside `.reader-prose`.
- * Falls through to true if the reader element isn't found yet (edge case
- * during hydration). */
-function selectionInsideReader(range: Range): boolean {
-  const root = document.querySelector(".reader-prose");
-  if (!root) return true;
-  return (
-    root.contains(range.startContainer) || root.contains(range.endContainer)
-  );
+/**
+ * We used to gate the popover on the selection living inside `.reader-prose`.
+ * That check was dropping selections whose range.startContainer was a text
+ * node inside a bionic <b> or an intermediate inline element, and it varied
+ * oddly between the dedication (where the popover worked) and chapter
+ * paragraphs (where it didn't). The selection popover is cheap, so just
+ * reject the obvious non-reading targets: form inputs, our own popovers,
+ * and anywhere inside the chrome/modal stack.
+ */
+function selectionIsOutOfBounds(range: Range): boolean {
+  const container = range.commonAncestorContainer;
+  const el =
+    container.nodeType === Node.ELEMENT_NODE
+      ? (container as Element)
+      : container.parentElement;
+  if (!el) return false;
+  if (el.closest("input, textarea, [contenteditable='true']")) return true;
+  if (
+    el.closest(
+      ".iinb-selpop, .glass-capsule, [role='dialog'], [role='tablist']",
+    )
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function registerHighlight(range: Range): boolean {
@@ -65,7 +81,7 @@ export function SelectionPopover() {
       return;
     }
     const range = sel.getRangeAt(0);
-    if (!selectionInsideReader(range)) {
+    if (selectionIsOutOfBounds(range)) {
       rangeRef.current = null;
       setPos(null);
       return;

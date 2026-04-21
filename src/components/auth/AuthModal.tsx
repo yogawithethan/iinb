@@ -7,6 +7,8 @@ import {
   type Theme,
   type Decade,
 } from "@/components/reader/SettingsContext";
+import { ColorPicker } from "@/components/reader/ColorPicker";
+import { bionify } from "@/components/reader/bionic";
 import {
   BookmarkIcon,
   CheckIcon,
@@ -26,6 +28,7 @@ type Step =
   | "unlocked"
   | "preferences"
   | "profile"
+  | "modes"
   | "tryit";
 
 type EntryTab = "license" | "login";
@@ -66,7 +69,13 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { update, theme, fontSize, refreshProfile } = useReaderSettings();
+  const {
+    update,
+    theme,
+    fontSize,
+    refreshProfile,
+    accentByTheme,
+  } = useReaderSettings();
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -246,7 +255,11 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
             <PreferencesStep
               theme={theme}
               fontSize={fontSize}
+              accentByTheme={accentByTheme}
               onChange={(patch) => update(patch)}
+              onAccentChange={(hex) =>
+                update({ accentByTheme: { ...accentByTheme, [theme]: hex } })
+              }
               onNext={() => setStep("profile")}
               onBack={() => setStep("unlocked")}
               stepIndex={2}
@@ -256,16 +269,23 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
             <ProfileStep
               profile={refreshProfile}
               onChange={(next) => update({ refreshProfile: next })}
-              onNext={() => setStep("tryit")}
+              onNext={() => setStep("modes")}
               onBack={() => setStep("preferences")}
               stepIndex={3}
+            />
+          )}
+          {step === "modes" && (
+            <ModesStep
+              onNext={() => setStep("tryit")}
+              onBack={() => setStep("profile")}
+              stepIndex={4}
             />
           )}
           {step === "tryit" && (
             <TryItStep
               onFinish={completeOnboarding}
-              onBack={() => setStep("profile")}
-              stepIndex={4}
+              onBack={() => setStep("modes")}
+              stepIndex={5}
             />
           )}
         </div>
@@ -454,7 +474,7 @@ function WelcomeStep({
 }) {
   return (
     <div className="flex flex-col items-center px-6 pb-6 pt-10 text-center">
-      <OnboardingDots total={5} active={stepIndex} />
+      <OnboardingDots total={6} active={stepIndex} />
       <h2
         className="mt-8 mb-2 text-[28px] leading-tight"
         style={{
@@ -504,24 +524,37 @@ function WelcomeStep({
   );
 }
 
+const DEFAULT_ACCENTS: Record<Theme, string> = {
+  light: "#2563eb",
+  dark: "#60a5fa",
+  sepia: "#b4653a",
+  oled: "#6ba6ff",
+};
+
 function PreferencesStep({
   theme,
   fontSize,
+  accentByTheme,
   onChange,
+  onAccentChange,
   onNext,
   onBack,
   stepIndex,
 }: {
   theme: Theme;
   fontSize: number;
+  accentByTheme: Record<Theme, string | null>;
   onChange: (patch: { theme?: Theme; fontSize?: number }) => void;
+  onAccentChange: (hex: string) => void;
   onNext: () => void;
   onBack: () => void;
   stepIndex: number;
 }) {
+  const currentAccent =
+    accentByTheme[theme] ?? DEFAULT_ACCENTS[theme] ?? "#2563eb";
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
-      <OnboardingDots total={5} active={stepIndex} />
+      <OnboardingDots total={6} active={stepIndex} />
       <h2
         className="mt-6 mb-5 text-center text-[20px] font-medium"
         style={{
@@ -622,13 +655,25 @@ function PreferencesStep({
         </p>
       </div>
 
+      <div className="mb-2 flex items-center justify-between">
+        <StepLabel>Accent color</StepLabel>
+        <span
+          className="text-[11px]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          Saved per theme
+        </span>
+      </div>
+      <ColorPicker
+        value={currentAccent}
+        onChange={(hex) => onAccentChange(hex)}
+      />
       <p
-        className="mb-6 text-[11.5px] leading-snug"
+        className="mt-2 mb-6 text-[11px] leading-snug"
         style={{ color: "var(--ink-tertiary)" }}
       >
-        Tip: each theme remembers its own accent color — so your
-        Light theme can be teal while Dark stays blue. Pick yours
-        later in <strong>Settings → Display → Accent color</strong>.
+        Pick different colors for Light, Dark, Sepia and OLED — each
+        theme remembers its own.
       </p>
 
       <FooterNav onBack={onBack} onNext={onNext} nextLabel="Next" />
@@ -679,7 +724,7 @@ function ProfileStep({
   }
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
-      <OnboardingDots total={5} active={stepIndex} />
+      <OnboardingDots total={6} active={stepIndex} />
       <h2
         className="mt-6 mb-1 text-center text-[20px] font-medium"
         style={{
@@ -741,6 +786,216 @@ function ProfileStep({
   );
 }
 
+function ModesStep({
+  onNext,
+  onBack,
+  stepIndex,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  stepIndex: number;
+}) {
+  return (
+    <div className="flex flex-col px-6 pb-6 pt-10">
+      <OnboardingDots total={6} active={stepIndex} />
+      <h2
+        className="mt-6 mb-1 text-center text-[20px] font-medium"
+        style={{
+          color: "var(--ink)",
+          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+        }}
+      >
+        Two speed-reading modes
+      </h2>
+      <p
+        className="mb-5 text-center text-[12px]"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        Find them later in <strong>Settings → Reading</strong>.
+      </p>
+
+      <BionicDemoCard />
+      <RsvpDemoCard />
+
+      <FooterNav onBack={onBack} onNext={onNext} nextLabel="Next" />
+    </div>
+  );
+}
+
+const BIONIC_SAMPLE =
+  "There is a child, born to a small village set deep in the western wilderness, thousands of miles away from civilization.";
+
+function BionicDemoCard() {
+  return (
+    <div
+      className="mb-3 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>Bionic reading</StepLabel>
+      <p
+        className="mt-2 text-[11px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        The first few letters of each word are bolded to give your eye a
+        fixation point — most people read a little faster.
+      </p>
+      <div
+        className="mt-3 rounded-lg px-3 py-2"
+        style={{ background: "var(--bg-soft)" }}
+      >
+        <p
+          className="text-[13.5px] leading-snug"
+          style={{
+            color: "var(--ink)",
+            fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+          }}
+          dangerouslySetInnerHTML={{ __html: bionify(BIONIC_SAMPLE) }}
+        />
+      </div>
+    </div>
+  );
+}
+
+const RSVP_SAMPLE_WORDS =
+  "The child hesitates before realizing that, actually, the decision has already been made and the journey already begun.".split(
+    /\s+/,
+  );
+
+function RsvpDemoCard() {
+  const [playing, setPlaying] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [wpm, setWpm] = useState(300);
+
+  React.useEffect(() => {
+    if (!playing) return;
+    const base = 60000 / wpm;
+    const word = RSVP_SAMPLE_WORDS[idx];
+    const extra = Math.max(0, word.length - 6) * 12;
+    const timer = window.setTimeout(() => {
+      setIdx((i) => (i + 1) % RSVP_SAMPLE_WORDS.length);
+    }, base + extra);
+    return () => window.clearTimeout(timer);
+  }, [playing, idx, wpm]);
+
+  const currentWord = RSVP_SAMPLE_WORDS[idx];
+  const orp = Math.max(
+    0,
+    Math.min(currentWord.length - 1, Math.floor((currentWord.length - 1) * 0.35)),
+  );
+
+  return (
+    <div
+      className="mb-3 rounded-xl px-3 py-3"
+      style={{ border: "1px solid var(--pill-border)" }}
+    >
+      <StepLabel>Rapid serial presentation</StepLabel>
+      <p
+        className="mt-2 text-[11px] leading-snug"
+        style={{ color: "var(--ink-tertiary)" }}
+      >
+        One word at a time, centered. Your eyes stay still; the text moves.
+      </p>
+
+      <div
+        className="mt-3 flex h-[88px] flex-col items-center justify-center rounded-lg px-3"
+        style={{ background: "var(--bg-soft)" }}
+      >
+        <span
+          className="leading-none"
+          style={{
+            color: "var(--ink)",
+            fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+            fontSize: 30,
+            letterSpacing: "0.01em",
+          }}
+        >
+          <span>{currentWord.slice(0, orp)}</span>
+          <span style={{ color: "var(--accent)" }}>
+            {currentWord.charAt(orp)}
+          </span>
+          <span>{currentWord.slice(orp + 1)}</span>
+        </span>
+        <div
+          className="mt-2 h-[2px] w-8"
+          style={{
+            background:
+              "color-mix(in srgb, var(--ink-tertiary) 50%, transparent)",
+          }}
+        />
+      </div>
+
+      <div className="mt-3 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            setPlaying((p) => !p);
+            if (!playing) setIdx(0);
+          }}
+          className="rounded-full px-3 py-1.5 text-[12px] font-medium transition-transform active:scale-95"
+          style={{
+            background: playing
+              ? "color-mix(in srgb, var(--ink-tertiary) 16%, transparent)"
+              : "var(--accent)",
+            color: playing ? "var(--ink)" : "#fff",
+            fontFamily:
+              "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+          }}
+        >
+          {playing ? "Pause" : "Play"}
+        </button>
+        <div className="flex flex-1 items-center gap-2">
+          <span
+            className="text-[10px] font-medium uppercase tracking-[0.08em]"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
+            Speed
+          </span>
+          <input
+            type="range"
+            min={200}
+            max={800}
+            step={25}
+            value={wpm}
+            onChange={(e) => setWpm(Number(e.target.value))}
+            className="iinb-slider flex-1"
+            aria-label="Words per minute"
+          />
+          <span
+            className="tabular-nums text-[11px]"
+            style={{ color: "var(--ink-tertiary)" }}
+          >
+            {wpm} wpm
+          </span>
+        </div>
+      </div>
+      <style jsx>{`
+        .iinb-slider {
+          appearance: none;
+          -webkit-appearance: none;
+          height: 4px;
+          border-radius: 999px;
+          background: color-mix(
+            in srgb,
+            var(--ink-tertiary) 35%,
+            transparent
+          );
+          outline: none;
+        }
+        .iinb-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: var(--accent);
+          border: 2px solid var(--bg);
+          cursor: pointer;
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function UnlockedStep({
   onNext,
   onBack,
@@ -761,7 +1016,7 @@ function UnlockedStep({
   ];
   return (
     <div className="flex flex-col items-center px-6 pb-6 pt-10 text-center">
-      <OnboardingDots total={5} active={stepIndex} />
+      <OnboardingDots total={6} active={stepIndex} />
 
       <div
         className="mt-8 mb-6 flex h-16 w-16 items-center justify-center rounded-full"
@@ -828,7 +1083,7 @@ function TryItStep({
 }) {
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
-      <OnboardingDots total={5} active={stepIndex} />
+      <OnboardingDots total={6} active={stepIndex} />
       <h2
         className="mt-6 mb-1 text-center text-[20px] font-medium"
         style={{
