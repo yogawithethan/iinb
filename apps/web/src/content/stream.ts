@@ -58,3 +58,34 @@ export async function getReaderStream(): Promise<ReaderStream> {
 
   return { nodes, chapters, parts, dedication, glossary };
 }
+
+export async function getPublicReaderStream(): Promise<ReaderStream> {
+  const stream = await getReaderStream();
+  const freeChapterNumbers = new Set(
+    stream.chapters
+      .filter((chapter) => chapter.isFree)
+      .map((chapter) => chapter.id.match(/^ch(\d+)$/)?.[1])
+      .filter((value): value is string => Boolean(value))
+      .map(Number),
+  );
+  const nodes: ReaderNode[] = [];
+
+  for (const node of stream.nodes) {
+    if (node.kind === "part") break;
+    if (node.kind === "chapter" && !node.chapter.isFree) break;
+    nodes.push(node);
+  }
+
+  return {
+    ...stream,
+    nodes,
+    chapters: stream.chapters.map((chapter) =>
+      chapter.isFree
+        ? chapter
+        : { ...chapter, blocks: [], isEmpty: false },
+    ),
+    glossary: stream.glossary.filter((entry) =>
+      freeChapterNumbers.has(entry.chapter),
+    ),
+  };
+}

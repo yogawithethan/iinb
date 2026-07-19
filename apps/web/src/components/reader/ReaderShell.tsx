@@ -23,8 +23,11 @@ type Anchor = {
 };
 
 export function ReaderShell({ stream }: Props) {
-  const { nodes, chapters, parts, glossary } = stream;
   const { purchased, authReady, loggedIn, refreshAccess, readerPosition } = useReaderSettings();
+  const [unlockedStream, setUnlockedStream] = useState<ReaderStream | null>(null);
+  const [contentError, setContentError] = useState<string | null>(null);
+  const activeStream = unlockedStream ?? stream;
+  const { nodes, chapters, parts, glossary } = activeStream;
   const [paywallExpanded, setPaywallExpanded] = useState(false);
   const [anyPanelOpen, setAnyPanelOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -32,6 +35,37 @@ export function ReaderShell({ stream }: Props) {
   const [purchasePending, setPurchasePending] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const restoredPosition = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!purchased || unlockedStream) return;
+    let canceled = false;
+
+    async function unlockContent() {
+      setContentError(null);
+      try {
+        const response = await fetch("/api/content", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || "content_unavailable");
+        }
+        if (!canceled) setUnlockedStream(data as ReaderStream);
+      } catch {
+        if (!canceled) {
+          setContentError(
+            "Your access is active, but the full book could not be loaded. Refresh to try again.",
+          );
+        }
+      }
+    }
+
+    void unlockContent();
+    return () => {
+      canceled = true;
+    };
+  }, [purchased, unlockedStream]);
 
   // `?reset=1` clears local presentation preferences only. Ownership remains
   // server-derived and cannot be reset or granted in browser storage.
@@ -181,7 +215,7 @@ export function ReaderShell({ stream }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!purchased || !readerPosition?.chapterId) return;
+    if (!purchased || !unlockedStream || !readerPosition?.chapterId) return;
     const key = `${readerPosition.chapterId}:${readerPosition.scrollY ?? "chapter"}`;
     if (restoredPosition.current === key) return;
     restoredPosition.current = key;
@@ -193,7 +227,7 @@ export function ReaderShell({ stream }: Props) {
       }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [purchased, readerPosition]);
+  }, [purchased, unlockedStream, readerPosition]);
 
   useEffect(() => {
     if (!purchased || !activeId) return;
@@ -266,6 +300,15 @@ export function ReaderShell({ stream }: Props) {
       <GlossaryProvider entries={glossary}>
       <main className="reader-scroll min-h-[100dvh] w-full">
         <ReaderView nodes={nodes} />
+        {purchased && !unlockedStream ? (
+          <p
+            role={contentError ? "alert" : "status"}
+            className="mx-auto max-w-[680px] px-6 pb-36 text-center text-sm"
+            style={{ color: "var(--ink-secondary)" }}
+          >
+            {contentError ?? "Opening the full book…"}
+          </p>
+        ) : null}
       </main>
       <Chrome
         chapterTitle={active?.title ?? ""}

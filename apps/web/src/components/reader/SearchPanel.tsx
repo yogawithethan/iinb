@@ -31,7 +31,6 @@ function runSearch(
   const lower = q.toLowerCase();
   const results: Hit[] = [];
   for (const ch of chapters) {
-    if (!ch.isFree) continue; // only search unlocked content for now
     for (let i = 0; i < ch.blocks.length; i++) {
       const b = ch.blocks[i];
       if (b.type === "separator") continue;

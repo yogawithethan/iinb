@@ -28,6 +28,8 @@ const nativeRefresh = readFileSync("apps/native/lib/refresh-paragraph.ts", "utf8
 const nativeLicense = readFileSync("apps/native/lib/license.ts", "utf8");
 const webCheckout = readFileSync("apps/web/src/app/api/checkout/route.ts", "utf8");
 const webSession = readFileSync("apps/web/src/app/api/session/route.ts", "utf8");
+const webContent = readFileSync("apps/web/src/app/api/content/route.ts", "utf8");
+const webPage = readFileSync("apps/web/src/app/page.tsx", "utf8");
 const webGlossaryRefresh = readFileSync("apps/web/src/app/api/glossary/refresh/route.ts", "utf8");
 
 assert.match(layout, /src="\/shared-components\/loader\.js"/);
@@ -57,6 +59,11 @@ assert.match(nativeRefresh, /yweFetch\('\/iinb\/refresh'/);
 assert.match(nativeLicense, /yweFetch\('\/iinb\/redeem'/);
 assert.match(webCheckout, /"\/iinb\/checkout"/);
 assert.match(webSession, /"\/iinb\/access"/);
+assert.match(webPage, /getPublicReaderStream/);
+assert.match(webContent, /"\/iinb\/access"/);
+assert.match(webContent, /if \(!access\.entitled\)/);
+assert.match(webContent, /getReaderStream\(\)/);
+assert.match(webContent, /Cache-Control": "private, no-store"/);
 assert.match(webGlossaryRefresh, /"\/iinb\/glossary\/refresh"/);
 assert.doesNotMatch(webGlossaryRefresh, /ANTHROPIC_API_KEY|api\.anthropic\.com|mockResponse/);
 assert.doesNotMatch(nativePackage, /@supabase\/supabase-js/);
