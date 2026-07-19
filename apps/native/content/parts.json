@@ -1,0 +1,29 @@
+[
+  {
+    "file": "part-1.md",
+    "id": "part-1",
+    "order": 1,
+    "numeral": "Part I",
+    "title": "Comatosed",
+    "matchesChapterPart": "Part I — Comatosed",
+    "body": "> “On Saturday he ate through one piece of chocolate cake, one ice-cream cone, one pickle, one slice of Swiss cheese, one slice of salami, one lollipop, one piece of cherry pie, one sausage, one cupcake, and one slice of watermelon. […] But he was still hungry.”\n> — The Very Hungry Caterpillar, Eric Carle\n\n> \"Not even if it rained gold coins would we have our fill of sensual pleasures.\"\n> — Dhammapada 186"
+  },
+  {
+    "file": "part-2.md",
+    "id": "part-2",
+    "order": 2,
+    "numeral": "Part II",
+    "title": "Into the Chrysalis",
+    "matchesChapterPart": "Part II — Into the Chrysalis",
+    "body": "<!-- Paste Part II epigraphs as blockquotes. -->\n\n> \"I cannot make you understand. I cannot make anyone understand what is happening inside me. I cannot even explain it to myself.\"\n> — Metamorphosis, Kafka\n\n> \"Just as fire reduces wood to ashes, so does the fire of knowledge burn to ashes all reactions to material activities.\"\n> — Bhagavad Gita 4.37"
+  },
+  {
+    "file": "part-3.md",
+    "id": "part-3",
+    "order": 3,
+    "numeral": "Part III",
+    "title": "Wings",
+    "matchesChapterPart": "Part III — Wings",
+    "body": "> \"The dream is ended: this is the morning.\"\n> — Aslan in Chronicles of Narnia, C.S. Lewis\n\n> \"Behold, I make all things new.\"\n> — Revelation 21:5"
+  }
+]

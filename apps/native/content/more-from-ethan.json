@@ -1,0 +1,56 @@
+{
+  "label": "More from Ethan",
+  "links": [
+    {
+      "id": "user-manual",
+      "title": "The User Manual",
+      "subtitle": "A practical guide to being human",
+      "url": "https://tutorial.yogawithethan.com",
+      "image": "user-manual.png",
+      "kind": "app"
+    },
+    {
+      "id": "ywe",
+      "title": "Yoga with Ethan",
+      "subtitle": "Classes, retreats, and online practice",
+      "url": "https://yogawithethan.com",
+      "image": "ywe.svg",
+      "kind": "app"
+    },
+    {
+      "id": "newsletter",
+      "title": "Newsletter",
+      "subtitle": "Reflections, twice a month",
+      "url": "https://yogawithethan.com/newsletter",
+      "image": "newsletter.png",
+      "kind": "external"
+    },
+    {
+      "id": "telegram",
+      "title": "Telegram channel",
+      "subtitle": "Daily posts and audio drops",
+      "url": "https://t.me/yogawithethan/channel",
+      "icon": "telegram",
+      "image": "telegram.svg",
+      "kind": "external"
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube",
+      "subtitle": "Talks, practices, and conversations",
+      "url": "https://youtube.com/@yogawithethan",
+      "icon": "youtube",
+      "image": "youtube.svg",
+      "kind": "external"
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram",
+      "subtitle": "Day-to-day reflections",
+      "url": "https://instagram.com/yogawithethan",
+      "icon": "instagram",
+      "image": "instagram.svg",
+      "kind": "external"
+    }
+  ]
+}
