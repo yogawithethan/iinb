@@ -83,6 +83,21 @@ function ChapterSection({
   isFirst: boolean;
   bionicReading: boolean;
 }) {
+  // Stabilize transformed blocks so BlockRenderer receives referentially
+  // stable props across unrelated re-renders (e.g. highlights context
+  // updates). Without this, every render creates fresh `{...block, html}`
+  // objects — not a correctness bug on its own, but it churns React work
+  // and the fresh `dangerouslySetInnerHTML` wrapper risks disturbing
+  // DOM nodes that user Ranges point into.
+  const blocks = useMemo(() => {
+    if (!bionicReading) return chapter.blocks;
+    return chapter.blocks.map((block) =>
+      block.type === "paragraph"
+        ? { ...block, html: bionify(block.html) }
+        : block,
+    );
+  }, [chapter.blocks, bionicReading]);
+
   return (
     <section
       id={chapter.id}
@@ -108,13 +123,9 @@ function ChapterSection({
       {chapter.isEmpty ? (
         <EmptyState chapter={chapter} />
       ) : (
-        chapter.blocks.map((block, i) => {
+        blocks.map((block, i) => {
           const anchor = `${chapter.id}::${i}`;
-          const transformed =
-            bionicReading && block.type === "paragraph"
-              ? { ...block, html: bionify(block.html) }
-              : block;
-          return <BlockRenderer key={i} block={transformed} anchor={anchor} />;
+          return <BlockRenderer key={i} block={block} anchor={anchor} />;
         })
       )}
     </section>

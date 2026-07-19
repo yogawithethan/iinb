@@ -65,6 +65,14 @@ export function SelectionPopover() {
    * the selection covers only virgin text. */
   const overlappingIdRef = useRef<string | null>(null);
   const [overlappingId, setOverlappingId] = useState<string | null>(null);
+  /** Mirror `highlights` into a ref so `syncFromSelection` can stay
+   * referentially stable — otherwise every new highlight re-subscribes
+   * the pointerup/mouseup listeners, and an in-flight setTimeout can
+   * land with a stale closure. */
+  const highlightsRef = useRef(highlights);
+  useEffect(() => {
+    highlightsRef.current = highlights;
+  }, [highlights]);
 
   useEffect(() => {
     setApiOk(highlightsApiSupported());
@@ -73,7 +81,6 @@ export function SelectionPopover() {
   const POPOVER_WIDTH = 220;
 
   const syncFromSelection = useCallback(() => {
-    // Helper must be inside because of the highlights closure.
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount) {
       rangeRef.current = null;
@@ -96,7 +103,7 @@ export function SelectionPopover() {
 
     // Detect any existing highlight that intersects this selection.
     let overlap: string | null = null;
-    for (const h of highlights) {
+    for (const h of highlightsRef.current) {
       if (!h.range) continue;
       try {
         const cmpEnd = range.compareBoundaryPoints(Range.START_TO_END, h.range);
@@ -120,7 +127,7 @@ export function SelectionPopover() {
     const maxLeft = window.scrollX + window.innerWidth - half - 12;
     const left = Math.max(minLeft, Math.min(maxLeft, rawLeft));
     setPos({ top, left });
-  }, [highlights]);
+  }, []);
 
   useEffect(() => {
     // Listen to every release event the browser might use. Whichever fires

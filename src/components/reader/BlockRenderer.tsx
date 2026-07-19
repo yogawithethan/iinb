@@ -1,8 +1,11 @@
+import { memo } from "react";
 import type { ChapterBlock } from "@/content/chapters";
 
 type Props = { block: ChapterBlock; anchor?: string };
 
-export function BlockRenderer({ block, anchor }: Props) {
+export const BlockRenderer = memo(BlockRendererImpl);
+
+function BlockRendererImpl({ block, anchor }: Props) {
   switch (block.type) {
     case "heading": {
       const cls = `reader-heading reader-heading--h${block.level}`;

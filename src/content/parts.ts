@@ -6,7 +6,8 @@ import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 import type { ChapterBlock } from "./chapters";
 
-const PARTS_DIR = path.join(process.cwd(), "src/content/parts");
+// Shared with iinb-native via /drsti/iinb-shared/content/.
+const PARTS_DIR = path.resolve(process.cwd(), "../iinb-shared/content/parts");
 
 export type Part = {
   id: string;

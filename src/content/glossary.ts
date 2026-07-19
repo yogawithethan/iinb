@@ -16,7 +16,8 @@ export type GlossaryEntry = {
   also_see: string[];
 };
 
-const GLOSSARY_FILE = path.join(process.cwd(), "glossary.json");
+// Shared with iinb-native via /drsti/iinb-shared/content/.
+const GLOSSARY_FILE = path.resolve(process.cwd(), "../iinb-shared/content/glossary.json");
 
 let cached: GlossaryEntry[] | null = null;
 

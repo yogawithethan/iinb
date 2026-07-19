@@ -6,9 +6,10 @@ import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 import type { ChapterBlock } from "./chapters";
 
-const DEDICATION_FILE = path.join(
+// Shared with iinb-native via /drsti/iinb-shared/content/.
+const DEDICATION_FILE = path.resolve(
   process.cwd(),
-  "src/content/dedication.md",
+  "../iinb-shared/content/dedication.md",
 );
 
 export type Dedication = {
