@@ -1,0 +1,110 @@
+<!--
+  Reauthentication code email for "Ignorance is not Bliss" / Islands.
+  Used by Supabase when a user is asked to confirm a sensitive action
+  (e.g. updating credentials) and must re-prove identity with a 6-digit code.
+  Paste verbatim into Supabase Dashboard → Authentication → Email Templates → Reauthentication.
+  Subject: Your verification code — Ignorance is not Bliss
+
+  Variables: {{ .Token }} — 6-digit code
+             {{ .Email }} — recipient
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>Verification code</title>
+</head>
+<body style="margin:0;padding:0;background-color:#efe9df;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;color:#1a1712;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#efe9df;">
+    Your one-time verification code: {{ .Token }}
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#efe9df;">
+    <tr>
+      <td align="center" style="padding:48px 16px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#fdf9f4;border:1px solid #e6dfd2;border-radius:14px;overflow:hidden;">
+
+          <tr>
+            <td style="padding:36px 40px 8px 40px;text-align:left;">
+              <div style="font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;font-size:24px;letter-spacing:0.4px;color:#1a1712;line-height:1;">
+                Islands
+              </div>
+              <div style="margin-top:4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#8a8278;">
+                Ignorance is not Bliss
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:32px 40px 0 40px;">
+              <h1 style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:32px;line-height:1.2;color:#1a1712;">
+                Confirm it's you
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:18px 40px 0 40px;">
+              <p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;line-height:1.55;color:#5b544a;">
+                Enter this code in the app to finish the change on <span style="color:#1a1712;">{{ .Email }}</span>. The code expires in a few minutes.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Code box — visually echoes the gift-code box in the app. -->
+          <tr>
+            <td style="padding:28px 40px 0 40px;">
+              <div style="
+                font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+                font-size: 28px;
+                font-weight: 600;
+                letter-spacing: 8px;
+                color: #1a1712;
+                background-color: #f3ecde;
+                border: 1px solid #e6dfd2;
+                border-radius: 12px;
+                padding: 22px 16px;
+                text-align: center;
+              ">
+                {{ .Token }}
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:36px 40px 0 40px;">
+              <div style="height:1px;background-color:#e6dfd2;"></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px 40px 36px 40px;">
+              <p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;line-height:1.65;color:#8a8278;">
+                If you didn't request this code, ignore this email — no change will happen and the code will expire on its own.
+              </p>
+              <p style="margin:14px 0 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;line-height:1.55;color:#8a8278;">
+                — Ethan
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;">
+          <tr>
+            <td align="center" style="padding:18px 16px 0 16px;">
+              <p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#a39b8e;">
+                Islands · yogawithethan.com
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

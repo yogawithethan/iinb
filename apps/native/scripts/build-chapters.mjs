@@ -6,8 +6,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(__dirname, '..', 'content');
 const ASSETS_IMG_DIR = resolve(__dirname, '..', 'assets', 'images');
 
-// Single source of truth — shared with iinb (web) at /drsti/iinb-shared/content/.
-const SHARED_DIR = resolve(__dirname, '..', '..', 'iinb-shared', 'content');
+// Single source of truth — shared with the web reader through the monorepo.
+const SHARED_DIR = resolve(__dirname, '..', '..', '..', 'packages', 'content');
 const SHARED_IMG_DIR = resolve(SHARED_DIR, 'images');
 
 function parseFrontmatter(raw) {
@@ -87,12 +87,12 @@ try {
 }
 
 // Shared Islands copy — single source of truth across every Islands-powered
-// app. Each project mirrors `iinb-shared/islands-info.json` into its own
+// app. Native mirrors `packages/content/islands-info.json` into its own
 // content dir at build time, so updating it here propagates everywhere on
 // the next build. Component implementation stays per-platform (RN / web).
 try {
   copyFileSync(
-    resolve(__dirname, '..', '..', 'iinb-shared', 'islands-info.json'),
+    resolve(SHARED_DIR, 'islands-info.json'),
     join(OUT_DIR, 'islands-info.json'),
   );
 } catch (err) {
@@ -102,7 +102,7 @@ try {
 // More from Ethan — cross-app outbound links list. Same single-source pattern.
 try {
   copyFileSync(
-    resolve(__dirname, '..', '..', 'iinb-shared', 'more-from-ethan.json'),
+    resolve(SHARED_DIR, 'more-from-ethan.json'),
     join(OUT_DIR, 'more-from-ethan.json'),
   );
 } catch (err) {
@@ -110,10 +110,10 @@ try {
 }
 
 // More-from-Ethan logo assets — mirror to assets/logos/ so Metro can require()
-// them by static path. Drop new logos in iinb-shared/assets/logos/ and they
+// them by static path. Drop new logos in packages/content/logos/ and they
 // flow through on the next build.
 const LOGOS_OUT = resolve(__dirname, '..', 'assets', 'logos');
-const LOGOS_SRC = resolve(__dirname, '..', '..', 'iinb-shared', 'assets', 'logos');
+const LOGOS_SRC = resolve(SHARED_DIR, 'logos');
 const LOGO_MAP_OUT = resolve(__dirname, '..', 'lib', 'logo-svg-map.ts');
 try {
   const all = readdirSync(LOGOS_SRC).filter((f) => /\.(png|jpe?g|webp|svg)$/i.test(f));
@@ -142,7 +142,7 @@ try {
 
 // Also emit a flat book.txt for the ask-the-book Supabase Edge Function.
 // Each chapter is delimited by a heading line so the model can cite by chapter.
-const ASK_FN_DIR = resolve(__dirname, '..', '..', 'iinb-shared', 'supabase', 'functions', 'ask-the-book');
+const ASK_FN_DIR = resolve(__dirname, '..', '..', '..', 'supabase', 'functions', 'ask-the-book');
 const bookText = chapters
   .map((c) => {
     const header = `\n=== ${c.title.toUpperCase()}${c.subtitle ? ` — ${c.subtitle}` : ''} (id: ${c.id}) ===\n`;
@@ -159,7 +159,7 @@ try {
 // AND emit a static require() map so Metro can resolve them by id at runtime
 // (dynamic require with a variable path is not allowed).
 const AUDIO_OUT = resolve(__dirname, '..', 'assets', 'audio');
-const AUDIO_SRC = resolve(__dirname, '..', '..', 'iinb-shared', 'assets', 'audio');
+const AUDIO_SRC = resolve(SHARED_DIR, 'audio');
 const AUDIO_MAP_OUT = resolve(__dirname, '..', 'lib', 'audio-map.ts');
 let copiedAudio = 0;
 try {
@@ -189,7 +189,7 @@ try {
 
 // Mirror shared images (signature, caterpillar/cocoon/butterfly, etc.) into
 // the native assets dir so Metro can `require()` them. Single source of truth
-// stays in iinb-shared; the iinb web app reads them in place, and we copy a
+// stays in packages/content; the web app reads them in place, and we copy a
 // snapshot here at build time. Also emits a static require() map keyed by
 // filename so chapter markdown can reference an image by name (e.g.
 // `![Caption](butterfly.png)`) without Metro needing a dynamic path.

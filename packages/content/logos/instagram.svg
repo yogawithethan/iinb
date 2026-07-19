@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hand-crafted Instagram brand mark with inline gradients (no xlink:href
+  chaining), so react-native-svg-transformer can render it without falling
+  back to a flat fill. Approximates the official magenta -> orange -> yellow
+  gradient used by Meta's brand assets.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="igGrad" cx="0.3" cy="1.05" r="1.2" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#FED576"/>
+      <stop offset="0.18" stop-color="#F47133"/>
+      <stop offset="0.42" stop-color="#BC3081"/>
+      <stop offset="0.7"  stop-color="#7024C4"/>
+      <stop offset="1"    stop-color="#4C68D7"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="256" height="256" rx="60" ry="60" fill="url(#igGrad)"/>
+
+  <path
+    fill="none" stroke="#FFFFFF" stroke-width="14"
+    d="M82 56 h92 a30 30 0 0 1 30 30 v84 a30 30 0 0 1 -30 30 h-92 a30 30 0 0 1 -30 -30 v-84 a30 30 0 0 1 30 -30 z"/>
+
+  <circle cx="128" cy="128" r="34" fill="none" stroke="#FFFFFF" stroke-width="14"/>
+
+  <circle cx="184" cy="76" r="9" fill="#FFFFFF"/>
+</svg>

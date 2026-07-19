@@ -6,8 +6,8 @@ import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 import type { ChapterBlock } from "./chapters";
 
-// Shared with iinb-native via /drsti/iinb-shared/content/.
-const PARTS_DIR = path.resolve(process.cwd(), "../iinb-shared/content/parts");
+// Shared with the native reader through the monorepo content package.
+const PARTS_DIR = path.resolve(process.cwd(), "../../packages/content/parts");
 
 export type Part = {
   id: string;

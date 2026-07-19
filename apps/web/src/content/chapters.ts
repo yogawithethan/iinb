@@ -5,9 +5,8 @@ import path from "node:path";
 import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 
-// Single source of truth lives at /drsti/iinb-shared/content/.
-// Both the web app (iinb) and the native app (iinb-native) read from here.
-const CHAPTERS_DIR = path.resolve(process.cwd(), "../iinb-shared/content/chapters");
+// The monorepo content package is the only manuscript source for web and native.
+const CHAPTERS_DIR = path.resolve(process.cwd(), "../../packages/content/chapters");
 
 export type ChapterBlock =
   | { type: "heading"; level: 1 | 2 | 3; html: string }

@@ -16,8 +16,8 @@ export type GlossaryEntry = {
   also_see: string[];
 };
 
-// Shared with iinb-native via /drsti/iinb-shared/content/.
-const GLOSSARY_FILE = path.resolve(process.cwd(), "../iinb-shared/content/glossary.json");
+// Shared with the native reader through the monorepo content package.
+const GLOSSARY_FILE = path.resolve(process.cwd(), "../../packages/content/glossary.json");
 
 let cached: GlossaryEntry[] | null = null;
 

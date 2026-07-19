@@ -6,10 +6,10 @@ import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 import type { ChapterBlock } from "./chapters";
 
-// Shared with iinb-native via /drsti/iinb-shared/content/.
+// Shared with the native reader through the monorepo content package.
 const DEDICATION_FILE = path.resolve(
   process.cwd(),
-  "../iinb-shared/content/dedication.md",
+  "../../packages/content/dedication.md",
 );
 
 export type Dedication = {

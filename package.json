@@ -9,6 +9,7 @@
     "build:native-content": "npm --prefix apps/native run build:chapters",
     "dev:native": "npm --prefix apps/native run start",
     "lint:native": "npm --prefix apps/native run lint",
-    "verify": "npm run build:native-content && npm run lint:web && npm run lint:native && npm run build:web"
+    "verify:content": "node scripts/verify-content.mjs",
+    "verify": "npm run verify:content && npm run build:native-content && npm run lint:web && npm run lint:native && npm run build:web"
   }
 }
