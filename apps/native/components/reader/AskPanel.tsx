@@ -151,7 +151,7 @@ export function AskPanel({
             ? 'Sign in to unlock the AI companion. Ask anything about the book and get answers in the author’s voice, drawn from the actual text.'
             : 'The AI companion comes with the full book. Get it once and ask anything — answers come grounded in the actual text.'
         }
-        ctaLabel={needsSignIn ? 'Sign in' : 'Buy · $14.99'}
+        ctaLabel={needsSignIn ? 'Sign in' : 'Buy · $22.00'}
         ctaIcon={needsSignIn ? 'arrow-forward' : undefined}
         onCta={needsSignIn ? onSignInRequired : onPurchaseRequired}
         onClose={onClose}

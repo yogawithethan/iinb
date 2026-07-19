@@ -21,7 +21,7 @@ export async function GET() {
         id: "iinb",
         title: "Ignorance Is Not Bliss",
         author: "Ethan Hill",
-        price: { amountCents: 1499, currency: "usd", type: "one_time" },
+        price: { amountCents: 2200, currency: "usd", type: "one_time" },
       },
       publication: {
         chapterCount: chapters.length,

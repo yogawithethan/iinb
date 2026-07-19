@@ -9,7 +9,7 @@ import {
   XIcon,
 } from "./icons";
 
-const PRICE_LABEL = "$14.99";
+const PRICE_LABEL = "$22.00";
 const BOOK_TITLE = "Ignorance Is Not Bliss";
 const AUTHOR = "Ethan Hill";
 

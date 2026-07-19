@@ -15,7 +15,7 @@ import {
 } from '@/lib/iap';
 import { yweFetch } from '@/lib/ywe';
 
-export const PRICE_LABEL = '$14.99';
+export const PRICE_LABEL = '$22.00';
 
 export async function openCheckout(): Promise<{ kind: 'ok' | 'sign_in_required' | 'error'; message?: string }> {
   try {

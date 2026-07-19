@@ -35,7 +35,7 @@ const webGlossaryRefresh = readFileSync("apps/web/src/app/api/glossary/refresh/r
 assert.match(layout, /src="\/shared-components\/loader\.js"/);
 assert.match(layout, /active: "iinb"/);
 assert.match(layout, /preset: "immersive-detail"/);
-assert.match(manifest, /amountCents: 1499/);
+assert.match(manifest, /amountCents: 2200/);
 assert.match(manifest, /freeChapterIds/);
 assert.match(manifest, /"Access-Control-Allow-Origin": "\*"/);
 assert.match(nextConfig, /source: "\/publication-manifest\.json"/);
