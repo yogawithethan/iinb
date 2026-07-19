@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Lora } from "next/font/google";
+import Script from "next/script";
+import { createElement } from "react";
 import "./globals.css";
 import { ReaderSettingsProvider } from "@/components/reader/SettingsContext";
 
@@ -38,6 +40,12 @@ export default function RootLayout({
       className={`${inter.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <Script src="/shared-components/loader.js" strategy="beforeInteractive" />
+        {createElement("ywe-header", {
+          active: "iinb",
+          preset: "immersive-detail",
+          "mobile-title": "Ignorance Is Not Bliss",
+        })}
         <ReaderSettingsProvider>{children}</ReaderSettingsProvider>
       </body>
     </html>

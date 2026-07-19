@@ -479,7 +479,7 @@ export function Chrome({
                 closeAllPanels();
               }
             }}
-            className="relative flex h-[88px] w-full items-start justify-between px-4 pt-4 md:px-8 md:pt-6 lg:px-12"
+            className="relative flex h-[88px] w-full items-start justify-between pl-[76px] pr-4 pt-4 md:pl-[104px] md:pr-8 md:pt-6 lg:pl-[112px] lg:pr-12"
           >
             <div className="flex items-center gap-2">
               <GlassBubble

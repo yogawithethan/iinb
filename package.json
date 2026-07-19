@@ -10,6 +10,7 @@
     "dev:native": "npm --prefix apps/native run start",
     "lint:native": "npm --prefix apps/native run lint",
     "verify:content": "node scripts/verify-content.mjs",
-    "verify": "npm run verify:content && npm run build:native-content && npm run lint:web && npm run lint:native && npm run build:web"
+    "verify:ecosystem": "node scripts/verify-ecosystem-contract.mjs",
+    "verify": "npm run verify:content && npm run verify:ecosystem && npm run build:native-content && npm run lint:web && npm run lint:native && npm run build:web"
   }
 }
