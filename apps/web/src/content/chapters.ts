@@ -1,12 +1,8 @@
 import "server-only";
 
-import fs from "node:fs/promises";
-import path from "node:path";
 import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
-
-// The monorepo content package is the only manuscript source for web and native.
-const CHAPTERS_DIR = path.resolve(process.cwd(), "../../packages/content/chapters");
+import generatedContent from "./generated-content.json";
 
 export type ChapterBlock =
   | { type: "heading"; level: 1 | 2 | 3; html: string }
@@ -30,17 +26,11 @@ export type Chapter = ChapterMeta & {
 };
 
 async function readAll() {
-  const files = (await fs.readdir(CHAPTERS_DIR)).filter((f) =>
-    f.endsWith(".md"),
-  );
-  const rows = await Promise.all(
-    files.map(async (file) => {
-      const raw = await fs.readFile(path.join(CHAPTERS_DIR, file), "utf8");
-      const { data, content } = matter(raw);
-      const meta = normalizeMeta(data, file);
-      return { meta, content };
-    }),
-  );
+  const rows = generatedContent.chapters.map(({ file, raw }) => {
+    const { data, content } = matter(raw);
+    const meta = normalizeMeta(data, file);
+    return { meta, content };
+  });
   return rows.sort((a, b) => a.meta.order - b.meta.order);
 }
 

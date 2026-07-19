@@ -1,13 +1,9 @@
 import "server-only";
 
-import fs from "node:fs/promises";
-import path from "node:path";
 import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 import type { ChapterBlock } from "./chapters";
-
-// Shared with the native reader through the monorepo content package.
-const PARTS_DIR = path.resolve(process.cwd(), "../../packages/content/parts");
+import generatedContent from "./generated-content.json";
 
 export type Part = {
   id: string;
@@ -19,15 +15,8 @@ export type Part = {
 };
 
 export async function getAllParts(): Promise<Part[]> {
-  let files: string[] = [];
-  try {
-    files = (await fs.readdir(PARTS_DIR)).filter((f) => f.endsWith(".md"));
-  } catch {
-    return [];
-  }
   const parts: Part[] = [];
-  for (const file of files) {
-    const raw = await fs.readFile(path.join(PARTS_DIR, file), "utf8");
+  for (const { file, raw } of generatedContent.parts) {
     const { data, content } = matter(raw);
     parts.push({
       id: String(data.id ?? file.replace(/\.md$/, "")),

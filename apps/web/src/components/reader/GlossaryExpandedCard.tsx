@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GlossaryEntry } from "@/content/glossary";
 import { RefreshIcon, SpeakerIcon } from "./icons";
+import { useReaderSettings } from "./SettingsContext";
 
 const TYPE_INTERVAL = 18;
 
@@ -50,6 +51,7 @@ function useTypedText(initial: string) {
 }
 
 export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
+  const { purchased } = useReaderSettings();
   const definition = useTypedText(entry.definition);
   const example = useTypedText(
     entry.example ?? entry.used_in_sentence ?? "",
@@ -150,11 +152,13 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
           }}
         >
           {definition.text}
-          <InlineRefresh
-            onClick={() => refresh("definition")}
-            spinning={spinningDef}
-            disabled={definition.typing}
-          />
+          {purchased ? (
+            <InlineRefresh
+              onClick={() => refresh("definition")}
+              spinning={spinningDef}
+              disabled={definition.typing}
+            />
+          ) : null}
         </p>
       </section>
 
@@ -171,7 +175,7 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
           }}
         >
           {example.text || "—"}
-          {example.text ? (
+          {example.text && purchased ? (
             <InlineRefresh
               onClick={() => refresh("example")}
               spinning={spinningEx}

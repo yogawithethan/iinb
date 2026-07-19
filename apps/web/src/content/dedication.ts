@@ -1,16 +1,9 @@
 import "server-only";
 
-import fs from "node:fs/promises";
-import path from "node:path";
 import matter from "gray-matter";
 import { marked, type Tokens } from "marked";
 import type { ChapterBlock } from "./chapters";
-
-// Shared with the native reader through the monorepo content package.
-const DEDICATION_FILE = path.resolve(
-  process.cwd(),
-  "../../packages/content/dedication.md",
-);
+import generatedContent from "./generated-content.json";
 
 export type Dedication = {
   id: string;
@@ -18,12 +11,7 @@ export type Dedication = {
 };
 
 export async function getDedication(): Promise<Dedication | null> {
-  let raw: string;
-  try {
-    raw = await fs.readFile(DEDICATION_FILE, "utf8");
-  } catch {
-    return null;
-  }
+  const raw = generatedContent.dedication.raw;
   const { data, content } = matter(raw);
   const blocks = parseBlocks(content);
   if (blocks.length === 0) return null;

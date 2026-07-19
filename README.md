@@ -27,8 +27,9 @@ npm run build:native-content
 npm run lint:web
 npm run lint:native
 npm run build:web
+npm --prefix apps/web run preview:cloudflare
 ```
 
-The web production build currently emits a non-fatal Turbopack warning for the standards-based CSS Custom Highlight pseudo-element, `::highlight(iinb-highlight)`.
+The web deployment is an OpenNext application on Cloudflare Workers. Its build bundles a deterministic snapshot from `packages/content`, while that package remains the only editable manuscript source. The web production build currently emits a non-fatal Turbopack warning for the standards-based CSS Custom Highlight pseudo-element, `::highlight(iinb-highlight)`.
 
 The source folders `/Users/ethanhill/drsti/iinb-native` and `/Users/ethanhill/drsti/iinb-shared` remain as migration fallbacks until parity and deployment verification are complete. Do not edit them as canonical sources after the monorepo cutover.

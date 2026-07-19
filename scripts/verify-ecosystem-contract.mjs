@@ -5,9 +5,13 @@ import { readFileSync } from "node:fs";
 
 const layout = readFileSync("apps/web/src/app/layout.tsx", "utf8");
 const manifest = readFileSync(
-  "apps/web/src/app/publication-manifest.json/route.ts",
+  "apps/web/src/app/publication-manifest/route.ts",
   "utf8",
 );
+const nextConfig = readFileSync("apps/web/next.config.ts", "utf8");
+const wranglerConfig = readFileSync("apps/web/wrangler.jsonc", "utf8");
+const webContentSources = ["chapters", "parts", "dedication", "glossary"]
+  .map((name) => readFileSync(`apps/web/src/content/${name}.ts`, "utf8"));
 const loader = readFileSync(
   "apps/web/src/app/shared-components/loader.js/route.ts",
   "utf8",
@@ -24,6 +28,7 @@ const nativeRefresh = readFileSync("apps/native/lib/refresh-paragraph.ts", "utf8
 const nativeLicense = readFileSync("apps/native/lib/license.ts", "utf8");
 const webCheckout = readFileSync("apps/web/src/app/api/checkout/route.ts", "utf8");
 const webSession = readFileSync("apps/web/src/app/api/session/route.ts", "utf8");
+const webGlossaryRefresh = readFileSync("apps/web/src/app/api/glossary/refresh/route.ts", "utf8");
 
 assert.match(layout, /src="\/shared-components\/loader\.js"/);
 assert.match(layout, /active: "iinb"/);
@@ -31,6 +36,10 @@ assert.match(layout, /preset: "immersive-detail"/);
 assert.match(manifest, /amountCents: 1499/);
 assert.match(manifest, /freeChapterIds/);
 assert.match(manifest, /"Access-Control-Allow-Origin": "\*"/);
+assert.match(nextConfig, /source: "\/publication-manifest\.json"/);
+assert.match(nextConfig, /destination: "\/publication-manifest"/);
+assert.match(wranglerConfig, /"main": "\.open-next\/worker\.js"/);
+assert.match(wranglerConfig, /"nodejs_compat"/);
 assert.match(loader, /assets\/components\/loader\.js/);
 assert.match(loader, /X-IINB-Shared-Component-Source/);
 assert.match(chrome, /pl-\[76px\][\s\S]*md:pl-\[104px\]/);
@@ -41,7 +50,13 @@ assert.match(nativeRefresh, /yweFetch\('\/iinb\/refresh'/);
 assert.match(nativeLicense, /yweFetch\('\/iinb\/redeem'/);
 assert.match(webCheckout, /"\/iinb\/checkout"/);
 assert.match(webSession, /"\/iinb\/access"/);
+assert.match(webGlossaryRefresh, /"\/iinb\/glossary\/refresh"/);
+assert.doesNotMatch(webGlossaryRefresh, /ANTHROPIC_API_KEY|api\.anthropic\.com|mockResponse/);
 assert.doesNotMatch(nativePackage, /@supabase\/supabase-js/);
+for (const source of webContentSources) {
+  assert.doesNotMatch(source, /node:fs|process\.cwd\(\)|packages\/content/);
+  assert.match(source, /generated-content\.json/);
+}
 for (const source of [nativeAuth, nativeIap, nativeRefresh, nativeLicense]) {
   assert.doesNotMatch(source, /supabase|polar/i);
 }
