@@ -46,11 +46,20 @@ npx wrangler secret put APPLE_BUNDLE_ID
 npx wrangler secret put APPLE_ISSUER_ID
 npx wrangler secret put APPLE_KEY_ID
 npx wrangler secret put APPLE_PRIVATE_KEY
+npx wrangler secret put APPLE_NOTIFICATION_TOKEN
 npx wrangler secret put IINB_LICENSE_HMAC_KEY
 npx wrangler secret list
 ```
 
 Use `com.yogawithethan.iinb` for `APPLE_BUNDLE_ID`. Paste the complete `.p8` file, including its BEGIN/END lines, for `APPLE_PRIVATE_KEY`. Generate `IINB_LICENSE_HMAC_KEY` once with a password manager or `openssl rand -hex 32`, retain it in the Yoga With Ethan secret vault, and do not casually rotate it: deterministic gift-code recovery depends on that key remaining stable.
+
+Generate `APPLE_NOTIFICATION_TOKEN` independently as a random 32+ character value. After migration `0111_iinb_app_store_notifications.sql` has received separate production-write approval and is present in remote D1, configure both production and sandbox App Store Server Notifications as **Version 2** with this URL:
+
+```text
+https://auth.yogawithethan.com/iinb/iap/notifications?token=<APPLE_NOTIFICATION_TOKEN>
+```
+
+Treat the complete callback URL as a secret. Request an App Store test notification and confirm the endpoint records one processed `TEST` row before testing purchases or refunds.
 
 `APPLE_SHARED_SECRET` is only the legacy StoreKit receipt fallback. Add it with `npx wrangler secret put APPLE_SHARED_SECRET` only if the Apple account supplies an applicable app-specific shared secret and legacy receipts must be supported. StoreKit 2 verification uses the App Store Server API credentials above.
 
@@ -78,6 +87,8 @@ Use a sandbox Apple account on a physical device and a distinct Yoga With Ethan 
 - Buying `iinb.giftcode` returns a single license code, does not silently entitle the buyer, and finishes the transaction as consumable.
 - A second YWE account can redeem that gift code exactly once; repeating the same transaction returns the same code rather than issuing a second one.
 - A malformed receipt, wrong bundle ID, wrong product ID, and signed-out verification are all rejected.
+- A sandbox refund sends a V2 `REFUND` notification and revokes the corresponding D1 entitlement or gift license; `REFUND_REVERSED` reinstates only after Apple's authenticated transaction state is active again.
+- Replaying the same notification UUID does not create a second ledger action.
 - Free Preface and Chapter 0 remain readable without purchase; all later chapters remain server-gated.
 
 Record transaction IDs, test-account emails, Worker response codes, and D1 source counts in the release evidence. Never record receipt bodies, private keys, or full license codes.
@@ -90,10 +101,10 @@ Do not submit while any of these are true:
 - either StoreKit product is missing metadata, unavailable, or not attached to the version;
 - the YWE Worker cannot verify a sandbox StoreKit 2 transaction;
 - full-book restore or gift-code idempotency fails;
-- Apple refund/revocation handling has not been implemented and verified for production entitlements;
+- migration `0111_iinb_app_store_notifications.sql`, the V2 callback token, test notification, refund, revocation, and reversal paths have not all been verified in sandbox;
 - the privacy disclosures, support URL, screenshots, review notes, or account-deletion requirements are incomplete.
 
-The current backend verifies purchases and restores, but App Store Server Notification handling for later refunds/revocations is still a required production gate.
+The backend code handles App Store Server Notifications V2, but the D1 migration, callback credential, App Store Connect URL, and sandbox lifecycle evidence remain production gates until completed.
 
 ## Production build and submission
 

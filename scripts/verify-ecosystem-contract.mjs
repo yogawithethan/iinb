@@ -22,6 +22,7 @@ const chrome = readFileSync(
 );
 const nativePackage = readFileSync("apps/native/package.json", "utf8");
 const nativeApp = JSON.parse(readFileSync("apps/native/app.json", "utf8"));
+const nativeRelease = readFileSync("apps/native/APP-STORE-RELEASE.md", "utf8");
 const nativeAccess = readFileSync("apps/native/lib/access.ts", "utf8");
 const nativeAuth = readFileSync("apps/native/lib/AuthContext.tsx", "utf8");
 const nativeIap = readFileSync("apps/native/lib/iap.ts", "utf8");
@@ -62,6 +63,9 @@ assert.equal(nativeApp.expo.owner, "yogawithethan");
 assert.equal(nativeApp.expo.ios.bundleIdentifier, "com.yogawithethan.iinb");
 assert.equal(nativeApp.expo.extra.eas.projectId, "30783386-c185-4e88-8509-b33e92f22b45");
 assert.equal(nativeApp.expo.updates.url, `https://u.expo.dev/${nativeApp.expo.extra.eas.projectId}`);
+assert.match(nativeRelease, /APPLE_NOTIFICATION_TOKEN/);
+assert.match(nativeRelease, /0111_iinb_app_store_notifications\.sql/);
+assert.match(nativeRelease, /REFUND_REVERSED/);
 assert.match(nativeRefresh, /yweFetch\('\/iinb\/refresh'/);
 assert.match(nativeLicense, /yweFetch\('\/iinb\/redeem'/);
 assert.match(webCheckout, /"\/iinb\/checkout"/);
