@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Ignorance is not Bliss",
-    "slug": "iinb",
+    "name": "iinb-native",
+    "slug": "iinb-native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -18,10 +18,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yogawithethan.iinb",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "com.yogawithethan.iinbnative",
+      "associatedDomains": [
+        "webcredentials:islands.bio",
+        "applinks:islands.bio"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -31,11 +32,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
-      ]
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "single",
@@ -56,9 +53,7 @@
         }
       ],
       "expo-audio",
-      "expo-iap",
-      "expo-asset",
-      "expo-web-browser"
+      "expo-iap"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -67,7 +62,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "30783386-c185-4e88-8509-b33e92f22b45"
+        "projectId": "cff1cc87-f7cc-4aeb-99ca-fa64c5700151"
       }
     },
     "owner": "yogawithethan"
