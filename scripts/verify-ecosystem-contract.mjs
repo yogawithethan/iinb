@@ -13,7 +13,7 @@ const wranglerConfig = readFileSync("apps/web/wrangler.jsonc", "utf8");
 const webContentSources = ["chapters", "parts", "dedication", "glossary"]
   .map((name) => readFileSync(`apps/web/src/content/${name}.ts`, "utf8"));
 const loader = readFileSync(
-  "apps/web/src/app/shared-components/loader.js/route.ts",
+  "apps/web/src/app/shared-components/[...asset]/route.ts",
   "utf8",
 );
 const chrome = readFileSync(
@@ -40,10 +40,15 @@ assert.match(nextConfig, /source: "\/publication-manifest\.json"/);
 assert.match(nextConfig, /destination: "\/publication-manifest"/);
 assert.match(wranglerConfig, /"main": "\.open-next\/worker\.js"/);
 assert.match(wranglerConfig, /"nodejs_compat"/);
-assert.match(wranglerConfig, /"pattern": "iinb\.yogawithethan\.com"/);
-assert.match(wranglerConfig, /"custom_domain": true/);
-assert.match(loader, /assets\/components\/loader\.js/);
-assert.match(loader, /X-IINB-Shared-Component-Source/);
+assert.match(wranglerConfig, /"workers_dev": true/);
+assert.match(wranglerConfig, /"pattern": "iinb\.yogawithethan\.com\/\*"/);
+assert.match(wranglerConfig, /"zone_id": "f27f4c1bf68e63d75e63a64e1b5edf3c"/);
+assert.match(loader, /assets\/components/);
+assert.match(loader, /path === "loader\.js"/);
+assert.match(loader, /X-YWE-Shared-Component-Proxy/);
+assert.match(loader, /stable-loader/);
+assert.match(loader, /immutable-asset/);
+assert.match(loader, /source\.replaceAll/);
 assert.match(chrome, /pl-\[76px\][\s\S]*md:pl-\[104px\]/);
 assert.match(nativeAccess, /FREE_GATE_ORDER = 1/);
 assert.match(nativeAuth, /requestNativeSignInLink/);

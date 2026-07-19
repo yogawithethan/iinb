@@ -6,6 +6,8 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -15,8 +17,8 @@
   },
   "routes": [
     {
-      "pattern": "iinb.yogawithethan.com",
-      "custom_domain": true
+      "pattern": "iinb.yogawithethan.com/*",
+      "zone_id": "f27f4c1bf68e63d75e63a64e1b5edf3c"
     }
   ]
 }
