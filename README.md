@@ -1,36 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ignorance Is Not Bliss
 
-## Getting Started
+This repository is the canonical product unit for **Ignorance Is Not Bliss** (IINB) across web, native, shared content, and backend contracts.
 
-First, run the development server:
+## Repository layout
+
+- `apps/web/` — the Next.js interactive reader served at `iinb.yogawithethan.com`
+- `apps/native/` — the Expo iOS and Android reader
+- `packages/content/` — the only canonical manuscript, glossary, image, audio, and cross-product content source
+- `supabase/` — authentication, licenses, entitlements, purchase webhooks, AI, and account-supporting backend functions
+- `docs/` — product specifications and migration evidence
+
+The Yoga With Ethan repository registers IINB as a governed product surface and owns ecosystem navigation, shared UI foundations, account integration, and operator tooling. This repository owns the IINB runtime and content.
+
+## Local commands
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build:native-content
+npm run lint:web
+npm run lint:native
+npm run build:web
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The source folders `/Users/ethanhill/drsti/iinb-native` and `/Users/ethanhill/drsti/iinb-shared` remain as migration fallbacks until parity and deployment verification are complete. Do not edit them as canonical sources after the monorepo cutover.

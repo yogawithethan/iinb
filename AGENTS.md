@@ -1,5 +1,17 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# IINB Repository Guidance
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+This repository is the canonical product unit for Ignorance Is Not Bliss.
+
+## Ownership
+
+- Edit manuscript and shared media only in `packages/content/`.
+- Treat generated files in `apps/native/content/`, `apps/native/assets/audio/`, `apps/native/assets/logos/`, and the generated native asset maps as build outputs.
+- Keep authentication, license, entitlement, webhook, and AI backend contracts in `supabase/`.
+- Keep product-specific reader typography and theme behavior local to IINB.
+- Reuse Yoga With Ethan shared foundations and shared navigation for ecosystem chrome; do not fork the canonical header.
+
+## Verification
+
+Run the root scripts for the affected platform. Before a release, run `npm run verify` and confirm the custom domain separately.
+
+The web app has version-specific Next.js guidance in `apps/web/AGENTS.md`; read it before editing web runtime code.
