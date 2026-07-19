@@ -12,5 +12,11 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "routes": [
+    {
+      "pattern": "iinb.yogawithethan.com",
+      "custom_domain": true
+    }
+  ]
 }

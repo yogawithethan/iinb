@@ -40,6 +40,8 @@ assert.match(nextConfig, /source: "\/publication-manifest\.json"/);
 assert.match(nextConfig, /destination: "\/publication-manifest"/);
 assert.match(wranglerConfig, /"main": "\.open-next\/worker\.js"/);
 assert.match(wranglerConfig, /"nodejs_compat"/);
+assert.match(wranglerConfig, /"pattern": "iinb\.yogawithethan\.com"/);
+assert.match(wranglerConfig, /"custom_domain": true/);
 assert.match(loader, /assets\/components\/loader\.js/);
 assert.match(loader, /X-IINB-Shared-Component-Source/);
 assert.match(chrome, /pl-\[76px\][\s\S]*md:pl-\[104px\]/);
