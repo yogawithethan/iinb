@@ -12,6 +12,6 @@ This repository is the canonical product unit for Ignorance Is Not Bliss.
 
 ## Verification
 
-Run the root scripts for the affected platform. Before a release, run `npm run verify` and confirm the custom domain separately.
+Run the root scripts for the affected platform. Before a release, run `npm run verify` and confirm both the canonical hostname and the `workers.dev` rollback endpoint separately.
 
 The web app has version-specific Next.js guidance in `apps/web/AGENTS.md`; read it before editing web runtime code.
