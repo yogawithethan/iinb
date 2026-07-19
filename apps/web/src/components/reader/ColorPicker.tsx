@@ -82,7 +82,6 @@ export function ColorPicker({ value, onChange }: Props) {
 
   const svRef = useRef<HTMLDivElement | null>(null);
   const draggingSv = useRef(false);
-  const draggingHue = useRef(false);
 
   const emit = useCallback(
     (newHue: number, s: number, v: number) => {

@@ -12,11 +12,12 @@ const SUGGESTED_PROMPTS = [
 ];
 
 type Props = {
+  chapterId?: string;
   chapterTitle?: string;
   onClose: () => void;
 };
 
-export function AiPanel({ chapterTitle }: Props) {
+export function AiPanel({ chapterId, chapterTitle }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,10 +49,11 @@ export function AiPanel({ chapterTitle }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: next,
-          chapterTitle,
+          chapterId,
         }),
       });
-      const data = (await res.json()) as { text?: string };
+      const data = (await res.json()) as { text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error || "Ask the book is unavailable.");
       setMessages((prev) => [
         ...prev,
         {
@@ -59,12 +61,12 @@ export function AiPanel({ chapterTitle }: Props) {
           content: data.text ?? "(no response)",
         },
       ]);
-    } catch {
+    } catch (error) {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, something went wrong. Try again.",
+          content: error instanceof Error ? error.message : "Sorry, something went wrong. Try again.",
         },
       ]);
     } finally {

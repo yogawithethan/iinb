@@ -298,12 +298,21 @@ function PartDivider({
 }
 
 export default function ReaderScreen() {
-  const { ready, fontFamily, fontSize, bionicReading, purchased, onboarded, firstLaunched, accent, tokens, devSimulateSignedIn, refreshProfile } = useSettings();
+  const { ready, fontFamily, fontSize, bionicReading, purchased, onboarded, firstLaunched, accent, tokens, refreshProfile } = useSettings();
   const { user, refreshEntitlements } = useAuth();
   const [purchasingFullBook, setPurchasingFullBook] = useState(false);
   const handleBuyFullBook = async () => {
     if (!isIapAvailable()) {
-      openCheckout();
+      if (!user) {
+        open('settings', 'profile', { authOpen: true });
+        return;
+      }
+      const result = await openCheckout();
+      if (result.kind === 'sign_in_required') {
+        open('settings', 'profile', { authOpen: true });
+      } else if (result.kind === 'error') {
+        Alert.alert('Checkout unavailable', result.message);
+      }
       return;
     }
     if (purchasingFullBook) return;
@@ -319,7 +328,7 @@ export default function ReaderScreen() {
       Alert.alert('Purchase failed', result.message);
     }
   };
-  const isAuthed = Boolean(user) || devSimulateSignedIn;
+  const isAuthed = Boolean(user);
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   // The reader sits inside a Tabs navigator — the bottom tab bar already
@@ -775,9 +784,9 @@ export default function ReaderScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        title: 'Ignorance is not Bliss',
+        title: 'Ignorance Is Not Bliss',
         message:
-          'Ignorance is not Bliss — Suffering, Purification and the Future of the Species, by Ethan Hill.\n\nhttps://iinb.yogawithethan.com/',
+          'Ignorance Is Not Bliss — Suffering, Purification and the Future of the Species, by Ethan Hill.\n\nhttps://iinb.yogawithethan.com/',
         url: 'https://iinb.yogawithethan.com/',
       });
     } catch {
@@ -1207,6 +1216,7 @@ export default function ReaderScreen() {
         ]}
       >
         <AskPanel
+          chapterId={currentId}
           isAuthed={isAuthed}
           purchased={purchased}
           onClose={close}
@@ -1420,7 +1430,7 @@ export default function ReaderScreen() {
                   ? 'See what you get with purchase'
                   : !isAuthed
                   ? 'Sign up to keep reading'
-                  : 'Ignorance is not Bliss'
+                  : 'Ignorance Is Not Bliss'
               }
               style={{
                 flexDirection: 'row',
@@ -1439,7 +1449,7 @@ export default function ReaderScreen() {
                         fontWeight: '600',
                       }}
                     >
-                      Ignorance is not Bliss
+                      Ignorance Is Not Bliss
                     </Text>
                     <Text
                       style={{

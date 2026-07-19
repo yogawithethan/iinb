@@ -23,7 +23,6 @@ import {
 
 type Step =
   | "entry"
-  | "password"
   | "welcome"
   | "unlocked"
   | "preferences"
@@ -63,14 +62,17 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
   const [step, setStep] = useState<Step>("entry");
   const [tab, setTab] = useState<EntryTab>(initialMode);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [licenseKey, setLicenseKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const {
     update,
+    onboarded,
+    loggedIn,
+    userEmail,
+    refreshAccess,
     theme,
     fontSize,
     refreshProfile,
@@ -83,8 +85,14 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
       setStep("entry");
       setTab(initialMode);
       setError(null);
+      setNotice(null);
+      void refreshAccess().catch(() => null);
     }
-  }, [open, initialMode]);
+  }, [open, initialMode, refreshAccess]);
+
+  useEffect(() => {
+    if (userEmail) setEmail(userEmail);
+  }, [userEmail]);
 
   if (!mounted || !open) return null;
 
@@ -92,24 +100,19 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setNotice(null);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setError(data.error ?? "Could not sign in.");
         return;
       }
-      // Returning reader — straight into purchased state, no onboarding
-      update({
-        purchased: true,
-        onboarded: true,
-        userEmail: data.email ?? email,
-      });
-      onClose();
+      setNotice("Check your email for a secure Yoga With Ethan sign-in link. It works for 30 minutes.");
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -121,18 +124,25 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setNotice(null);
     try {
       const res = await fetch("/api/auth/validate-license", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, licenseKey }),
+        body: JSON.stringify({ licenseKey }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setError(data.error ?? "License validation failed.");
         return;
       }
-      setStep("password");
+      const access = await refreshAccess();
+      if (!access.entitled) {
+        setError("The key was accepted, but access has not refreshed yet. Try once more.");
+        return;
+      }
+      if (onboarded) onClose();
+      else setStep("welcome");
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -140,30 +150,13 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
     }
   }
 
-  function submitPassword(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords don't match.");
-      return;
-    }
-    // MVP: we don't actually persist the password here — Supabase will take
-    // over once auth is wired. For now, just proceed.
-    update({ userEmail: email });
-    setStep("welcome");
-  }
-
   function completeOnboarding() {
-    update({ purchased: true, onboarded: true, userEmail: email });
+    update({ onboarded: true });
     onClose();
   }
 
   function skipOnboarding() {
-    update({ purchased: true, onboarded: true, userEmail: email });
+    update({ onboarded: true });
     onClose();
   }
 
@@ -214,28 +207,19 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
               setTab={(t) => {
                 setTab(t);
                 setError(null);
+                setNotice(null);
               }}
               email={email}
               setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
               licenseKey={licenseKey}
               setLicenseKey={setLicenseKey}
+              loggedIn={loggedIn}
+              signedInEmail={userEmail}
               loading={loading}
               error={error}
+              notice={notice}
               onLogin={submitLogin}
               onLicense={submitLicense}
-            />
-          )}
-          {step === "password" && (
-            <PasswordStep
-              email={email}
-              password={password}
-              setPassword={setPassword}
-              confirmPassword={confirmPassword}
-              setConfirmPassword={setConfirmPassword}
-              error={error}
-              onSubmit={submitPassword}
             />
           )}
           {step === "welcome" && (
@@ -360,12 +344,13 @@ function EntryStep(props: {
   setTab: (t: EntryTab) => void;
   email: string;
   setEmail: (s: string) => void;
-  password: string;
-  setPassword: (s: string) => void;
   licenseKey: string;
   setLicenseKey: (s: string) => void;
+  loggedIn: boolean;
+  signedInEmail: string | null;
   loading: boolean;
   error: string | null;
+  notice: string | null;
   onLogin: (e: React.FormEvent) => void;
   onLicense: (e: React.FormEvent) => void;
 }) {
@@ -374,12 +359,13 @@ function EntryStep(props: {
     setTab,
     email,
     setEmail,
-    password,
-    setPassword,
     licenseKey,
     setLicenseKey,
+    loggedIn,
+    signedInEmail,
     loading,
     error,
+    notice,
     onLogin,
     onLicense,
   } = props;
@@ -398,7 +384,7 @@ function EntryStep(props: {
         className="mb-5 text-center text-[12px]"
         style={{ color: "var(--ink-tertiary)" }}
       >
-        Log in or unlock with your license key.
+        One Yoga With Ethan account for your reader and the wider ecosystem.
       </p>
 
       <TabSwitcher
@@ -420,30 +406,18 @@ function EntryStep(props: {
             onChange={setEmail}
             required
           />
-          <TextInput
-            type="password"
-            placeholder="Password"
-            autoComplete="current-password"
-            value={password}
-            onChange={setPassword}
-            required
-          />
           {error && <ErrorText>{error}</ErrorText>}
-          <PrimaryButton loading={loading} label="Log in" />
+          {notice && <NoticeText>{notice}</NoticeText>}
+          <PrimaryButton loading={loading} label="Email me a secure sign-in link" />
         </form>
-      ) : (
+      ) : loggedIn ? (
         <form onSubmit={onLicense} className="mt-5 flex flex-col gap-3">
-          <TextInput
-            type="email"
-            placeholder="Email"
-            autoComplete="email"
-            value={email}
-            onChange={setEmail}
-            required
-          />
+          <p className="text-center text-[12px]" style={{ color: "var(--ink-secondary)" }}>
+            Signed in as {signedInEmail}. Enter a key from an earlier IINB purchase.
+          </p>
           <TextInput
             type="text"
-            placeholder="License key (e.g. IINB-TEST-2026)"
+            placeholder="License key"
             value={licenseKey}
             onChange={setLicenseKey}
             required
@@ -454,69 +428,27 @@ function EntryStep(props: {
             className="mt-1 text-center text-[11px]"
             style={{ color: "var(--ink-tertiary)" }}
           >
-            Lemon Squeezy emails the key after purchase.
+            The key is bound to this verified Yoga With Ethan account when redeemed.
           </p>
         </form>
+      ) : (
+        <form onSubmit={onLogin} className="mt-5 flex flex-col gap-3">
+          <p className="text-center text-[12px]" style={{ color: "var(--ink-secondary)" }}>
+            Sign in first so your historical purchase can be attached safely.
+          </p>
+          <TextInput
+            type="email"
+            placeholder="Email used for your purchase"
+            autoComplete="email"
+            value={email}
+            onChange={setEmail}
+            required
+          />
+          {error && <ErrorText>{error}</ErrorText>}
+          {notice && <NoticeText>{notice}</NoticeText>}
+          <PrimaryButton loading={loading} label="Email me a secure sign-in link" />
+        </form>
       )}
-    </div>
-  );
-}
-
-function PasswordStep(props: {
-  email: string;
-  password: string;
-  setPassword: (s: string) => void;
-  confirmPassword: string;
-  setConfirmPassword: (s: string) => void;
-  error: string | null;
-  onSubmit: (e: React.FormEvent) => void;
-}) {
-  const {
-    email,
-    password,
-    setPassword,
-    confirmPassword,
-    setConfirmPassword,
-    error,
-    onSubmit,
-  } = props;
-  return (
-    <div className="px-6 pb-6 pt-10">
-      <h2
-        className="mb-1 text-center text-[20px] font-medium"
-        style={{
-          color: "var(--ink)",
-          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
-        }}
-      >
-        Create a password
-      </h2>
-      <p
-        className="mb-5 text-center text-[12px]"
-        style={{ color: "var(--ink-tertiary)" }}
-      >
-        You'll use this to sign in next time with {email}.
-      </p>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <TextInput
-          type="password"
-          placeholder="New password"
-          autoComplete="new-password"
-          value={password}
-          onChange={setPassword}
-          required
-        />
-        <TextInput
-          type="password"
-          placeholder="Confirm password"
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={setConfirmPassword}
-          required
-        />
-        {error && <ErrorText>{error}</ErrorText>}
-        <PrimaryButton label="Continue" />
-      </form>
     </div>
   );
 }
@@ -540,7 +472,7 @@ function WelcomeStep({
           fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
         }}
       >
-        Ignorance is not Bliss
+        Ignorance Is Not Bliss
       </h2>
       <p
         className="mb-1 text-[13px]"
@@ -583,7 +515,7 @@ function WelcomeStep({
 }
 
 const DEFAULT_ACCENTS: Record<Theme, string> = {
-  light: "#2563eb",
+  light: "#6d4aa7",
   dark: "#60a5fa",
   sepia: "#b4653a",
   oled: "#6ba6ff",
@@ -609,7 +541,7 @@ function PreferencesStep({
   stepIndex: number;
 }) {
   const currentAccent =
-    accentByTheme[theme] ?? DEFAULT_ACCENTS[theme] ?? "#2563eb";
+    accentByTheme[theme] ?? DEFAULT_ACCENTS[theme] ?? "#6d4aa7";
   return (
     <div className="flex flex-col px-6 pb-6 pt-10">
       <OnboardingDots total={6} active={stepIndex} />
@@ -1099,8 +1031,8 @@ function UnlockedStep({
         className="mb-6 max-w-[320px] text-[13px] leading-snug"
         style={{ color: "var(--ink-secondary)" }}
       >
-        All chapters, the author's audio, AI Q&A, and every reading tool
-        are unlocked. Here's a quick taste:
+        All chapters, the author’s audio, AI Q&A, and every reading tool
+        are unlocked. Here’s a quick taste:
       </p>
 
       <ul className="mb-8 flex w-full flex-col gap-2.5 text-left">
@@ -1155,7 +1087,7 @@ function TryItStep({
         className="mb-5 text-center text-[12px]"
         style={{ color: "var(--ink-tertiary)" }}
       >
-        Try the glossary now, then the rest when you're reading.
+        Try the glossary now, then the rest when you’re reading.
       </p>
 
       <GlossaryDemoCard />
@@ -1347,7 +1279,7 @@ function HighlightsDemoCard() {
     if (!r) return;
     try {
       await navigator.clipboard.writeText(
-        `${r.toString()}\n\n— Ignorance is not Bliss by Ethan Hill`,
+        `${r.toString()}\n\n— Ignorance Is Not Bliss by Ethan Hill`,
       );
     } catch {
       /* ignore */
@@ -1734,6 +1666,18 @@ function ErrorText({ children }: { children: React.ReactNode }) {
       role="alert"
       className="text-center text-[12px]"
       style={{ color: "#c0392b" }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function NoticeText({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      role="status"
+      className="rounded-xl px-3 py-2 text-center text-[12px] leading-snug"
+      style={{ color: "var(--accent-ink)", background: "var(--accent-soft)" }}
     >
       {children}
     </p>

@@ -1147,7 +1147,7 @@ function TryItStep() {
             textAlign: 'center',
           }}
         >
-          Try each one — they're sprinkled throughout the book.
+          Try each one — they’re sprinkled throughout the book.
         </Text>
       </View>
 
@@ -1249,7 +1249,7 @@ function FootnoteDemo() {
         <Text onPress={() => setShow((v) => !v)} style={{ color: accent }}>
           <Ionicons name="document-text-outline" size={13} color={accent} />
         </Text>
-        {' '}— tap it and the note types itself out inline so you don't lose your place.
+        {' '}— tap it and the note types itself out inline so you don’t lose your place.
         {show ? (
           <Text style={{ fontFamily: serifItalic, color: tokens.inkSecondary }}>
             {' '}{streamed}
@@ -1266,4 +1266,3 @@ function FootnoteDemo() {
     </View>
   );
 }
-

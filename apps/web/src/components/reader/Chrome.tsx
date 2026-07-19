@@ -379,6 +379,7 @@ export function Chrome({
             }}
           >
             <AiPanel
+              chapterId={currentId}
               chapterTitle={chapterTitle}
               onClose={() => setAiOpen(false)}
             />

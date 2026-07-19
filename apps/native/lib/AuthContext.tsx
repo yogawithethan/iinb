@@ -1,156 +1,109 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { AppState } from 'react-native';
-import type { Session, User } from '@supabase/supabase-js';
+import { AppState, Linking } from 'react-native';
 
-import { supabase } from './supabase';
+import {
+  clearMemberSession,
+  exchangeNativeCode,
+  getMemberSession,
+  requestNativeSignInLink,
+  type StoredMemberSession,
+  yweFetch,
+} from './ywe';
 
-const IINB_PRODUCT_SLUG = 'ignorance-is-not-bliss' as const;
+type MemberUser = { id: string; email: string };
 
 type AuthCtx = {
   ready: boolean;
-  session: Session | null;
-  user: User | null;
-  /** True iff the signed-in user has an active iinb entitlement in product_entitlements. */
+  session: StoredMemberSession | null;
+  user: MemberUser | null;
   entitled: boolean;
-  /** Re-fetch the entitlement (e.g. after a purchase). */
   refreshEntitlements: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (
-    email: string,
-    password: string,
-  ) => Promise<{ error: string | null; alreadyRegistered: boolean; needsConfirmation: boolean }>;
+  requestSignInLink: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: string | null }>;
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [ready, setReady] = useState(false);
+  const [session, setSession] = useState<StoredMemberSession | null>(null);
   const [entitled, setEntitled] = useState(false);
-  const lastCheckedUserId = useRef<string | null>(null);
+  const [ready, setReady] = useState(false);
 
-  const fetchEntitlement = useCallback(async (userId: string | null) => {
-    if (!userId) {
+  const refreshEntitlements = useCallback(async () => {
+    const current = await getMemberSession();
+    if (!current) {
+      setSession(null);
       setEntitled(false);
       return;
     }
-    const { data, error } = await supabase
-      .from('product_entitlements')
-      .select('status')
-      .eq('user_id', userId)
-      .eq('product_slug', IINB_PRODUCT_SLUG)
-      .eq('status', 'active')
-      .maybeSingle();
-    if (error) {
-      console.warn('[auth] entitlement check failed', error.message);
-      // Don't change entitled state on transient errors — keep last good value.
+    const response = await yweFetch('/iinb/access');
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.loggedIn) {
+      await clearMemberSession();
+      setSession(null);
+      setEntitled(false);
       return;
     }
-    setEntitled(Boolean(data));
+    setSession({ ...current, email: String(data.email || current.email) });
+    setEntitled(Boolean(data.entitled));
   }, []);
 
-  const refreshEntitlements = useCallback(async () => {
-    await fetchEntitlement(session?.user?.id ?? null);
-  }, [fetchEntitlement, session?.user?.id]);
+  const handleAuthUrl = useCallback(async (url: string | null) => {
+    if (!url) return;
+    let code = '';
+    try { code = new URL(url).searchParams.get('code') || ''; } catch { return; }
+    if (!code) return;
+    try {
+      const next = await exchangeNativeCode(code);
+      setSession(next);
+      await refreshEntitlements();
+    } catch (error) {
+      console.warn('[auth] native exchange failed', error);
+    }
+  }, [refreshEntitlements]);
 
   useEffect(() => {
     let mounted = true;
-
-    supabase.auth.getSession().then(({ data }) => {
+    void getMemberSession().then(async (stored) => {
       if (!mounted) return;
-      setSession(data.session ?? null);
-      setReady(true);
+      setSession(stored);
+      await refreshEntitlements().catch(() => undefined);
+      if (mounted) setReady(true);
     });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
-      setSession(next ?? null);
-      // Auto-claim license keys whose payer/recipient email matches this
-      // user. Silent; runs only on fresh sign-ins (not token refresh).
-      if (event === 'SIGNED_IN' && next) {
-        // Lazy require avoids a circular dep at module load.
-        import('./license').then(({ claimPendingLicenses }) => {
-          claimPendingLicenses().catch(() => undefined);
-        });
-      }
+    void Linking.getInitialURL().then(handleAuthUrl);
+    const linkSub = Linking.addEventListener('url', ({ url }) => { void handleAuthUrl(url); });
+    const appSub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void refreshEntitlements().catch(() => undefined);
     });
-
-    // Refresh tokens when app comes back to the foreground.
-    const appStateSub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') supabase.auth.startAutoRefresh();
-      else supabase.auth.stopAutoRefresh();
-    });
-
-    supabase.auth.startAutoRefresh();
-
     return () => {
       mounted = false;
-      sub.subscription.unsubscribe();
-      appStateSub.remove();
+      linkSub.remove();
+      appSub.remove();
     };
-  }, []);
+  }, [handleAuthUrl, refreshEntitlements]);
 
-  // Re-check entitlement whenever the user identity changes.
-  useEffect(() => {
-    const userId = session?.user?.id ?? null;
-    if (lastCheckedUserId.current === userId) return;
-    lastCheckedUserId.current = userId;
-    fetchEntitlement(userId);
-  }, [session?.user?.id, fetchEntitlement]);
-
-  const value = useMemo<AuthCtx>(
-    () => ({
-      ready,
-      session,
-      user: session?.user ?? null,
-      entitled,
-      refreshEntitlements,
-      async signIn(email, password) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        return { error: error?.message ?? null };
-      },
-      async signUp(email, password) {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-          // Supabase returns "User already registered" for existing emails — surface
-          // that as a flag so the UI can flip into sign-in mode rather than show a
-          // generic error that reads like the app is broken.
-          const msg = (error.message ?? '').toLowerCase();
-          const alreadyRegistered =
-            msg.includes('already registered') ||
-            msg.includes('user already') ||
-            msg.includes('already exists');
-          return { error: error.message, alreadyRegistered, needsConfirmation: false };
-        }
-        // Some Supabase configs return success + no session for existing
-        // unconfirmed emails ("user-already-exists" leak prevention). When
-        // identities is empty, treat as already-registered.
-        const identities = (data.user as unknown as { identities?: unknown[] } | null)
-          ?.identities;
-        const looksAlreadyRegistered = Array.isArray(identities) && identities.length === 0;
-        if (looksAlreadyRegistered) {
-          return {
-            error: 'An Islands account already exists for this email.',
-            alreadyRegistered: true,
-            needsConfirmation: false,
-          };
-        }
-        const needsConfirmation = !data.session;
-        return { error: null, alreadyRegistered: false, needsConfirmation };
-      },
-      async signOut() {
-        await supabase.auth.signOut();
-        setEntitled(false);
-      },
-      async resetPassword(email) {
-        const { error } = await supabase.auth.resetPasswordForEmail(email);
-        return { error: error?.message ?? null };
-      },
-    }),
-    [ready, session, entitled, refreshEntitlements]
-  );
+  const value = useMemo<AuthCtx>(() => ({
+    ready,
+    session,
+    user: session ? { id: session.email, email: session.email } : null,
+    entitled,
+    refreshEntitlements,
+    async requestSignInLink(email) {
+      try {
+        const response = await requestNativeSignInLink(email.trim());
+        const data = await response.json().catch(() => ({}));
+        return { error: response.ok && data.ok ? null : String(data.error || 'Could not send the sign-in link.') };
+      } catch (error) {
+        return { error: error instanceof Error ? error.message : 'Network error.' };
+      }
+    },
+    async signOut() {
+      await clearMemberSession();
+      setSession(null);
+      setEntitled(false);
+    },
+  }), [ready, session, entitled, refreshEntitlements]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

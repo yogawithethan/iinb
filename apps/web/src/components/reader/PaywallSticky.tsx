@@ -14,6 +14,9 @@ type Props = {
   expanded: boolean;
   onToggle: () => void;
   onOpenLicense?: () => void;
+  onPurchase?: () => void;
+  purchasePending?: boolean;
+  purchaseError?: string | null;
   /** Hide the paywall while another popover (TOC / Settings / Search) is open. */
   hidden?: boolean;
 };
@@ -22,6 +25,9 @@ export function PaywallSticky({
   expanded,
   onToggle,
   onOpenLicense,
+  onPurchase,
+  purchasePending,
+  purchaseError,
   hidden = false,
 }: Props) {
   const { purchased, readingWidth } = useReaderSettings();
@@ -66,7 +72,10 @@ export function PaywallSticky({
             <PaywallCard
               expanded={expanded}
               onToggle={onToggle}
+              onPurchase={onPurchase}
               onAlreadyPurchased={onOpenLicense}
+              purchasePending={purchasePending}
+              purchaseError={purchaseError}
             />
           </div>
         </div>

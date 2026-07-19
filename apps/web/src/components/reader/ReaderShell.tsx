@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReaderView } from "./ReaderView";
 import { Chrome } from "./Chrome";
 import { RsvpOverlay } from "./RsvpOverlay";
@@ -12,7 +12,6 @@ import { FootnoteController } from "./FootnoteController";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useReaderSettings } from "./SettingsContext";
 import type { ChapterMeta } from "@/content/chapters";
-import type { Part } from "@/content/parts";
 import type { ReaderStream } from "@/content/stream";
 
 type Props = { stream: ReaderStream };
@@ -25,15 +24,17 @@ type Anchor = {
 
 export function ReaderShell({ stream }: Props) {
   const { nodes, chapters, parts, glossary } = stream;
-  const { purchased } = useReaderSettings();
+  const { purchased, authReady, loggedIn, refreshAccess, readerPosition } = useReaderSettings();
   const [paywallExpanded, setPaywallExpanded] = useState(false);
   const [anyPanelOpen, setAnyPanelOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "license">("license");
+  const [purchasePending, setPurchasePending] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const restoredPosition = useRef<string | null>(null);
 
-  // Dev test mode: `?reset=1` clears all reader state and reloads clean,
-  // so the onboarding flow can be rehearsed repeatedly with
-  // IINB-TEST-2026 as the test license.
+  // `?reset=1` clears local presentation preferences only. Ownership remains
+  // server-derived and cannot be reset or granted in browser storage.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const url = new URL(window.location.href);
@@ -48,6 +49,31 @@ export function ReaderShell({ stream }: Props) {
       window.location.reload();
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("checkout")) {
+      sessionStorage.removeItem("iinb:checkout-request");
+    }
+    if (url.searchParams.get("checkout") !== "success") return;
+    let canceled = false;
+    async function reconcile() {
+      for (let attempt = 0; attempt < 6 && !canceled; attempt += 1) {
+        const access = await refreshAccess().catch(() => null);
+        if (access?.entitled) {
+          url.searchParams.delete("checkout");
+          url.searchParams.delete("session_id");
+          window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+          return;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 1000));
+      }
+      if (!canceled) setPurchaseError("Payment succeeded. Access is still syncing; refresh in a moment.");
+    }
+    void reconcile();
+    return () => { canceled = true; };
+  }, [refreshAccess]);
 
   // Collapse the paywall whenever a popover opens so the two don't stack.
   useEffect(() => {
@@ -81,7 +107,14 @@ export function ReaderShell({ stream }: Props) {
   );
 
   const chapterMetas: ChapterMeta[] = useMemo(
-    () => chapters.map(({ blocks: _b, isEmpty: _e, ...meta }) => meta),
+    () => chapters.map((chapter) => ({
+      id: chapter.id,
+      order: chapter.order,
+      title: chapter.title,
+      subtitle: chapter.subtitle,
+      part: chapter.part,
+      isFree: chapter.isFree,
+    })),
     [chapters],
   );
 
@@ -147,10 +180,86 @@ export function ReaderShell({ stream }: Props) {
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
 
+  useEffect(() => {
+    if (!purchased || !readerPosition?.chapterId) return;
+    const key = `${readerPosition.chapterId}:${readerPosition.scrollY ?? "chapter"}`;
+    if (restoredPosition.current === key) return;
+    restoredPosition.current = key;
+    const frame = window.requestAnimationFrame(() => {
+      if (Number.isFinite(readerPosition.scrollY)) {
+        window.scrollTo({ top: Math.max(0, Number(readerPosition.scrollY)), behavior: "auto" });
+      } else {
+        document.getElementById(readerPosition.chapterId || "")?.scrollIntoView({ block: "start" });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [purchased, readerPosition]);
+
+  useEffect(() => {
+    if (!purchased || !activeId) return;
+    let timer = 0;
+    const save = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        void fetch("/api/reader-state", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ position: { chapterId: activeId, scrollY: Math.round(window.scrollY) } }),
+        }).catch(() => null);
+      }, 1200);
+    };
+    save();
+    window.addEventListener("scroll", save, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", save);
+      window.clearTimeout(timer);
+    };
+  }, [purchased, activeId]);
+
   const openPaywall = useCallback(() => {
     setPaywallExpanded(true);
     navigateTo("paywall");
   }, [navigateTo]);
+
+  const startPurchase = useCallback(async () => {
+    setPurchaseError(null);
+    if (!loggedIn) {
+      setAuthMode("login");
+      setAuthOpen(true);
+      return;
+    }
+    setPurchasePending(true);
+    try {
+      let requestKey = sessionStorage.getItem("iinb:checkout-request");
+      if (!requestKey) {
+        requestKey = crypto.randomUUID();
+        sessionStorage.setItem("iinb:checkout-request", requestKey);
+      }
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ requestKey }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 409 && data.code === "already_entitled") {
+        await refreshAccess();
+        return;
+      }
+      if (response.status === 401) {
+        setAuthMode("login");
+        setAuthOpen(true);
+        return;
+      }
+      if (!response.ok || !data.url) throw new Error(data.error || "Checkout could not be opened.");
+      window.location.assign(data.url);
+    } catch (error) {
+      setPurchaseError(error instanceof Error ? error.message : "Checkout could not be opened.");
+    } finally {
+      setPurchasePending(false);
+    }
+  }, [loggedIn, refreshAccess]);
 
   return (
     <HighlightsProvider>
@@ -171,11 +280,14 @@ export function ReaderShell({ stream }: Props) {
         onOpenPaywall={openPaywall}
         onPanelStateChange={setAnyPanelOpen}
       />
-      {!purchased && (
+      {authReady && !purchased && (
         <PaywallSticky
           expanded={paywallExpanded}
           onToggle={() => setPaywallExpanded((v) => !v)}
           hidden={anyPanelOpen || authOpen}
+          onPurchase={startPurchase}
+          purchasePending={purchasePending}
+          purchaseError={purchaseError}
           onOpenLicense={() => {
             setAuthMode("license");
             setAuthOpen(true);

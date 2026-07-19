@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Linking, Pressable, Share, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Share, Text, TextInput, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -9,13 +9,11 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 
 import { serif, serifItalic } from '@/lib/fonts';
-import { POLAR_CHECKOUT_URL } from './PaywallCard';
 import { useAuth } from '@/lib/AuthContext';
 import { useSettings } from '@/lib/SettingsContext';
 import { withAlpha } from '@/lib/theme';
-import { SectionLabel, ToggleRow } from './SettingsPrimitives';
+import { SectionLabel } from './SettingsPrimitives';
 import { AuthForm } from './AuthForm';
-import { PoweredByIslands } from './IslandsWordmark';
 import { MoreFromEthan } from '@/components/MoreFromEthan';
 import { PRODUCT_GIFT_CODE, isIapAvailable, purchaseProduct } from '@/lib/iap';
 
@@ -40,8 +38,8 @@ export function ProfileSettings({
   authOpenTrigger?: number;
   redeemOpenTrigger?: number;
 }) {
-  const { user, signOut } = useAuth();
-  const { tokens, accent, purchased, licenseEmail, devSimulateSignedIn, update } = useSettings();
+  const { user, signOut, refreshEntitlements } = useAuth();
+  const { tokens, accent, purchased, update } = useSettings();
   const [authOpen, setAuthOpen] = useState(false);
   const [giftOpen, setGiftOpen] = useState(false);
   // Initialize from the trigger so a fresh-mount triggered open expands on
@@ -73,7 +71,7 @@ export function ProfileSettings({
     setRedeemSubmitting(false);
     if (result.kind === 'ok') {
       setRedeemSuccess(true);
-      update({ purchased: true });
+      await refreshEntitlements();
       setTimeout(() => {
         setRedeemSuccess(false);
         setRedeemCode('');
@@ -114,24 +112,7 @@ export function ProfileSettings({
       return;
     }
 
-    // Web/Android path — Polar checkout with metadata so the webhook routes
-    // the gift email and license code to the recipient.
-    const trimmed = giftEmail.trim();
-    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setGiftError("That email doesn't look right.");
-      return;
-    }
-    const params = new URLSearchParams();
-    params.set('metadata[is_gift]', 'true');
-    params.set('metadata[recipient_email]', trimmed);
-    if (giftNote) params.set('metadata[gift_note]', giftNote);
-    if (user?.id) params.set('metadata[user_id]', user.id);
-    const url = `${POLAR_CHECKOUT_URL}?${params.toString()}`;
-    try {
-      await Linking.openURL(url);
-    } catch {
-      setGiftError('Could not open checkout. Try again in a moment.');
-    }
+    setGiftError('Gift codes are currently available through the iOS app. Web gifting will return through Yoga With Ethan checkout.');
   };
 
   const shareGiftCode = async (code: string) => {
@@ -141,7 +122,7 @@ export function ProfileSettings({
       recipient ? `For ${recipient}:` : '',
       note,
       note ? '' : '',
-      `Here's your copy of "Ignorance is not Bliss" by Ethan Hill.`,
+      `Here's your copy of "Ignorance Is Not Bliss" by Ethan Hill.`,
       ``,
       `Redemption code: ${code}`,
       ``,
@@ -170,13 +151,12 @@ export function ProfileSettings({
     }
   }, [authOpenTrigger, user]);
 
-  const isAuthed = Boolean(user) || purchased;
-  const email = user?.email ?? licenseEmail ?? '';
+  const isAuthed = Boolean(user);
+  const email = user?.email ?? '';
   const name = email ? nameFromEmail(email) : 'Islander';
 
   const handleSignOut = async () => {
     if (user) await signOut();
-    update({ purchased: false, licenseEmail: null });
   };
 
   return (
@@ -311,28 +291,12 @@ export function ProfileSettings({
               ) : null}
             </Animated.View>
 
-            {/* Powered by Islands sits OUTSIDE the sign-in card but is
-                always visible while the user is signed-out — it's the
-                only context where Islands attribution is meaningful. */}
-            <PoweredByIslands />
           </View>
         )}
       </View>
 
       <View>
-        <SectionLabel>Access (preview)</SectionLabel>
-        <ToggleRow
-          label="Premium unlocked"
-          description="Simulates a paid account. Will be replaced by Islands entitlements."
-          value={purchased}
-          onChange={(v) => update({ purchased: v })}
-        />
-        <ToggleRow
-          label="Pretend signed-in"
-          description="Dev only: shows the signed-in (no purchase) state — bottom bar shows the price button instead of Log in."
-          value={devSimulateSignedIn}
-          onChange={(v) => update({ devSimulateSignedIn: v })}
-        />
+        <SectionLabel>Reader setup</SectionLabel>
 
         <Pressable
           onPress={() => update({ firstLaunched: false })}
@@ -356,14 +320,14 @@ export function ProfileSettings({
                 lineHeight: 16,
               }}
             >
-              Dev only: shows the cold-open flow as if it's the first time.
+              Return to the introduction and reader preferences.
             </Text>
           </View>
           <Ionicons name="play-outline" size={16} color={tokens.inkSecondary} />
         </Pressable>
 
-        <Pressable
-          onPress={() => update({ purchased: true, onboarded: false })}
+        {purchased ? <Pressable
+          onPress={() => update({ onboarded: false })}
           className="flex-row items-center justify-between rounded-2xl px-4 py-3 active:opacity-70"
           style={{
             borderWidth: 1,
@@ -384,17 +348,16 @@ export function ProfileSettings({
                 lineHeight: 16,
               }}
             >
-              Dev only: flips to purchased + unviewed so the 7-step thank-you flow opens.
+              Revisit the complete-reader walkthrough.
             </Text>
           </View>
           <Ionicons name="play-outline" size={16} color={tokens.inkSecondary} />
-        </Pressable>
+        </Pressable> : null}
       </View>
 
-      {/* Gift the book — shown on every platform. Note: on iOS this drives
-          the user to an external Polar checkout, which Apple's IAP policy
-          technically bars for digital goods. Reviewing Anthropic's stance
-          per Ethan's call. */}
+      {/* StoreKit owns digital gift purchases on iOS. The old Polar runtime
+          path has been retired; non-iOS gifting stays visibly unavailable
+          until the canonical YWE Stripe gift flow is ready. */}
       <Animated.View
         layout={LinearTransition.duration(220).easing(Easing.out(Easing.cubic))}
         style={{
@@ -434,7 +397,7 @@ export function ProfileSettings({
             >
               {useGiftIap
                 ? "Buy a code you can share with anyone — they redeem it in the app."
-                : "They'll get a license key by email — no account needed to receive it."}
+                : "Gift codes are currently available in the iOS app."}
             </Text>
           </View>
           <Ionicons
@@ -458,7 +421,7 @@ export function ProfileSettings({
                 lineHeight: 18,
               }}
             >
-              Done — here's the code. Share it with your friend any way you like; they'll redeem it under Profile → Redeem a code.
+              Done — here’s the code. Share it with your friend any way you like; they’ll redeem it under Profile → Redeem a code.
             </Text>
             <View
               style={{
@@ -526,7 +489,7 @@ export function ProfileSettings({
             >
               {useGiftIap
                 ? "After purchase, you'll get a code to share with your friend. The email and note below are just to help you remember who it's for."
-                : "We'll email them a one-time code right after you check out. They won't need an account until they claim it."}
+                : "The former Polar gift checkout has been retired while gifting moves into Yoga With Ethan."}
             </Text>
 
             <View>
@@ -608,7 +571,7 @@ export function ProfileSettings({
 
             <Pressable
               onPress={submitGift}
-              disabled={(!useGiftIap && !giftEmail) || giftSubmitting}
+              disabled={!useGiftIap || giftSubmitting}
               className="active:opacity-80"
               style={{
                 marginTop: 4,
@@ -617,7 +580,7 @@ export function ProfileSettings({
                 paddingVertical: 13,
                 borderRadius: 999,
                 backgroundColor: accent,
-                opacity: (!useGiftIap && !giftEmail) || giftSubmitting ? 0.45 : 1,
+                opacity: !useGiftIap || giftSubmitting ? 0.45 : 1,
               }}
             >
               <Text
@@ -631,8 +594,8 @@ export function ProfileSettings({
                 {giftSubmitting
                   ? 'Purchasing…'
                   : useGiftIap
-                    ? 'Buy gift code · $22'
-                    : 'Continue to checkout · $22'}
+                    ? 'Buy gift code'
+                    : 'Available on iOS'}
               </Text>
             </Pressable>
 
@@ -712,7 +675,7 @@ export function ProfileSettings({
                 lineHeight: 17,
               }}
             >
-              Paste the IINB code from your purchase email or gift. We'll handle the dashes.
+              Paste the IINB code from your purchase email or gift. We’ll handle the dashes.
             </Text>
 
             <TextInput

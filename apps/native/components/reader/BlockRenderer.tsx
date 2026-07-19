@@ -94,18 +94,6 @@ export function BlockRenderer({
 }: Props) {
   const [expansion, setExpansion] = useState<Expansion>(null);
 
-  if (block.kind === 'image' && block.image) {
-    return (
-      <ContentImage
-        filename={block.image}
-        caption={block.text}
-        fontSize={fontSize}
-        italicFamily={italicFamily}
-        inkSecondary={inkSecondary}
-      />
-    );
-  }
-
   const isBlockquote = block.kind === 'p' && block.text.startsWith('> ');
   const sourceText = rewrittenText ?? block.text;
   const text = isBlockquote ? sourceText.replace(/^>\s?/gm, '') : sourceText;
@@ -122,6 +110,18 @@ export function BlockRenderer({
         .trim(),
     [text],
   );
+
+  if (block.kind === 'image' && block.image) {
+    return (
+      <ContentImage
+        filename={block.image}
+        caption={block.text}
+        fontSize={fontSize}
+        italicFamily={italicFamily}
+        inkSecondary={inkSecondary}
+      />
+    );
+  }
   const isBionic = bionic && block.kind === 'p';
 
   const headingMargin = (extra: number) => ({

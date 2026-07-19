@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -23,6 +24,21 @@ export type RefreshProfile = {
   culture: string[];
 };
 
+export type ReaderPosition = {
+  chapterId?: string;
+  scrollY?: number;
+};
+
+export type SyncedHighlight = {
+  id: string;
+  text: string;
+  note?: string;
+  createdAt: number;
+  anchor?: string;
+  startOffset?: number;
+  endOffset?: number;
+};
+
 export type ReaderSettings = {
   theme: Theme;
   fontFamily: ReadingFont;
@@ -38,11 +54,11 @@ export type ReaderSettings = {
   autoScrollWithAudio: boolean;
   sleepTimer: SleepTimer;
   skipInterval: SkipInterval;
-  /** Dev flag that simulates a logged-in, purchased reader. */
+  /** Canonical IINB entitlement resolved from the shared YWE member session. */
   purchased: boolean;
   /** True once the reader has completed the post-purchase onboarding. */
   onboarded: boolean;
-  /** Email the reader signed up with (informational). */
+  /** Verified email from the shared YWE member session. */
   userEmail: string | null;
   /** Personalization inputs for the refresh mechanic. */
   refreshProfile: RefreshProfile;
@@ -52,6 +68,12 @@ const ALL_THEMES: readonly Theme[] = ["light", "dark", "sepia", "oled"];
 
 type Ctx = ReaderSettings & {
   update: (patch: Partial<ReaderSettings>) => void;
+  authReady: boolean;
+  loggedIn: boolean;
+  refreshAccess: () => Promise<{ loggedIn: boolean; entitled: boolean; email?: string }>;
+  readerPosition: ReaderPosition | null;
+  syncedHighlights: SyncedHighlight[];
+  readerSyncReady: boolean;
 };
 
 const STORAGE_KEY = "iinb:reader-settings:v2";
@@ -137,12 +159,11 @@ function sanitize(
     ),
     sleepTimer: (raw.sleepTimer as SleepTimer) ?? DEFAULTS.sleepTimer,
     skipInterval: (raw.skipInterval as SkipInterval) ?? DEFAULTS.skipInterval,
-    purchased: Boolean(raw.purchased ?? DEFAULTS.purchased),
+    // Ownership is never restored from browser storage. The shared YWE
+    // session refresh below is the only source of truth.
+    purchased: false,
     onboarded: Boolean(raw.onboarded ?? DEFAULTS.onboarded),
-    userEmail:
-      typeof raw.userEmail === "string" && raw.userEmail.trim().length > 0
-        ? raw.userEmail
-        : null,
+    userEmail: null,
     refreshProfile: sanitizeRefreshProfile(raw.refreshProfile),
   };
 }
@@ -164,6 +185,10 @@ function sanitizeRefreshProfile(raw: unknown): RefreshProfile {
   return out;
 }
 
+function presentationSettings(settings: ReaderSettings): ReaderSettings {
+  return { ...settings, purchased: false, userEmail: null };
+}
+
 export function ReaderSettingsProvider({
   children,
 }: {
@@ -171,6 +196,70 @@ export function ReaderSettingsProvider({
 }) {
   const [settings, setSettings] = useState<ReaderSettings>(DEFAULTS);
   const [hydrated, setHydrated] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [remoteSyncReady, setRemoteSyncReady] = useState(false);
+  const [readerPosition, setReaderPosition] = useState<ReaderPosition | null>(null);
+  const [syncedHighlights, setSyncedHighlights] = useState<SyncedHighlight[]>([]);
+  const remoteLoadId = useRef(0);
+
+  const refreshAccess = useCallback(async () => {
+    const loadId = ++remoteLoadId.current;
+    setRemoteSyncReady(false);
+    try {
+      const response = await fetch("/api/session", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "access_unavailable");
+      const next = {
+        loggedIn: Boolean(data.loggedIn),
+        entitled: Boolean(data.entitled),
+        email: typeof data.email === "string" ? data.email : undefined,
+      };
+      setLoggedIn(next.loggedIn);
+      setSettings((prev) => ({
+        ...prev,
+        purchased: next.entitled,
+        userEmail: next.email || null,
+      }));
+      let stateAvailable = false;
+      if (next.entitled) {
+        try {
+          const stateResponse = await fetch("/api/reader-state", {
+            credentials: "include",
+            cache: "no-store",
+          });
+          const stateData = await stateResponse.json().catch(() => ({}));
+          stateAvailable = stateResponse.ok;
+          if (loadId === remoteLoadId.current && stateResponse.ok && stateData.state) {
+            const remoteSettings = stateData.state.settings;
+            if (remoteSettings && typeof remoteSettings === "object") {
+              setSettings((prev) => ({
+                ...sanitize({ ...prev, ...remoteSettings }),
+                purchased: true,
+                userEmail: next.email || null,
+              }));
+            }
+            setReaderPosition(
+              stateData.state.position && typeof stateData.state.position === "object"
+                ? stateData.state.position
+                : null,
+            );
+            setSyncedHighlights(Array.isArray(stateData.state.highlights) ? stateData.state.highlights : []);
+          }
+        } catch { /* access remains valid even when optional sync is unavailable */ }
+      } else if (loadId === remoteLoadId.current) {
+        setReaderPosition(null);
+        setSyncedHighlights([]);
+      }
+      if (loadId === remoteLoadId.current) setRemoteSyncReady(next.entitled && stateAvailable);
+      return next;
+    } finally {
+      setAuthReady(true);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -181,6 +270,11 @@ export function ReaderSettingsProvider({
     }
     setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    void refreshAccess().catch(() => null);
+  }, [hydrated, refreshAccess]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -202,19 +296,35 @@ export function ReaderSettingsProvider({
       root.style.removeProperty("--accent");
     }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(presentationSettings(settings)));
     } catch {
       // storage full / disabled
     }
   }, [settings, hydrated]);
 
+  useEffect(() => {
+    if (!hydrated || !settings.purchased || !remoteSyncReady) return;
+    const timer = window.setTimeout(() => {
+      void fetch("/api/reader-state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ settings: presentationSettings(settings) }),
+      }).catch(() => null);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [settings, hydrated, remoteSyncReady]);
+
   const update = useCallback((patch: Partial<ReaderSettings>) => {
-    setSettings((prev) => sanitize({ ...prev, ...patch }));
+    setSettings((prev) => {
+      const next = sanitize({ ...prev, ...patch, purchased: false, userEmail: null });
+      return { ...next, purchased: prev.purchased, userEmail: prev.userEmail };
+    });
   }, []);
 
   const value = useMemo<Ctx>(
-    () => ({ ...settings, update }),
-    [settings, update],
+    () => ({ ...settings, update, authReady, loggedIn, refreshAccess, readerPosition, syncedHighlights, readerSyncReady: remoteSyncReady }),
+    [settings, update, authReady, loggedIn, refreshAccess, readerPosition, syncedHighlights, remoteSyncReady],
   );
 
   return <SettingsCtx.Provider value={value}>{children}</SettingsCtx.Provider>;

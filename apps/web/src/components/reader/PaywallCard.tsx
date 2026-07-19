@@ -9,10 +9,8 @@ import {
   XIcon,
 } from "./icons";
 
-const CHECKOUT_URL = process.env.NEXT_PUBLIC_LS_CHECKOUT_URL ?? "";
-
 const PRICE_LABEL = "$14.99";
-const BOOK_TITLE = "Ignorance is not Bliss";
+const BOOK_TITLE = "Ignorance Is Not Bliss";
 const AUTHOR = "Ethan Hill";
 
 const FEATURES: {
@@ -47,6 +45,8 @@ type Props = {
   onToggle: () => void;
   onPurchase?: () => void;
   onAlreadyPurchased?: () => void;
+  purchasePending?: boolean;
+  purchaseError?: string | null;
 };
 
 export function PaywallCard({
@@ -54,11 +54,11 @@ export function PaywallCard({
   onToggle,
   onPurchase,
   onAlreadyPurchased,
+  purchasePending = false,
+  purchaseError = null,
 }: Props) {
   function handlePurchase() {
-    if (onPurchase) onPurchase();
-    else if (CHECKOUT_URL) window.open(CHECKOUT_URL, "_blank");
-    else alert("Lemon Squeezy checkout URL not yet configured");
+    if (!purchasePending) onPurchase?.();
   }
 
   return (
@@ -119,6 +119,7 @@ export function PaywallCard({
               }}
               aria-hidden={expanded ? "true" : "false"}
               tabIndex={expanded ? -1 : 0}
+              disabled={purchasePending}
               className="paywall-price-compact rounded-full px-4 py-2 text-[13px] font-medium transition-[opacity,transform,width,margin] duration-300 ease-out"
               style={{
                 background: "var(--accent)",
@@ -136,7 +137,7 @@ export function PaywallCard({
                 whiteSpace: "nowrap",
               }}
             >
-              {PRICE_LABEL}
+              {purchasePending ? "Opening…" : PRICE_LABEL}
             </button>
             {/* Info / X indicator (not a separate button — the row is the button) */}
             <span
@@ -216,6 +217,7 @@ export function PaywallCard({
                 e.stopPropagation();
                 handlePurchase();
               }}
+              disabled={purchasePending}
               className="paywall-price-full mt-6 w-full rounded-full py-3.5 text-[15px] font-semibold transition-all active:scale-[0.98]"
               style={{
                 background: "var(--accent)",
@@ -225,8 +227,10 @@ export function PaywallCard({
                 letterSpacing: "0.01em",
               }}
             >
-              {PRICE_LABEL}
+              {purchasePending ? "Opening secure checkout…" : PRICE_LABEL}
             </button>
+
+            {purchaseError ? <p role="alert" className="mt-3 text-center text-[12px]" style={{ color: "#a23a2f" }}>{purchaseError}</p> : null}
 
             <button
               type="button"

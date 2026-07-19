@@ -1,69 +1,14 @@
-# Islands Supabase — backend bits shared by iinb (web) and iinb-native
+# Legacy Supabase backend (read-only migration evidence)
 
-## What's here
+This folder preserves the historical Islands/Supabase schema and Edge Functions used by IINB before the Yoga With Ethan integration. It is not a canonical runtime and must not receive new application writes or deployments.
 
-- `migrations/` — SQL migrations that mutate the Islands schema
-- `functions/` — Supabase Edge Functions (Deno runtime)
-- `config.toml` — links this folder to project `swtsqngrkkhggjacfhft`
+The canonical writer is the Yoga With Ethan Worker and D1 database in `/Users/ethanhill/drsti/ywe`:
 
-## One-time setup
+- shared member identity and magic links
+- Stripe checkout and fulfillment
+- App Store receipt verification
+- license redemption and historical entitlement recovery
+- AI and paragraph personalization
+- reader position, settings, highlights, and activity
 
-You need the Supabase CLI logged in:
-
-```bash
-cd /Users/ethanhill/drsti/iinb-shared
-npx supabase login
-npx supabase link --project-ref swtsqngrkkhggjacfhft
-```
-
-## Apply pending SQL migrations
-
-```bash
-cd /Users/ethanhill/drsti/iinb-shared
-npx supabase db push
-```
-
-This runs every `.sql` file in `migrations/` against the linked project. Run it once after pulling new migrations.
-
-## Set Edge Function secrets
-
-The polar-webhook function needs the webhook signing secret as an env var:
-
-```bash
-cd /Users/ethanhill/drsti/iinb-shared
-npx supabase secrets set POLAR_WEBHOOK_SECRET=replace-with-secret-from-password-manager
-```
-
-(`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-provided to functions by Supabase — no need to set them.)
-
-## Deploy the polar-webhook function
-
-```bash
-cd /Users/ethanhill/drsti/iinb-shared
-npx supabase functions deploy polar-webhook
-```
-
-After deploy, the function URL is:
-
-```
-https://swtsqngrkkhggjacfhft.supabase.co/functions/v1/polar-webhook
-```
-
-Paste that URL into the Polar dashboard webhook config to replace the placeholder.
-
-## How it works
-
-1. Customer pays via Polar checkout
-2. Polar sends `order.paid` webhook to the function URL
-3. Function verifies the signature using `POLAR_WEBHOOK_SECRET`
-4. Function resolves the buyer to a Supabase user (via `metadata.user_id` or email match)
-5. Function inserts a row into `product_entitlements` with `product_slug='ignorance-is-not-bliss'`, `source='polar'`, `status='active'`
-6. Both web and native iinb apps query this table on sign-in to determine premium status
-
-## Logs
-
-```bash
-npx supabase functions logs polar-webhook
-```
-
-or in the dashboard: Edge Functions → polar-webhook → Logs.
+Do not run `supabase db push` or deploy these functions. The files remain available only to prepare and verify the one-time historical export. Use `scripts/prepare-iinb-historical-import.mjs` in the YWE repository to transform an approved Supabase JSON export into reviewable D1 SQL. Retire the Supabase project only after row counts and representative entitlement claims have been reconciled in production.

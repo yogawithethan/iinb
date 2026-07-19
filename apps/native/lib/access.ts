@@ -1,8 +1,7 @@
 // Three-tier access model for the book.
 //
-//   Preface (order 0)             — always free.
-//   Chapters 0 + 1 (order 1, 2)   — unlocked once the reader signs in.
-//   Chapter 2 onwards (order ≥ 3) — requires purchase.
+//   Preface + Chapter 0 (orders 0–1) — always free.
+//   Chapter 1 onwards (order ≥ 2)    — requires the complete-reader purchase.
 //
 // The bottom CTA in the reader nudges guests to sign up (carrot: 2 free
 // chapters), then nudges signed-in non-buyers to purchase. Tapping a locked
@@ -16,12 +15,10 @@ export type AccessInput = {
   purchased: boolean;
 };
 
-export const SIGNUP_GATE_ORDER = 0; // chapters above this need signup (until purchase gate)
-export const PURCHASE_GATE_ORDER = 2; // chapters above this need purchase
+export const FREE_GATE_ORDER = 1;
 
 export function chapterTier({ order, isAuthed, purchased }: AccessInput): AccessTier {
   if (purchased) return 'open';
-  if (order > PURCHASE_GATE_ORDER) return 'requires-purchase';
-  if (order > SIGNUP_GATE_ORDER && !isAuthed) return 'requires-signin';
-  return 'open';
+  if (order <= FREE_GATE_ORDER) return 'open';
+  return isAuthed ? 'requires-purchase' : 'requires-signin';
 }

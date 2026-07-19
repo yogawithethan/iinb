@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
 import { serif, serifItalic } from '@/lib/fonts';
@@ -28,6 +28,7 @@ const SUGGESTIONS = [
 ];
 
 type Props = {
+  chapterId?: string;
   isAuthed: boolean;
   purchased: boolean;
   onClose: () => void;
@@ -36,6 +37,7 @@ type Props = {
 };
 
 export function AskPanel({
+  chapterId,
   isAuthed,
   purchased,
   onClose,
@@ -43,33 +45,6 @@ export function AskPanel({
   onSignInRequired,
 }: Props) {
   const { tokens, accent } = useSettings();
-
-  // Locked states — show a friendly explanation card with the right CTA
-  // instead of dropping the user straight into the auth or paywall flow.
-  if (!purchased) {
-    const needsSignIn = !isAuthed;
-    return (
-      <LockedCard
-        accent={accent}
-        ink={tokens.ink}
-        inkSecondary={tokens.inkSecondary}
-        inkTertiary={tokens.inkTertiary}
-        bgSoft={tokens.bgSoft}
-        pillBorder={tokens.pillBorder}
-        title="Ask the book"
-        description={
-          needsSignIn
-            ? 'Sign in to unlock the AI companion. Ask anything about the book and get answers in the author’s voice, drawn from the actual text.'
-            : 'The AI companion comes with the full book. Get it once and ask anything — answers come grounded in the actual text.'
-        }
-        ctaLabel={needsSignIn ? 'Sign in' : 'Buy · $22'}
-        ctaIcon={needsSignIn ? 'arrow-forward' : undefined}
-        onCta={needsSignIn ? onSignInRequired : onPurchaseRequired}
-        onClose={onClose}
-      />
-    );
-  }
-
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -105,6 +80,7 @@ export function AskPanel({
     const outcome = await askTheBook(
       q,
       history,
+      chapterId,
       {
         onToken: (text) => {
           setTurns((prev) => {
@@ -156,6 +132,32 @@ export function AskPanel({
       abortRef.current?.abort();
     };
   }, []);
+
+  // Locked states — show a friendly explanation card with the right CTA
+  // instead of dropping the user straight into the auth or paywall flow.
+  if (!purchased) {
+    const needsSignIn = !isAuthed;
+    return (
+      <LockedCard
+        accent={accent}
+        ink={tokens.ink}
+        inkSecondary={tokens.inkSecondary}
+        inkTertiary={tokens.inkTertiary}
+        bgSoft={tokens.bgSoft}
+        pillBorder={tokens.pillBorder}
+        title="Ask the book"
+        description={
+          needsSignIn
+            ? 'Sign in to unlock the AI companion. Ask anything about the book and get answers in the author’s voice, drawn from the actual text.'
+            : 'The AI companion comes with the full book. Get it once and ask anything — answers come grounded in the actual text.'
+        }
+        ctaLabel={needsSignIn ? 'Sign in' : 'Buy · $14.99'}
+        ctaIcon={needsSignIn ? 'arrow-forward' : undefined}
+        onCta={needsSignIn ? onSignInRequired : onPurchaseRequired}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -212,8 +214,8 @@ export function AskPanel({
                   lineHeight: 20,
                 }}
               >
-                Ask anything about Ignorance is not Bliss. Answers come from the book itself —
-                if it doesn't say, the answer says so.
+                Ask anything about Ignorance Is Not Bliss. Answers come from the book itself —
+                if it doesn’t say, the answer says so.
               </Text>
               <View style={{ gap: 6, marginTop: 6 }}>
                 {SUGGESTIONS.map((s) => (

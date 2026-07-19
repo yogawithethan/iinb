@@ -5,7 +5,7 @@ import {
   type ReadingWidth,
   type Theme,
 } from "./SettingsContext";
-import { LockedRow, SectionLabel, ToggleRow } from "./SettingsPrimitives";
+import { LockedRow } from "./SettingsPrimitives";
 import { ColorPicker } from "./ColorPicker";
 import { LockIcon } from "./icons";
 import { usePaywall } from "./PaywallContext";
@@ -14,7 +14,7 @@ import clsx from "clsx";
 const PREMIUM_THEMES = new Set<Theme>(["sepia", "oled"]);
 
 const DEFAULT_ACCENTS_BY_THEME: Record<Theme, string> = {
-  light: "#2563eb",
+  light: "#6d4aa7",
   dark: "#60a5fa",
   sepia: "#b4653a",
   oled: "#6ba6ff",
@@ -46,7 +46,7 @@ export function DisplaySettings() {
   const paywall = usePaywall();
   const themeAccent = accentByTheme[theme];
   const currentAccent =
-    themeAccent ?? DEFAULT_ACCENTS_BY_THEME[theme] ?? "#2563eb";
+    themeAccent ?? DEFAULT_ACCENTS_BY_THEME[theme] ?? "#6d4aa7";
 
   function setAccent(hex: string | null) {
     update({ accentByTheme: { ...accentByTheme, [theme]: hex } });
@@ -276,16 +276,6 @@ export function DisplaySettings() {
             description="Tint the app with any color you like."
           />
         )}
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <SectionLabel>Access (preview)</SectionLabel>
-        <ToggleRow
-          label="Premium unlocked"
-          description="Simulates a paid account. Unlocks paid chapters, hides lock icons."
-          value={purchased}
-          onChange={(v) => update({ purchased: v })}
-        />
       </section>
 
       <style jsx>{`

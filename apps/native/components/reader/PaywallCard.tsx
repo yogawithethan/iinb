@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -13,16 +13,24 @@ import {
   isIapAvailable,
   purchaseProduct,
 } from '@/lib/iap';
+import { yweFetch } from '@/lib/ywe';
 
-// Polar Checkout Link for the iinb product. Generated in Polar dashboard →
-// Products → Checkout link. Accepts metadata via `?metadata[key]=value` query
-// params, which the polar-webhook reads on order.paid (gifts use this).
-export const POLAR_CHECKOUT_URL =
-  'https://buy.polar.sh/polar_cl_15SfIsDnghbKb6dTImLQNoae2Mnxf6D7C7Fqy2LT2BN';
-export const PRICE_LABEL = '$22';
+export const PRICE_LABEL = '$14.99';
 
-export function openCheckout() {
-  Linking.openURL(POLAR_CHECKOUT_URL).catch(() => {});
+export async function openCheckout(): Promise<{ kind: 'ok' | 'sign_in_required' | 'error'; message?: string }> {
+  try {
+    const response = await yweFetch('/iinb/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ requestKey: `native-${Date.now()}-${Math.random().toString(36).slice(2)}` }),
+    });
+    if (response.status === 401) return { kind: 'sign_in_required' };
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.url) return { kind: 'error', message: String(data.error || 'Checkout is unavailable.') };
+    await Linking.openURL(String(data.url));
+    return { kind: 'ok' };
+  } catch (error) {
+    return { kind: 'error', message: (error as Error)?.message || 'Checkout is unavailable.' };
+  }
 }
 
 export const FEATURES: { icon: keyof typeof Ionicons.glyphMap; title: string; desc: string }[] = [
@@ -84,9 +92,8 @@ export function PaywallCard({
     };
   }, [useIap]);
 
-  // Auth-aware CTA:
-  //  - signed out → "Log In" (which opens the auth form)
-  //  - signed in but not purchased → "$22" (opens Polar checkout, or IAP on iOS)
+  // Auth-aware CTA: signed-out readers get the shared account link; signed-in
+  // readers use StoreKit on iOS and canonical YWE Stripe checkout elsewhere.
   const ctaLabel = !isAuthed
     ? 'Log In'
     : purchasing
@@ -98,7 +105,11 @@ export function PaywallCard({
       return;
     }
     if (!useIap) {
-      openCheckout();
+      setPurchasing(true);
+      const result = await openCheckout();
+      setPurchasing(false);
+      if (result.kind === 'sign_in_required') onSignIn();
+      if (result.kind === 'error') Alert.alert('Checkout unavailable', result.message);
       return;
     }
     if (purchasing) return;
@@ -145,7 +156,7 @@ export function PaywallCard({
       >
         <View>
           <Text style={{ fontFamily: serif, fontSize: 16, fontWeight: '600', color: tokens.ink }}>
-            Ignorance is not Bliss
+            Ignorance Is Not Bliss
           </Text>
           <Text
             style={{

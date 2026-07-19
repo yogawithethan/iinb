@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
+import { jsonFromYwe, readerReturnUrl, yweRequest } from "@/lib/ywe-server";
 
-type Body = { email?: string; password?: string };
+type Body = { email?: string };
 
-/**
- * Dev login stub. Accepts any email + password combo so you can flow
- * through the returning-reader path. Replace with a real Supabase call
- * (supabase.auth.signInWithPassword) once auth is wired.
- */
 export async function POST(req: Request) {
   let body: Body;
   try {
@@ -16,11 +12,10 @@ export async function POST(req: Request) {
   }
 
   const email = (body.email ?? "").trim();
-  const password = (body.password ?? "").trim();
 
-  if (!email || !password) {
+  if (!email) {
     return NextResponse.json(
-      { ok: false, error: "Email and password are required." },
+      { ok: false, error: "Email is required." },
       { status: 400 },
     );
   }
@@ -30,12 +25,16 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  if (password.length < 6) {
+  try {
+    const response = await yweRequest(req, "/auth/member/request-link", {
+      method: "POST",
+      body: JSON.stringify({ email, return: readerReturnUrl(req) }),
+    });
+    return jsonFromYwe(response);
+  } catch {
     return NextResponse.json(
-      { ok: false, error: "Password must be at least 6 characters." },
-      { status: 400 },
+      { ok: false, error: "The sign-in email could not be sent. Try again." },
+      { status: 503 },
     );
   }
-
-  return NextResponse.json({ ok: true, email });
 }

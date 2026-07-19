@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Ignorance is not Bliss",
+    "name": "Ignorance Is Not Bliss",
     "slug": "iinb",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -58,7 +58,8 @@
       "expo-audio",
       "expo-iap",
       "expo-asset",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

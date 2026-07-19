@@ -36,7 +36,7 @@ export type Settings = {
   skipInterval: SkipInterval;
   purchased: boolean;
   licenseEmail: string | null;
-  /** Dev-only: simulate a signed-in user without going through Supabase. */
+  /** Deprecated local access fields retained only for storage migration. */
   devSimulateSignedIn: boolean;
   /** True after the first-launch onboarding has been completed or skipped. */
   firstLaunched: boolean;
@@ -85,7 +85,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (raw) {
         try {
           const parsed = JSON.parse(raw);
-          setSettings({ ...DEFAULTS, ...parsed });
+          setSettings({ ...DEFAULTS, ...parsed, purchased: false, licenseEmail: null, devSimulateSignedIn: false });
         } catch {}
       }
       setReady(true);
@@ -94,7 +94,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const update = (patch: Partial<Settings>) => {
     setSettings((prev) => {
-      const next = { ...prev, ...patch };
+      const next = { ...prev, ...patch, purchased: false, licenseEmail: null, devSimulateSignedIn: false };
       if (writeTimer.current) clearTimeout(writeTimer.current);
       writeTimer.current = setTimeout(() => {
         AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
@@ -107,22 +107,19 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const accentOverride = settings.accentByTheme[settings.theme];
   const accent = accentOverride ?? tokens.defaultAccent;
 
-  // When signed in, real entitlements override the local "purchased" toggle.
-  // The dev toggle still works for users who aren't signed in (so testing flows
-  // don't require a real Polar order).
-  const { user, entitled } = useAuth();
-  const effectivePurchased = user ? entitled : settings.purchased;
+  // Ownership is always resolved by the canonical YWE entitlement service.
+  const { entitled } = useAuth();
 
   const value = useMemo<Ctx>(
     () => ({
       ...settings,
-      purchased: effectivePurchased,
+      purchased: entitled,
       ready,
       update,
       tokens,
       accent,
     }),
-    [settings, effectivePurchased, ready, tokens, accent]
+    [settings, entitled, ready, tokens, accent]
   );
 
   return <SettingsCtx.Provider value={value}>{children}</SettingsCtx.Provider>;

@@ -5,7 +5,7 @@ import { CopyIcon, HighlightIcon, NoteIcon, XIcon } from "./icons";
 import { useHighlights } from "./HighlightsContext";
 
 const HIGHLIGHT_NAME = "iinb-highlight";
-const COPY_ATTRIBUTION = "— Ignorance is not Bliss by Ethan Hill";
+const COPY_ATTRIBUTION = "— Ignorance Is Not Bliss by Ethan Hill";
 
 type Pos = { top: number; left: number };
 
@@ -176,7 +176,6 @@ export function SelectionPopover() {
     const range = rangeRef.current;
     if (!range) return;
     if (!apiOk) {
-      // eslint-disable-next-line no-alert
       alert(
         "Your browser doesn't support persistent highlights yet. Upgrade to Safari 17.2+ or Chrome 105+.",
       );

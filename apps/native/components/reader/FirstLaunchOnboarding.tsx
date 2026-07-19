@@ -9,7 +9,6 @@ import { serif, serifItalic } from '@/lib/fonts';
 import { useSettings } from '@/lib/SettingsContext';
 import { PREMIUM_THEMES, THEME_CARDS, withAlpha, type ThemeId } from '@/lib/theme';
 import { AuthForm } from './AuthForm';
-import { PoweredByIslands } from './IslandsWordmark';
 import { useAuth } from '@/lib/AuthContext';
 import chaptersJson from '@/content/chapters.json';
 import partsJson from '@/content/parts.json';
@@ -975,27 +974,17 @@ function AccountStep({
   onSkip: () => void;
   onBack: () => void;
 }) {
-  const { tokens, accent } = useSettings();
+  const { tokens } = useSettings();
   const { user } = useAuth();
-  // Default to sign-in: existing-Islands users (signed up via YWE / TCOT /
-  // another app) outnumber brand-new users on this surface and creating a
-  // duplicate account is far worse than tapping one extra pill to switch.
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
-
   useEffect(() => {
     if (user) onSuccess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const heading = mode === 'sign-up' ? 'Create your account' : 'Welcome back';
-  const subheading =
-    mode === 'sign-up'
-      ? Platform.OS === 'ios'
-        ? 'Make an account here, or sign in if you already have one — we\'ll restore any past purchase automatically.'
-        : 'Save your reading. Unlocks the next two chapters and syncs your spot across every device.'
-      : Platform.OS === 'ios'
-      ? 'Sign in to pick up where you left off and restore your purchase on this device.'
-      : 'Sign in to pick up where you left off.';
+  const heading = 'Your Yoga With Ethan account';
+  const subheading = Platform.OS === 'ios'
+    ? 'Use one secure email link to restore your purchase and reading life on this device.'
+    : 'Use one secure email link to pick up where you left off across the Yoga With Ethan ecosystem.';
 
   return (
     <View style={{ flex: 1 }}>
@@ -1035,51 +1024,10 @@ function AccountStep({
         </Text>
       </View>
 
-      {/* Mode pills — two segmented buttons. */}
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 8,
-          marginBottom: 6,
-        }}
-      >
-        {(['sign-up', 'sign-in'] as const).map((m) => {
-          const active = mode === m;
-          return (
-            <Pressable
-              key={m}
-              onPress={() => setMode(m)}
-              className="flex-1 items-center rounded-full px-4 py-2.5 active:opacity-70"
-              style={{
-                borderWidth: 1,
-                borderColor: active ? accent : tokens.pillBorder,
-                backgroundColor: active ? withAlpha(accent, 0.12) : 'transparent',
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: serif,
-                  fontSize: 14,
-                  fontWeight: active ? '600' : '500',
-                  color: active ? accent : tokens.inkSecondary,
-                }}
-              >
-                {m === 'sign-up' ? 'Create account' : 'Sign in'}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
       <AuthForm
         onSuccess={onSuccess}
         hideHeader
-        hideModeToggle
-        mode={mode}
-        onModeChange={setMode}
       />
-
-      <PoweredByIslands />
     </ScrollView>
 
     {/* Footer — same placement as Back / Next on the other onboarding pages. */}

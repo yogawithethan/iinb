@@ -1,15 +1,15 @@
 // iOS In-App Purchase wrapper for the book and gift codes.
 //
 // Apple's review policy requires digital-goods purchases inside the app to use
-// StoreKit IAP, not external web checkouts. This module is iOS-only — Android
-// and web continue to use Polar (see PaywallCard.tsx / ProfileSettings.tsx).
+// StoreKit IAP. This module is iOS-only; YWE verifies receipts and owns the
+// resulting entitlement or gift-code record in D1.
 //
 // Two products are configured in App Store Connect:
 //   - PRODUCT_FULL_BOOK   (non-consumable) — "Ignorance Is Not Bliss"
 //   - PRODUCT_GIFT_CODE   (consumable)     — "Gift a Copy" (issues a license code)
 //
 // Receipt verification + entitlement/code issuance happens server-side in the
-// `verify-iap-receipt` Edge Function.
+// canonical YWE Worker.
 
 import { Platform } from 'react-native';
 import {
@@ -22,17 +22,11 @@ import {
   type Purchase,
 } from 'expo-iap';
 
-import { supabase } from './supabase';
+import { getMemberSession, yweFetch } from './ywe';
 
 export const PRODUCT_FULL_BOOK = 'iinb.fullbook';
 export const PRODUCT_GIFT_CODE = 'iinb.giftcode';
 export const ALL_PRODUCT_IDS = [PRODUCT_FULL_BOOK, PRODUCT_GIFT_CODE];
-
-const VERIFY_FN_URL = (() => {
-  const base =
-    process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'https://swtsqngrkkhggjacfhft.supabase.co';
-  return `${base.replace(/\/+$/, '')}/functions/v1/verify-iap-receipt`;
-})();
 
 let connectionReady = false;
 
@@ -72,9 +66,7 @@ export type VerifyOutcome =
   | { kind: 'error'; message: string };
 
 async function verifyReceipt(productId: string, purchase: Purchase): Promise<VerifyOutcome> {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData?.session?.access_token;
-  if (!token) return { kind: 'sign_in_required' };
+  if (!(await getMemberSession())) return { kind: 'sign_in_required' };
 
   // expo-iap exposes the JWS receipt under different fields across SDK versions
   // and between StoreKit 1 and 2 — try the common ones in priority order.
@@ -90,9 +82,8 @@ async function verifyReceipt(productId: string, purchase: Purchase): Promise<Ver
 
   let res: Response;
   try {
-    res = await fetch(VERIFY_FN_URL, {
+    res = await yweFetch('/iinb/iap/verify', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
       body: JSON.stringify({
         platform: 'ios',
         productId,
@@ -106,8 +97,8 @@ async function verifyReceipt(productId: string, purchase: Purchase): Promise<Ver
 
   if (res.status === 401) return { kind: 'sign_in_required' };
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    return { kind: 'error', message: text || `HTTP ${res.status}` };
+    const data = await res.json().catch(() => ({}));
+    return { kind: 'error', message: String(data.error || `HTTP ${res.status}`) };
   }
   const data = await res.json().catch(() => null);
   return { kind: 'ok', entitled: !!data?.entitled, giftCode: data?.giftCode };
@@ -138,13 +129,12 @@ export async function purchaseProduct(productId: string): Promise<VerifyOutcome>
       const pid = (purchase as any).productId ?? (purchase as any).id;
       if (pid !== productId) return;
       const verified = await verifyReceipt(productId, purchase);
-      try {
-        // Always finish — even on verify failure, otherwise the transaction
-        // queue will replay forever. Failed verifications can be retried by
-        // the user from Restore.
-        await finishTransaction({ purchase, isConsumable: productId === PRODUCT_GIFT_CODE });
-      } catch (err) {
-        console.warn('[iap] finishTransaction failed', err);
+      if (verified.kind === 'ok') {
+        try {
+          await finishTransaction({ purchase, isConsumable: productId === PRODUCT_GIFT_CODE });
+        } catch (err) {
+          console.warn('[iap] finishTransaction failed', err);
+        }
       }
       finish(verified);
     });
