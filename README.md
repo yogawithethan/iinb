@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ignorance Is Not Bliss
 
-## Getting Started
+This repository is the canonical product unit for **Ignorance Is Not Bliss** (IINB) across web, native, shared content, and backend contracts.
 
-First, run the development server:
+## Repository layout
+
+- `apps/web/` — the Next.js interactive reader served at `iinb.yogawithethan.com`
+- `apps/native/` — the Expo iOS and Android reader
+- `packages/content/` — the only canonical manuscript, glossary, image, audio, and cross-product content source
+- `supabase/` — read-only legacy schema and Edge Function evidence retained for the audited historical import
+- `docs/` — product specifications and migration evidence
+
+The Yoga With Ethan repository registers IINB as a governed product surface and owns ecosystem navigation, shared UI foundations, account integration, operator tooling, Stripe fulfillment, App Store receipt verification, AI, reader sync, and canonical D1 entitlements. This repository owns the IINB web/native runtime and content. Supabase and Polar are no longer runtime writers.
+
+## Access and commerce contract
+
+- Preface and Chapter 0 are readable without purchase; Chapter 1 onward requires an active IINB entitlement.
+- Web and non-iOS checkout uses the authenticated YWE Stripe route at a fixed **$22.00 USD** one-time price.
+- iOS digital purchases remain StoreKit purchases; the YWE Worker verifies Apple receipts and grants the same D1 entitlement used by web.
+- Existing license keys are imported as hashed, auditable records and become attached to a verified YWE email when claimed.
+- The web reader uses the shared `.yogawithethan.com` member cookie. Native exchanges a one-time email-link code for a secure YWE bearer session stored in Keychain/Keystore.
+
+## Local commands
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build:native-content
+npm run lint:web
+npm run lint:native
+npm run build:web
+npm --prefix apps/web run preview:cloudflare
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The web deployment is an OpenNext application on Cloudflare Workers. Its build bundles a deterministic snapshot from `packages/content`, while that package remains the only editable manuscript source. The web production build currently emits a non-fatal Turbopack warning for the standards-based CSS Custom Highlight pseudo-element, `::highlight(iinb-highlight)`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The source folders `/Users/ethanhill/drsti/iinb-native` and `/Users/ethanhill/drsti/iinb-shared` remain as migration fallbacks until parity and deployment verification are complete. Do not edit them as canonical sources after the monorepo cutover.

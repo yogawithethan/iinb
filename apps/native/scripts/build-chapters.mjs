@@ -1,0 +1,221 @@
+import { readdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const OUT_DIR = resolve(__dirname, '..', 'content');
+const ASSETS_IMG_DIR = resolve(__dirname, '..', 'assets', 'images');
+
+// Single source of truth — shared with the web reader through the monorepo.
+const SHARED_DIR = resolve(__dirname, '..', '..', '..', 'packages', 'content');
+const SHARED_IMG_DIR = resolve(SHARED_DIR, 'images');
+
+function parseFrontmatter(raw) {
+  const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return { data: {}, body: raw };
+  const [, yaml, body] = match;
+  const data = {};
+  for (const line of yaml.split('\n')) {
+    const m = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+    if (!m) continue;
+    let [, key, value] = m;
+    value = value.trim();
+    if (value === '') data[key] = '';
+    else if (value === 'true') data[key] = true;
+    else if (value === 'false') data[key] = false;
+    else if (/^-?\d+(\.\d+)?$/.test(value)) data[key] = Number(value);
+    else if (/^".*"$/.test(value) || /^'.*'$/.test(value)) data[key] = value.slice(1, -1);
+    else data[key] = value;
+  }
+  return { data, body: body.trim() };
+}
+
+function readMdDir(dir) {
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .sort()
+    .map((file) => {
+      const raw = readFileSync(join(dir, file), 'utf8');
+      const { data, body } = parseFrontmatter(raw);
+      return { file, data, body };
+    });
+}
+
+const chaptersDir = join(SHARED_DIR, 'chapters');
+const partsDir = join(SHARED_DIR, 'parts');
+const glossarySrc = join(SHARED_DIR, 'glossary.json');
+
+const chapters = readMdDir(chaptersDir)
+  .map(({ file, data, body }) => ({
+    file,
+    id: data.id ?? file.replace(/\.md$/, ''),
+    order: data.order ?? 0,
+    title: data.title ?? file,
+    subtitle: data.subtitle ?? '',
+    part: data.part ?? '',
+    isFree: data.isFree ?? false,
+    body,
+  }))
+  .sort((a, b) => a.order - b.order);
+
+const parts = readMdDir(partsDir)
+  .map(({ file, data, body }) => ({
+    file,
+    id: data.id ?? file.replace(/\.md$/, ''),
+    order: data.order ?? 0,
+    numeral: data.numeral ?? '',
+    title: data.title ?? '',
+    matchesChapterPart: data.matchesChapterPart ?? '',
+    body,
+  }))
+  .sort((a, b) => a.order - b.order);
+
+writeFileSync(join(OUT_DIR, 'chapters.json'), JSON.stringify(chapters, null, 2));
+writeFileSync(join(OUT_DIR, 'parts.json'), JSON.stringify(parts, null, 2));
+copyFileSync(glossarySrc, join(OUT_DIR, 'glossary.json'));
+
+// Dedication — front matter optional, body is the prose lines.
+try {
+  const raw = readFileSync(join(SHARED_DIR, 'dedication.md'), 'utf8');
+  const { data, body } = parseFrontmatter(raw);
+  writeFileSync(
+    join(OUT_DIR, 'dedication.json'),
+    JSON.stringify({ id: data.id ?? 'dedication', body }, null, 2),
+  );
+} catch (err) {
+  console.warn(`[build-chapters] no dedication.md: ${err.message}`);
+}
+
+// Shared Islands copy — single source of truth across every Islands-powered
+// app. Native mirrors `packages/content/islands-info.json` into its own
+// content dir at build time, so updating it here propagates everywhere on
+// the next build. Component implementation stays per-platform (RN / web).
+try {
+  copyFileSync(
+    resolve(SHARED_DIR, 'islands-info.json'),
+    join(OUT_DIR, 'islands-info.json'),
+  );
+} catch (err) {
+  console.warn(`[build-chapters] no islands-info.json: ${err.message}`);
+}
+
+// More from Ethan — cross-app outbound links list. Same single-source pattern.
+try {
+  copyFileSync(
+    resolve(SHARED_DIR, 'more-from-ethan.json'),
+    join(OUT_DIR, 'more-from-ethan.json'),
+  );
+} catch (err) {
+  console.warn(`[build-chapters] no more-from-ethan.json: ${err.message}`);
+}
+
+// More-from-Ethan logo assets — mirror to assets/logos/ so Metro can require()
+// them by static path. Drop new logos in packages/content/logos/ and they
+// flow through on the next build.
+const LOGOS_OUT = resolve(__dirname, '..', 'assets', 'logos');
+const LOGOS_SRC = resolve(SHARED_DIR, 'logos');
+const LOGO_MAP_OUT = resolve(__dirname, '..', 'lib', 'logo-svg-map.ts');
+try {
+  const all = readdirSync(LOGOS_SRC).filter((f) => /\.(png|jpe?g|webp|svg)$/i.test(f));
+  for (const f of all) copyFileSync(join(LOGOS_SRC, f), join(LOGOS_OUT, f));
+  // Auto-generated static-import map for .svg logos so MoreFromEthan can
+  // resolve a brand SVG by filename (e.g. "telegram.svg") without hardcoding
+  // a giant import block. Add a new .svg here, rerun this script — done.
+  const svgs = all.filter((f) => /\.svg$/i.test(f));
+  const imports = svgs
+    .map((f, i) => `import Logo${i} from '@/assets/logos/${f}';`)
+    .join('\n');
+  const entries = svgs.map((f, i) => `  '${f}': Logo${i},`).join('\n');
+  writeFileSync(
+    LOGO_MAP_OUT,
+    `// AUTO-GENERATED by scripts/build-chapters.mjs — do not edit by hand.\n` +
+      `// Static-import map of every .svg in assets/logos/ so MoreFromEthan can\n` +
+      `// resolve a brand logo by filename.\n\n` +
+      `import type { ComponentType } from 'react';\n` +
+      `import type { SvgProps } from 'react-native-svg';\n` +
+      (imports ? imports + '\n\n' : '\n') +
+      `export const SVG_LOGOS: Record<string, ComponentType<SvgProps>> = {\n${entries}\n};\n`,
+  );
+} catch (err) {
+  console.warn(`[build-chapters] could not mirror logos: ${err.message}`);
+}
+
+// Also emit a flat book.txt for the ask-the-book Supabase Edge Function.
+// Each chapter is delimited by a heading line so the model can cite by chapter.
+const ASK_FN_DIR = resolve(__dirname, '..', '..', '..', 'supabase', 'functions', 'ask-the-book');
+const bookText = chapters
+  .map((c) => {
+    const header = `\n=== ${c.title.toUpperCase()}${c.subtitle ? ` — ${c.subtitle}` : ''} (id: ${c.id}) ===\n`;
+    return header + (c.body || '').trim() + '\n';
+  })
+  .join('\n');
+try {
+  writeFileSync(join(ASK_FN_DIR, 'book.txt'), bookText);
+} catch {
+  // Function dir may not exist yet on a fresh checkout — non-fatal.
+}
+
+// Mirror shared audio clips (e.g. kookaburra.mp3) into the native assets dir
+// AND emit a static require() map so Metro can resolve them by id at runtime
+// (dynamic require with a variable path is not allowed).
+const AUDIO_OUT = resolve(__dirname, '..', 'assets', 'audio');
+const AUDIO_SRC = resolve(SHARED_DIR, 'audio');
+const AUDIO_MAP_OUT = resolve(__dirname, '..', 'lib', 'audio-map.ts');
+let copiedAudio = 0;
+try {
+  const files = readdirSync(AUDIO_SRC).filter((f) => /\.(mp3|m4a|wav|aac)$/i.test(f));
+  for (const f of files) {
+    copyFileSync(join(AUDIO_SRC, f), join(AUDIO_OUT, f));
+    copiedAudio++;
+  }
+  // Lowercase the id so `{{audio:kookaburra}}` resolves regardless of how
+  // the source file is named (Kookaburra.wav, kookaburra.mp3, etc.).
+  const entries = files
+    .map((f) => {
+      const id = f.replace(/\.(mp3|m4a|wav|aac)$/i, '').toLowerCase();
+      return `  '${id}': require('@/assets/audio/${f}'),`;
+    })
+    .join('\n');
+  writeFileSync(
+    AUDIO_MAP_OUT,
+    `// AUTO-GENERATED by scripts/build-chapters.mjs — do not edit by hand.\n` +
+      `// Static require() map so Metro can bundle audio clips referenced by id\n` +
+      `// from {{audio:NAME}} markers in chapter markdown.\n\n` +
+      `export const AUDIO_CLIPS: Record<string, number> = {\n${entries}\n};\n`,
+  );
+} catch (err) {
+  console.warn(`[build-chapters] could not mirror audio: ${err.message}`);
+}
+
+// Mirror shared images (signature, caterpillar/cocoon/butterfly, etc.) into
+// the native assets dir so Metro can `require()` them. Single source of truth
+// stays in packages/content; the web app reads them in place, and we copy a
+// snapshot here at build time. Also emits a static require() map keyed by
+// filename so chapter markdown can reference an image by name (e.g.
+// `![Caption](butterfly.png)`) without Metro needing a dynamic path.
+const IMAGE_MAP_OUT = resolve(__dirname, '..', 'lib', 'image-map.ts');
+let copiedImages = 0;
+let imageEntries = [];
+try {
+  for (const f of readdirSync(SHARED_IMG_DIR)) {
+    if (!/\.(png|jpe?g|webp|gif)$/i.test(f)) continue;
+    copyFileSync(join(SHARED_IMG_DIR, f), join(ASSETS_IMG_DIR, f));
+    copiedImages++;
+    imageEntries.push(`  '${f}': require('@/assets/images/${f}'),`);
+  }
+  writeFileSync(
+    IMAGE_MAP_OUT,
+    `// AUTO-GENERATED by scripts/build-chapters.mjs — do not edit by hand.\n` +
+      `// Static require() map so chapter markdown can reference images by\n` +
+      `// filename (e.g. \`![Caption](butterfly.png)\`).\n\n` +
+      `export const CONTENT_IMAGES: Record<string, number> = {\n${imageEntries.join('\n')}\n};\n`,
+  );
+} catch (err) {
+  console.warn(`[build-chapters] could not mirror images: ${err.message}`);
+}
+
+console.log(
+  `Built ${chapters.length} chapters, ${parts.length} parts; glossary copied; ${copiedImages} images mirrored; ${copiedAudio} audio clips mirrored`,
+);
+console.log(`  source: ${SHARED_DIR}`);
+console.log(`  out:    ${OUT_DIR}`);

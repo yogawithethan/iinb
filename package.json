@@ -1,31 +1,16 @@
 {
-  "name": "iinb",
+  "name": "@yogawithethan/iinb-platform",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@phosphor-icons/react": "^2.1.10",
-    "clsx": "^2.1.1",
-    "gray-matter": "^4.0.3",
-    "marked": "^18.0.2",
-    "next": "16.2.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "server-only": "^0.0.1"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.4",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "build:web": "npm --prefix apps/web run build",
+    "dev:web": "npm --prefix apps/web run dev",
+    "lint:web": "npm --prefix apps/web run lint",
+    "build:native-content": "npm --prefix apps/native run build:chapters",
+    "dev:native": "npm --prefix apps/native run start",
+    "lint:native": "npm --prefix apps/native run lint",
+    "verify:content": "node scripts/verify-content.mjs && npm --prefix apps/web run check:content",
+    "verify:ecosystem": "node scripts/verify-ecosystem-contract.mjs",
+    "verify": "npm run verify:content && npm run verify:ecosystem && npm run build:native-content && npm run lint:web && npm run lint:native && npm run build:web"
   }
 }

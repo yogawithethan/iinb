@@ -1,0 +1,6 @@
+# Minimal config for `supabase functions deploy` from this directory.
+# Linked to the Islands Supabase project.
+project_id = "swtsqngrkkhggjacfhft"
+
+[functions.polar-webhook]
+verify_jwt = false
