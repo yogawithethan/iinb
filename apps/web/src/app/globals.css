@@ -141,6 +141,16 @@ body {
   filter: invert(1);
 }
 
+/* On mobile the reader's own chrome (TOC / glossary / settings / search /
+   share) is the whole interface, so hide the global ecosystem header — its
+   menu pill (top-right) and bottom bar were competing with, and duplicating,
+   the reader controls. Kept on desktop, where the toolbar aligns to it. */
+@media (max-width: 767px) {
+  ywe-header {
+    display: none !important;
+  }
+}
+
 /* Page-turn mode — hide the scrollbar so the reader reads as discrete pages. */
 html.reader-paged {
   scrollbar-width: none;
@@ -313,14 +323,18 @@ html.reader-paged::-webkit-scrollbar {
   transform: translateY(0);
 }
 
-/* Footnote text is just more prose — inherit everything, no background / border. */
+/* Footnote text reads as an aside — tinted with the accent so it's distinct
+   from the surrounding prose. */
 .footnote-text {
-  color: inherit;
+  color: var(--accent);
   font-family: inherit;
   font-size: inherit;
   font-style: inherit;
   font-weight: inherit;
   line-height: inherit;
+}
+.footnote-content {
+  color: var(--accent);
 }
 
 .footnote-cursor {
@@ -338,19 +352,32 @@ html.reader-paged::-webkit-scrollbar {
   to { transform: rotate(360deg); }
 }
 
+/* Close button mirrors the footnote marker: a small accent circle with an ×. */
 .footnote-close {
-  font-size: 0.72em;
-  vertical-align: super;
-  line-height: 0;
-  color: var(--ink-tertiary);
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: 0.18em;
+  width: 1.3em;
+  height: 1.3em;
+  margin: 0 0.15em 0 0.3em;
+  font-size: 0.65em;
   font-family: inherit;
+  line-height: 1;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-radius: 9999px;
+  cursor: pointer;
   user-select: none;
-  margin-left: 2px;
-  transition: color 120ms ease-out;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    transform 150ms ease-out;
 }
 .footnote-close:hover {
-  color: var(--ink-secondary);
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 /* Locked rows: hover gets a subtle accent wash and border shift */
