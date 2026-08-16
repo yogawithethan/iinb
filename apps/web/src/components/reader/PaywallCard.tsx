@@ -144,7 +144,7 @@ export function PaywallCard({
               style={{
                 color: "var(--ink-secondary)",
                 border: "1px solid var(--pill-border)",
-                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                transform: expanded ? "rotate(0deg)" : "rotate(180deg)",
               }}
             >
               <svg

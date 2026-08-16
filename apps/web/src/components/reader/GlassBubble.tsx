@@ -42,6 +42,7 @@ export const GlassBubble = forwardRef<HTMLButtonElement, Props>(
         ref={ref}
         type="button"
         aria-label={label}
+        title={label}
         aria-pressed={active}
         onClick={onClick}
         className={clsx(

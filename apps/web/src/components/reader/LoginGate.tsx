@@ -29,7 +29,7 @@ export function LoginGate({ onLogin, hidden = false }: Props) {
     >
       <div
         className={`${hidden ? "pointer-events-none" : "pointer-events-auto"} mx-auto w-full px-6 md:px-10`}
-        style={{ maxWidth: `${Math.min(WIDTH_PX[readingWidth], 460)}px` }}
+        style={{ maxWidth: `${Math.min(WIDTH_PX[readingWidth], 500)}px` }}
       >
         <div className="pb-[24px] md:pb-[28px]">
           <div

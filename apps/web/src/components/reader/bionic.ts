@@ -10,9 +10,11 @@
  */
 export function bionify(html: string): string {
   return html.replace(
-    /(<[^>]*>)|([^<]+)/g,
-    (_match: string, tag?: string, text?: string) => {
+    // tags | HTML entities (kept whole — never wrap inside them) | plain text
+    /(<[^>]*>)|(&[#a-zA-Z0-9]+;)|([^<&]+)/g,
+    (_match: string, tag?: string, entity?: string, text?: string) => {
       if (tag !== undefined) return tag;
+      if (entity !== undefined) return entity;
       if (!text) return "";
       return text.replace(
         /[\p{L}\p{M}\p{N}'\u2019]+/gu,

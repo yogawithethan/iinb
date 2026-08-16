@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GlassBubble } from "./GlassBubble";
 import { DisplaySettings } from "./DisplaySettings";
 import { ReadingSettings } from "./ReadingSettings";
@@ -91,7 +91,6 @@ export function Chrome({
   /** Toggled by the play bubble / ⌘L. Real audio engine TBD. */
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const hideTimer = useRef<number | null>(null);
 
   const paywallValue = useMemo(
     () => ({
@@ -110,22 +109,25 @@ export function Chrome({
   const searchAnim = useOpenableState(searchOpen, 220);
   const bookmarksAnim = useOpenableState(bookmarksOpen, 250);
   const aiAnim = useOpenableState(aiOpen, 240);
+  const shareAnim = useOpenableState(shareOpen, 220);
   const anyPanelOpen =
-    settingsOpen || tocOpen || searchOpen || bookmarksOpen || aiOpen;
+    settingsOpen || tocOpen || searchOpen || bookmarksOpen || aiOpen || shareOpen;
   const anyPanelMounted =
     settingsAnim.mounted ||
     tocAnim.mounted ||
     searchAnim.mounted ||
     bookmarksAnim.mounted ||
-    aiAnim.mounted;
+    aiAnim.mounted ||
+    shareAnim.mounted;
   const anyPanelAnimating =
     settingsAnim.animate ||
     tocAnim.animate ||
     searchAnim.animate ||
     bookmarksAnim.animate ||
-    aiAnim.animate;
+    aiAnim.animate ||
+    shareAnim.animate;
 
-  const effectiveVisible = isDesktop || visible || anyPanelOpen;
+  const effectiveVisible = visible || anyPanelOpen;
 
   useEffect(() => {
     onPanelStateChange?.(anyPanelOpen);
@@ -196,13 +198,20 @@ export function Chrome({
   }, [searchOpen, anyPanelOpen, aiOpen, audioPlaying]);
 
   useEffect(() => {
-    if (isDesktop || anyPanelOpen) return;
+    if (anyPanelOpen) return;
+    let last = window.scrollY;
     function onScroll() {
-      setVisible(false);
+      const y = window.scrollY;
+      const delta = y - last;
+      last = y;
+      // Slide the chrome by scroll direction, like the site header.
+      if (y < 80) setVisible(true);
+      else if (delta > 5) setVisible(false); // scrolling down → slide out
+      else if (delta < -5) setVisible(true); // scrolling up → slide in
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [isDesktop, anyPanelOpen]);
+  }, [anyPanelOpen]);
 
   // Tap-to-reveal (mobile): tapping anywhere in the reading area toggles the
   // chrome — works page-wide, not just the mask strips. Skips interactive
@@ -228,21 +237,26 @@ export function Chrome({
     return () => document.removeEventListener("click", onTap);
   }, [isDesktop, anyPanelOpen]);
 
-  useEffect(() => {
-    if (isDesktop || !visible || anyPanelOpen) return;
-    if (hideTimer.current) window.clearTimeout(hideTimer.current);
-    hideTimer.current = window.setTimeout(() => setVisible(false), 4000);
-    return () => {
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
-    };
-  }, [visible, anyPanelOpen, isDesktop]);
-
   function closeAllPanels() {
     setSettingsOpen(false);
     setTocOpen(false);
     setSearchOpen(false);
     setBookmarksOpen(false);
     setAiOpen(false);
+    setShareOpen(false);
+  }
+
+  function toggleShare() {
+    if (shareOpen) {
+      setShareOpen(false);
+    } else {
+      setShareOpen(true);
+      setSettingsOpen(false);
+      setTocOpen(false);
+      setSearchOpen(false);
+      setAiOpen(false);
+      setVisible(true);
+    }
   }
 
   function toggleAi() {
@@ -354,7 +368,13 @@ export function Chrome({
         </div>
       )}
 
-      <ShareMenu open={shareOpen} onClose={() => setShareOpen(false)} />
+      {shareAnim.mounted && (
+        <ShareMenu
+          animate={shareAnim.animate}
+          isDesktop={isDesktop}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
 
       {/* Ask (AI) popover — anchored top-right on desktop, centered on mobile */}
       {aiAnim.mounted && (
@@ -463,8 +483,11 @@ export function Chrome({
         {/* TOP MASK */}
         <div
           onClick={handleStageClick}
-          className="pointer-events-auto absolute inset-x-0 top-0 min-h-[140px] mask-top transition-opacity duration-300 ease-out"
-          style={{ opacity: effectiveVisible ? 1 : 0 }}
+          className="pointer-events-auto absolute inset-x-0 top-0 min-h-[140px] mask-top transition-[transform,opacity] duration-300 ease-out"
+          style={{
+            opacity: effectiveVisible ? 1 : 0,
+            transform: effectiveVisible ? "translateY(0)" : "translateY(-115%)",
+          }}
         >
           <div
             onClick={(e) => {
@@ -538,8 +561,11 @@ export function Chrome({
             NOT active (paywall handles its own fade). Bubbles always visible. */}
         <div
           onClick={handleStageClick}
-          className={`pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] transition-opacity duration-300 ease-out ${purchased ? "" : ""}`}
-          style={{ opacity: effectiveVisible ? 1 : 0 }}
+          className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] transition-[transform,opacity] duration-300 ease-out"
+          style={{
+            opacity: effectiveVisible ? 1 : 0,
+            transform: effectiveVisible ? "translateY(0)" : "translateY(115%)",
+          }}
         >
           <div
             onClick={(e) => {
@@ -585,8 +611,8 @@ export function Chrome({
               <GlassBubble
                 label={shareOpen ? "Close share" : "Share"}
                 active={shareOpen}
-                dimmed={anyPanelOpen}
-                onClick={() => setShareOpen((v) => !v)}
+                dimmed={anyPanelOpen && !shareOpen}
+                onClick={toggleShare}
               >
                 <ShareIcon />
               </GlassBubble>
