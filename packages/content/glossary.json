@@ -9,7 +9,84 @@
     "used_in_sentence": "He recognized the familiar taṇhā rising — the quiet, reflexive wanting that tells you the next thing will finally be enough.",
     "chapter": 1,
     "order": 1,
-    "also_see": ["dukkha", "nirvana"]
+    "also_see": [
+      "dukkha",
+      "nirvana"
+    ]
+  },
+  {
+    "term": "anicca",
+    "display": "anicca",
+    "lang": "Pali",
+    "pronunciation": "ah-NEE-chah",
+    "definition": "Impermanence. The characteristic of all conditioned phenomena constantly arising and passing away.",
+    "example": "The thought came and went, anicca made plain — a cloud passing over the field of attention.",
+    "used_in_sentence": "The thought came and went, anicca made plain — a cloud passing over the field of attention.",
+    "chapter": 1,
+    "order": 2,
+    "also_see": [
+      "dukkha"
+    ]
+  },
+  {
+    "term": "nirvana",
+    "display": "nirvāṇa",
+    "lang": "Sanskrit",
+    "pronunciation": "nir-VAH-nah",
+    "definition": "The cessation of suffering; liberation. Literally 'blown out' or 'extinguished' — the quieting of the fires of craving, aversion, and delusion.",
+    "example": "She did not talk about nirvāṇa; she simply sat in such a way that you forgot, for a while, that you had been looking for something.",
+    "used_in_sentence": "She did not talk about nirvāṇa; she simply sat in such a way that you forgot, for a while, that you had been looking for something.",
+    "chapter": 1,
+    "order": 3,
+    "also_see": [
+      "tanha",
+      "moksha"
+    ]
+  },
+  {
+    "term": "vedana",
+    "display": "vedanā",
+    "lang": "Pali",
+    "pronunciation": "veh-DAH-nah",
+    "definition": "Feeling-tone — the immediate, pre-verbal sense that an experience is pleasant, unpleasant, or neutral. In Buddhist psychology it is the hinge where craving is born, before thought ever gets involved.",
+    "example": "Watch closely and you can catch the vedanā — the flicker of ‘pleasant’ or ‘unpleasant’ — that arrives a half-second before the wanting does.",
+    "used_in_sentence": "Watch closely and you can catch the vedanā — the flicker of ‘pleasant’ or ‘unpleasant’ — that arrives a half-second before the wanting does.",
+    "chapter": 1,
+    "order": 4,
+    "also_see": [
+      "tanha",
+      "samskara"
+    ]
+  },
+  {
+    "term": "samskara",
+    "display": "saṃskāra",
+    "lang": "Sanskrit",
+    "pronunciation": "sam-SKAR-ah",
+    "definition": "A mental impression or conditioned imprint left by past experience — the grooves of habit and reaction that shape how you meet the present moment, often without your noticing.",
+    "example": "Every reaction you don’t question deepens the saṃskāra beneath it, until the groove is doing the choosing for you.",
+    "used_in_sentence": "Every reaction you don’t question deepens the saṃskāra beneath it, until the groove is doing the choosing for you.",
+    "chapter": 1,
+    "order": 5,
+    "also_see": [
+      "vedana",
+      "vritti"
+    ]
+  },
+  {
+    "term": "dharma",
+    "display": "dharma",
+    "lang": "Sanskrit",
+    "pronunciation": "DAR-mah",
+    "definition": "Teaching, truth, or law — most often the teachings of the Buddha, and more broadly the way things actually are when seen clearly.",
+    "example": "The dharma, one disciple said, is just this: that whatever arises also passes away.",
+    "used_in_sentence": "The dharma, one disciple said, is just this: that whatever arises also passes away.",
+    "chapter": 1,
+    "order": 6,
+    "also_see": [
+      "anicca",
+      "nirvana"
+    ]
   },
   {
     "term": "dukkha",
@@ -21,7 +98,24 @@
     "used_in_sentence": "Even at the peak of the climb, dukkha waited, patient as weather.",
     "chapter": 2,
     "order": 1,
-    "also_see": ["tanha"]
+    "also_see": [
+      "tanha"
+    ]
+  },
+  {
+    "term": "vritti",
+    "display": "vṛtti",
+    "lang": "Sanskrit",
+    "pronunciation": "VRIT-tee",
+    "definition": "A fluctuation or modification of the mind — the ceaseless waves of thought, memory, and impression that ripple across awareness. Patañjali defines yoga itself as the stilling of these fluctuations.",
+    "example": "Yoga, the sūtras say, is nothing more mystical than the settling of the vṛttis — the mind’s waters going quiet enough to see the bottom.",
+    "used_in_sentence": "Yoga, the sūtras say, is nothing more mystical than the settling of the vṛttis — the mind’s waters going quiet enough to see the bottom.",
+    "chapter": 2,
+    "order": 2,
+    "also_see": [
+      "nirodha",
+      "samadhi"
+    ]
   },
   {
     "term": "anatta",
@@ -36,28 +130,19 @@
     "also_see": []
   },
   {
-    "term": "anicca",
-    "display": "anicca",
+    "term": "anatta2",
+    "display": "anattā",
     "lang": "Pali",
-    "pronunciation": "ah-NEE-chah",
-    "definition": "Impermanence. The characteristic of all conditioned phenomena constantly arising and passing away.",
-    "example": "The thought came and went, anicca made plain — a cloud passing over the field of attention.",
-    "used_in_sentence": "The thought came and went, anicca made plain — a cloud passing over the field of attention.",
-    "chapter": 1,
+    "pronunciation": "uh-NUT-tah",
+    "definition": "Non-self — the recognition that no fixed, separate ‘I’ can be found at the center of experience. One of the three marks of existence alongside anicca and dukkha.",
+    "example": "Look for the self anattā denies and you find only a procession of thoughts and sensations, with no one behind them holding the reins.",
+    "used_in_sentence": "Look for the self anattā denies and you find only a procession of thoughts and sensations, with no one behind them holding the reins.",
+    "chapter": 3,
     "order": 2,
-    "also_see": ["dukkha"]
-  },
-  {
-    "term": "nirvana",
-    "display": "nirvāṇa",
-    "lang": "Sanskrit",
-    "pronunciation": "nir-VAH-nah",
-    "definition": "The cessation of suffering; liberation. Literally 'blown out' or 'extinguished' — the quieting of the fires of craving, aversion, and delusion.",
-    "example": "She did not talk about nirvāṇa; she simply sat in such a way that you forgot, for a while, that you had been looking for something.",
-    "used_in_sentence": "She did not talk about nirvāṇa; she simply sat in such a way that you forgot, for a while, that you had been looking for something.",
-    "chapter": 1,
-    "order": 3,
-    "also_see": ["tanha", "moksha"]
+    "also_see": [
+      "anatta",
+      "anicca"
+    ]
   },
   {
     "term": "moksha",
@@ -69,6 +154,428 @@
     "used_in_sentence": "The word mokṣa does not so much describe a destination as mark the moment the door swings open from the inside.",
     "chapter": 4,
     "order": 1,
-    "also_see": ["nirvana"]
+    "also_see": [
+      "nirvana"
+    ]
+  },
+  {
+    "term": "ashtanga",
+    "display": "aṣṭāṅga",
+    "lang": "Sanskrit",
+    "pronunciation": "ash-TAHN-gah",
+    "definition": "The ‘eight limbs’ of Patañjali’s yoga — yama, niyama, āsana, prāṇāyāma, pratyāhāra, dhāraṇā, dhyāna, and samādhi — a progressive path from ethical foundation to absorption.",
+    "example": "The eight limbs of aṣṭāṅga are less a ladder than a spiral, each one quietly strengthening the others.",
+    "used_in_sentence": "The eight limbs of aṣṭāṅga are less a ladder than a spiral, each one quietly strengthening the others.",
+    "chapter": 4,
+    "order": 2,
+    "also_see": [
+      "yamas",
+      "niyamas"
+    ]
+  },
+  {
+    "term": "yamas",
+    "display": "Yamas",
+    "lang": "Sanskrit",
+    "pronunciation": "YAH-mahs",
+    "definition": "The five restraints — the ethical foundation of yoga and its first limb: ahiṃsā (non-harming), satya (truthfulness), asteya (non-stealing), brahmacarya (right use of energy), and aparigraha (non-grasping). How one relates to the world.",
+    "example": "The yamas are the ground floor of the whole edifice; skip them and everything built above wobbles.",
+    "used_in_sentence": "The yamas are the ground floor of the whole edifice; skip them and everything built above wobbles.",
+    "chapter": 4,
+    "order": 3,
+    "also_see": [
+      "niyamas",
+      "ashtanga"
+    ]
+  },
+  {
+    "term": "niyamas",
+    "display": "Niyamas",
+    "lang": "Sanskrit",
+    "pronunciation": "nee-YAH-mahs",
+    "definition": "The five observances — the second limb of yoga: śauca (purity), santoṣa (contentment), tapas (discipline), svādhyāya (self-study), and īśvara-praṇidhāna (surrender). How one relates to oneself.",
+    "example": "If the yamas govern how you meet the world, the niyamas govern how you meet yourself.",
+    "used_in_sentence": "If the yamas govern how you meet the world, the niyamas govern how you meet yourself.",
+    "chapter": 4,
+    "order": 4,
+    "also_see": [
+      "yamas",
+      "ashtanga"
+    ]
+  },
+  {
+    "term": "ahimsa",
+    "display": "ahiṃsā",
+    "lang": "Sanskrit",
+    "pronunciation": "uh-HIM-sah",
+    "definition": "Non-harming — the first of the five yamas. Not merely refraining from violence but cultivating an active gentleness toward all beings, oneself included.",
+    "example": "Ahiṃsā begins the moment you stop making an enemy of your own experience.",
+    "used_in_sentence": "Ahiṃsā begins the moment you stop making an enemy of your own experience.",
+    "chapter": 4,
+    "order": 5,
+    "also_see": [
+      "yamas",
+      "satya"
+    ]
+  },
+  {
+    "term": "satya",
+    "display": "satya",
+    "lang": "Sanskrit",
+    "pronunciation": "SUT-yah",
+    "definition": "Truthfulness — the second yama. Alignment between what is real, what one thinks, and what one says, so that word and world stop pulling in opposite directions.",
+    "example": "Satya is expensive at first and free forever after; the cost is all paid up front, in the discomfort of honesty.",
+    "used_in_sentence": "Satya is expensive at first and free forever after; the cost is all paid up front, in the discomfort of honesty.",
+    "chapter": 4,
+    "order": 6,
+    "also_see": [
+      "ahimsa",
+      "yamas"
+    ]
+  },
+  {
+    "term": "asteya",
+    "display": "asteya",
+    "lang": "Sanskrit",
+    "pronunciation": "uh-STAY-yah",
+    "definition": "Non-stealing — the third yama. Taking nothing that is not freely given, including time, energy, and credit, not just possessions.",
+    "example": "Asteya asks a subtler question than ‘did you steal?’ — it asks whether you are living off what you have actually earned.",
+    "used_in_sentence": "Asteya asks a subtler question than ‘did you steal?’ — it asks whether you are living off what you have actually earned.",
+    "chapter": 4,
+    "order": 7,
+    "also_see": [
+      "yamas",
+      "aparigraha"
+    ]
+  },
+  {
+    "term": "brahmacarya",
+    "display": "brahmacarya",
+    "lang": "Sanskrit",
+    "pronunciation": "brah-muh-CHAR-yah",
+    "definition": "Right use of vital energy — the fourth yama. Often translated as continence or moderation, it is the conservation and skillful direction of one’s life force rather than its heedless spending.",
+    "example": "Brahmacarya is less about denial than aim — deciding, on purpose, where your energy is allowed to go.",
+    "used_in_sentence": "Brahmacarya is less about denial than aim — deciding, on purpose, where your energy is allowed to go.",
+    "chapter": 4,
+    "order": 8,
+    "also_see": [
+      "prana",
+      "yamas"
+    ]
+  },
+  {
+    "term": "aparigraha",
+    "display": "aparigraha",
+    "lang": "Sanskrit",
+    "pronunciation": "uh-pah-ree-GRAH-hah",
+    "definition": "Non-grasping — the fifth yama. Holding life open-handed, taking only what is needed and clinging to none of it.",
+    "example": "Aparigraha is the practice of enjoying a thing fully while already knowing how to let it go.",
+    "used_in_sentence": "Aparigraha is the practice of enjoying a thing fully while already knowing how to let it go.",
+    "chapter": 4,
+    "order": 9,
+    "also_see": [
+      "asteya",
+      "vairagya"
+    ]
+  },
+  {
+    "term": "saucha",
+    "display": "śauca",
+    "lang": "Sanskrit",
+    "pronunciation": "SHAO-chah",
+    "definition": "Purity or cleanliness — the first niyama. Keeping body, environment, and mind clear enough that what is essential can be seen.",
+    "example": "Śauca is the housekeeping of the soul: clear the clutter and the signal comes through.",
+    "used_in_sentence": "Śauca is the housekeeping of the soul: clear the clutter and the signal comes through.",
+    "chapter": 4,
+    "order": 10,
+    "also_see": [
+      "niyamas",
+      "santosha"
+    ]
+  },
+  {
+    "term": "santosha",
+    "display": "santoṣa",
+    "lang": "Sanskrit",
+    "pronunciation": "san-TOH-shah",
+    "definition": "Contentment — the second niyama. A settled sufficiency that does not depend on conditions improving, the antidote to the mind’s endless ‘not yet, not enough’.",
+    "example": "Santoṣa is not resignation but relief — the quiet discovery that this, right here, was already enough.",
+    "used_in_sentence": "Santoṣa is not resignation but relief — the quiet discovery that this, right here, was already enough.",
+    "chapter": 4,
+    "order": 11,
+    "also_see": [
+      "niyamas",
+      "tanha"
+    ]
+  },
+  {
+    "term": "tapas",
+    "display": "tapas",
+    "lang": "Sanskrit",
+    "pronunciation": "TAH-pahs",
+    "definition": "Disciplined heat — the third niyama. The willing friction of practice, the austerity that burns off impurity and forges the will, literally ‘to heat’.",
+    "example": "Tapas is the heat you generate on purpose, the way effort held steadily becomes a kind of fire that refines.",
+    "used_in_sentence": "Tapas is the heat you generate on purpose, the way effort held steadily becomes a kind of fire that refines.",
+    "chapter": 4,
+    "order": 12,
+    "also_see": [
+      "niyamas",
+      "abhyasa"
+    ]
+  },
+  {
+    "term": "svadhyaya",
+    "display": "svādhyāya",
+    "lang": "Sanskrit",
+    "pronunciation": "svahd-HYAH-yah",
+    "definition": "Self-study — the fourth niyama. The turning of attention back upon oneself, through sacred texts and through honest observation of one’s own patterns.",
+    "example": "Svādhyāya is reading two books at once: the scripture in your hands and the self doing the reading.",
+    "used_in_sentence": "Svādhyāya is reading two books at once: the scripture in your hands and the self doing the reading.",
+    "chapter": 4,
+    "order": 13,
+    "also_see": [
+      "niyamas",
+      "samskara"
+    ]
+  },
+  {
+    "term": "ishvara-pranidhana",
+    "display": "Īśvara-Praṇidhāna",
+    "lang": "Sanskrit",
+    "pronunciation": "EESH-vah-rah pruh-nee-DHAH-nah",
+    "definition": "Surrender to the divine — the fifth niyama. The release of the small self’s grip and its offering up to something larger; the culmination of the observances.",
+    "example": "Īśvara-praṇidhāna is where effort finally lays itself down, trusting the current it has been swimming against all along.",
+    "used_in_sentence": "Īśvara-praṇidhāna is where effort finally lays itself down, trusting the current it has been swimming against all along.",
+    "chapter": 4,
+    "order": 14,
+    "also_see": [
+      "niyamas",
+      "moksha"
+    ]
+  },
+  {
+    "term": "nirodha",
+    "display": "nirodhaḥ",
+    "lang": "Sanskrit",
+    "pronunciation": "nee-ROH-dhah",
+    "definition": "Cessation or stilling. In Patañjali’s definition of yoga — yogaś citta-vṛtti-nirodhaḥ — it is the quieting of the mind’s fluctuations that reveals what was always underneath.",
+    "example": "Nirodhaḥ is not the suppression of the mind but its natural settling, the way a shaken glass of water clears when finally left alone.",
+    "used_in_sentence": "Nirodhaḥ is not the suppression of the mind but its natural settling, the way a shaken glass of water clears when finally left alone.",
+    "chapter": 5,
+    "order": 1,
+    "also_see": [
+      "vritti",
+      "samadhi"
+    ]
+  },
+  {
+    "term": "patanjali",
+    "display": "Patañjali",
+    "lang": "Sanskrit",
+    "pronunciation": "puh-TAHN-juh-lee",
+    "definition": "The sage traditionally credited with compiling the Yoga Sūtras, the foundational text that lays out the eight-limbed path (aṣṭāṅga) to liberation.",
+    "example": "Patañjali’s genius was to take a sprawling oral tradition and compress it into a few terse lines you could carry in your pocket.",
+    "used_in_sentence": "Patañjali’s genius was to take a sprawling oral tradition and compress it into a few terse lines you could carry in your pocket.",
+    "chapter": 5,
+    "order": 2,
+    "also_see": [
+      "ashtanga",
+      "nirodha"
+    ]
+  },
+  {
+    "term": "dharana",
+    "display": "dhāraṇā",
+    "lang": "Sanskrit",
+    "pronunciation": "dhah-rah-NAH",
+    "definition": "Concentration — the sixth limb. The gathering of scattered attention onto a single point and the effort of keeping it there.",
+    "example": "Dhāraṇā is attention learning to stay, returning to its object as many thousands of times as it wanders.",
+    "used_in_sentence": "Dhāraṇā is attention learning to stay, returning to its object as many thousands of times as it wanders.",
+    "chapter": 5,
+    "order": 3,
+    "also_see": [
+      "dhyana",
+      "pratyahara"
+    ]
+  },
+  {
+    "term": "dhyana",
+    "display": "dhyāna",
+    "lang": "Sanskrit",
+    "pronunciation": "dhee-YAH-nah",
+    "definition": "Meditation — the seventh limb. The unbroken flow of attention toward its object, when concentration stops needing to be renewed.",
+    "example": "Dhyāna begins the moment the effort of dhāraṇā dissolves and attention simply pours, uninterrupted.",
+    "used_in_sentence": "Dhyāna begins the moment the effort of dhāraṇā dissolves and attention simply pours, uninterrupted.",
+    "chapter": 5,
+    "order": 4,
+    "also_see": [
+      "dharana",
+      "samadhi"
+    ]
+  },
+  {
+    "term": "samadhi",
+    "display": "samādhi",
+    "lang": "Sanskrit",
+    "pronunciation": "suh-MAH-dhee",
+    "definition": "Absorption — the eighth and final limb. The collapse of the gap between observer and observed, where the meditator, meditation, and object become one.",
+    "example": "In samādhi the watcher and the watched fall into each other, and for a moment there is no one left to be separate.",
+    "used_in_sentence": "In samādhi the watcher and the watched fall into each other, and for a moment there is no one left to be separate.",
+    "chapter": 5,
+    "order": 5,
+    "also_see": [
+      "dhyana",
+      "moksha"
+    ]
+  },
+  {
+    "term": "abhyasa",
+    "display": "abhyāsa",
+    "lang": "Sanskrit",
+    "pronunciation": "ub-HYAH-sah",
+    "definition": "Steady practice — the sustained, patient effort held over a long time, which together with vairāgya (non-attachment) stills the mind.",
+    "example": "Abhyāsa is simply showing up again, and the power is not in any single sitting but in the unbroken chain of them.",
+    "used_in_sentence": "Abhyāsa is simply showing up again, and the power is not in any single sitting but in the unbroken chain of them.",
+    "chapter": 5,
+    "order": 6,
+    "also_see": [
+      "vairagya",
+      "tapas"
+    ]
+  },
+  {
+    "term": "vairagya",
+    "display": "vairāgya",
+    "lang": "Sanskrit",
+    "pronunciation": "vai-RAHG-yah",
+    "definition": "Non-attachment — the loosening of grasping and aversion that lets experience come and go freely. Paired with abhyāsa as the two wings of practice.",
+    "example": "Vairāgya is the release valve to abhyāsa’s discipline: hold the practice tightly, hold its fruits loosely.",
+    "used_in_sentence": "Vairāgya is the release valve to abhyāsa’s discipline: hold the practice tightly, hold its fruits loosely.",
+    "chapter": 5,
+    "order": 7,
+    "also_see": [
+      "abhyasa",
+      "aparigraha"
+    ]
+  },
+  {
+    "term": "asana",
+    "display": "āsana",
+    "lang": "Sanskrit",
+    "pronunciation": "AH-sah-nah",
+    "definition": "Posture — the third limb. Originally a steady, comfortable seat for meditation; the body made quiet and stable enough to be forgotten.",
+    "example": "Āsana is not the pose for its own sake but the stillness it buys — a body that will finally sit down and stop interrupting.",
+    "used_in_sentence": "Āsana is not the pose for its own sake but the stillness it buys — a body that will finally sit down and stop interrupting.",
+    "chapter": 6,
+    "order": 1,
+    "also_see": [
+      "pranayama",
+      "ashtanga"
+    ]
+  },
+  {
+    "term": "pranayama",
+    "display": "prāṇāyāma",
+    "lang": "Sanskrit",
+    "pronunciation": "prah-nah-YAH-mah",
+    "definition": "Breath regulation — the fourth limb. The conscious extension and direction of the breath, and through it the life force (prāṇa) it carries.",
+    "example": "In prāṇāyāma the breath becomes a handle on the nervous system, a lever most people never learn they are holding.",
+    "used_in_sentence": "In prāṇāyāma the breath becomes a handle on the nervous system, a lever most people never learn they are holding.",
+    "chapter": 6,
+    "order": 2,
+    "also_see": [
+      "prana",
+      "asana"
+    ]
+  },
+  {
+    "term": "pratyahara",
+    "display": "pratyāhāra",
+    "lang": "Sanskrit",
+    "pronunciation": "prut-yah-HAH-rah",
+    "definition": "Withdrawal of the senses — the fifth limb. The turning inward of attention, unhooking awareness from the pull of sights, sounds, and sensations.",
+    "example": "Pratyāhāra is the sense-doors drawing closed, not by force but because something more interesting has appeared within.",
+    "used_in_sentence": "Pratyāhāra is the sense-doors drawing closed, not by force but because something more interesting has appeared within.",
+    "chapter": 6,
+    "order": 3,
+    "also_see": [
+      "dharana",
+      "sushumna"
+    ]
+  },
+  {
+    "term": "prana",
+    "display": "prāṇa",
+    "lang": "Sanskrit",
+    "pronunciation": "PRAH-nah",
+    "definition": "Life force — the vital energy animating all living things, carried on the breath and circulated through the body’s subtle channels.",
+    "example": "Prāṇa is the difference between a body and a corpse, the current that a spiritual practice learns to gather rather than leak.",
+    "used_in_sentence": "Prāṇa is the difference between a body and a corpse, the current that a spiritual practice learns to gather rather than leak.",
+    "chapter": 6,
+    "order": 4,
+    "also_see": [
+      "pranayama",
+      "sushumna"
+    ]
+  },
+  {
+    "term": "sushumna",
+    "display": "suṣumnā",
+    "lang": "Sanskrit",
+    "pronunciation": "soo-SHOOM-nah",
+    "definition": "The central channel — the subtle river of energy running along the spine from its base to the crown, through which awakened life force is said to rise.",
+    "example": "When prāṇa stops scattering through the senses and gathers into the suṣumnā, the whole system turns to face inward.",
+    "used_in_sentence": "When prāṇa stops scattering through the senses and gathers into the suṣumnā, the whole system turns to face inward.",
+    "chapter": 6,
+    "order": 5,
+    "also_see": [
+      "prana",
+      "kundalini"
+    ]
+  },
+  {
+    "term": "kundalini",
+    "display": "kuṇḍalinī",
+    "lang": "Sanskrit",
+    "pronunciation": "koon-dah-LEE-nee",
+    "definition": "The coiled, dormant spiritual energy said to rest at the base of the spine, which awakens and ascends the central channel as practice deepens.",
+    "example": "Kuṇḍalinī is described as a serpent asleep at the spine’s root, and its waking as the beginning of the return journey home.",
+    "used_in_sentence": "Kuṇḍalinī is described as a serpent asleep at the spine’s root, and its waking as the beginning of the return journey home.",
+    "chapter": 6,
+    "order": 6,
+    "also_see": [
+      "sushumna",
+      "prana"
+    ]
+  },
+  {
+    "term": "samsara",
+    "display": "saṃsāra",
+    "lang": "Sanskrit",
+    "pronunciation": "sam-SAH-rah",
+    "definition": "The cycle — the round of birth, death, and rebirth, and by extension the repetitive churn of craving and suffering the unawakened mind spins within.",
+    "example": "Saṃsāra is not only lifetimes but afternoons: the same hungers and reactions circling back, dressed in new clothes.",
+    "used_in_sentence": "Saṃsāra is not only lifetimes but afternoons: the same hungers and reactions circling back, dressed in new clothes.",
+    "chapter": 7,
+    "order": 1,
+    "also_see": [
+      "moksha",
+      "dukkha"
+    ]
+  },
+  {
+    "term": "jivanmukta",
+    "display": "jīvanmukta",
+    "lang": "Sanskrit",
+    "pronunciation": "jee-vahn-MOOK-tah",
+    "definition": "One liberated while still alive — a being who has realized freedom and yet remains embodied, walking the ordinary world unbound by it.",
+    "example": "The jīvanmukta looks like anyone else in line for coffee; the difference is entirely on the inside.",
+    "used_in_sentence": "The jīvanmukta looks like anyone else in line for coffee; the difference is entirely on the inside.",
+    "chapter": 9,
+    "order": 1,
+    "also_see": [
+      "moksha",
+      "samadhi"
+    ]
   }
 ]

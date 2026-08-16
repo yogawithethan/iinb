@@ -1,4 +1,4 @@
-import { getReaderStream } from "@/content/stream";
+import { getReaderStream, getMemberReaderStream } from "@/content/stream";
 import { yweRequest } from "@/lib/ywe-server";
 
 export async function GET(request: Request) {
@@ -17,6 +17,14 @@ export async function GET(request: Request) {
     }
 
     if (!access.entitled) {
+      // Signed-in non-buyers get the member tier (Preface + Ch 0 + Ch 1).
+      // Signed-out callers get nothing here — the public SSR stream already
+      // carries the Preface.
+      if (access.loggedIn) {
+        return Response.json(await getMemberReaderStream(), {
+          headers: { "Cache-Control": "private, no-store" },
+        });
+      }
       return Response.json(
         { error: "premium_required" },
         { status: 403, headers: { "Cache-Control": "no-store" } },

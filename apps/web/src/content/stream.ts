@@ -59,33 +59,54 @@ export async function getReaderStream(): Promise<ReaderStream> {
   return { nodes, chapters, parts, dedication, glossary };
 }
 
-export async function getPublicReaderStream(): Promise<ReaderStream> {
-  const stream = await getReaderStream();
-  const freeChapterNumbers = new Set(
+// Reading tiers:
+//   public  — visible with no account at all (SSR landing).      → Preface only
+//   member  — visible once signed in, before purchase (all free). → Preface + Ch 0 + Ch 1
+//   full    — everything, after purchase.
+// Public chapters are a hardcoded subset of the free chapters; the rest of the
+// free chapters (Ch 0, Ch 1) unlock on login via /api/content.
+const PUBLIC_CHAPTER_IDS = new Set(["preface"]);
+
+// Shrink a full stream down to only the chapters `visible()` allows: trailing
+// chapters are dropped from the flow, gated chapters are emptied of body, and
+// the glossary is scoped to what's readable.
+function gateStream(
+  stream: ReaderStream,
+  visible: (chapter: Chapter) => boolean,
+): ReaderStream {
+  const nodes: ReaderNode[] = [];
+  for (const node of stream.nodes) {
+    if (node.kind === "part") break;
+    if (node.kind === "chapter" && !visible(node.chapter)) break;
+    nodes.push(node);
+  }
+  const visibleNumbers = new Set(
     stream.chapters
-      .filter((chapter) => chapter.isFree)
+      .filter(visible)
       .map((chapter) => chapter.id.match(/^ch(\d+)$/)?.[1])
       .filter((value): value is string => Boolean(value))
       .map(Number),
   );
-  const nodes: ReaderNode[] = [];
-
-  for (const node of stream.nodes) {
-    if (node.kind === "part") break;
-    if (node.kind === "chapter" && !node.chapter.isFree) break;
-    nodes.push(node);
-  }
-
   return {
     ...stream,
     nodes,
     chapters: stream.chapters.map((chapter) =>
-      chapter.isFree
-        ? chapter
-        : { ...chapter, blocks: [], isEmpty: false },
+      visible(chapter) ? chapter : { ...chapter, blocks: [], isEmpty: false },
     ),
     glossary: stream.glossary.filter((entry) =>
-      freeChapterNumbers.has(entry.chapter),
+      visibleNumbers.has(entry.chapter),
     ),
   };
+}
+
+// No account: Preface only.
+export async function getPublicReaderStream(): Promise<ReaderStream> {
+  const stream = await getReaderStream();
+  return gateStream(stream, (chapter) => PUBLIC_CHAPTER_IDS.has(chapter.id));
+}
+
+// Signed in, not yet purchased: every free chapter (Preface + Ch 0 + Ch 1).
+export async function getMemberReaderStream(): Promise<ReaderStream> {
+  const stream = await getReaderStream();
+  return gateStream(stream, (chapter) => chapter.isFree);
 }

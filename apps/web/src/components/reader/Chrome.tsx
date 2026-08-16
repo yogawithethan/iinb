@@ -11,6 +11,7 @@ import { HighlightsPanel } from "./HighlightsPanel";
 import { AiPanel } from "./AiPanel";
 import { PaywallProvider } from "./PaywallContext";
 import { useOpenableState } from "@/hooks/useOpenableState";
+import { COMING_SOON } from "@/lib/comingSoon";
 import { useReaderSettings } from "./SettingsContext";
 import type { Chapter } from "@/content/chapters";
 import {
@@ -159,6 +160,7 @@ export function Chrome({
         }
       } else if (mod && k === "k") {
         e.preventDefault();
+        if (COMING_SOON.ai) return;
         if (!purchased) {
           onOpenPaywall();
           return;
@@ -175,6 +177,7 @@ export function Chrome({
         }
       } else if (mod && k === "l") {
         e.preventDefault();
+        if (COMING_SOON.audio) return;
         if (!purchased) {
           onOpenPaywall();
           return;
@@ -480,7 +483,7 @@ export function Chrome({
                 closeAllPanels();
               }
             }}
-            className="relative flex h-[88px] w-full items-start justify-between pl-[76px] pr-4 pt-4 md:pl-[104px] md:pr-8 md:pt-6 lg:pl-[112px] lg:pr-12"
+            className="relative flex h-[88px] w-full items-start justify-between pl-[74px] pr-4 pt-4 md:pl-[74px] md:pr-8 md:pt-6 lg:pl-[74px] lg:pr-12"
           >
             <div className="flex items-center gap-2">
               <GlassBubble
@@ -530,15 +533,21 @@ export function Chrome({
               </GlassBubble>
               <GlassBubble
                 label={
-                  !purchased
-                    ? "Ask the book — premium"
-                    : aiOpen
-                      ? "Close ask"
-                      : "Ask the book (⌘K)"
+                  COMING_SOON.ai
+                    ? "Ask the book — coming soon"
+                    : !purchased
+                      ? "Ask the book — premium"
+                      : aiOpen
+                        ? "Close ask"
+                        : "Ask the book (⌘K)"
                 }
-                active={aiOpen}
-                locked={!purchased}
-                onClick={() => (purchased ? toggleAi() : onOpenPaywall())}
+                active={aiOpen && !COMING_SOON.ai}
+                locked={COMING_SOON.ai || !purchased}
+                onClick={() => {
+                  if (COMING_SOON.ai) return;
+                  if (purchased) toggleAi();
+                  else onOpenPaywall();
+                }}
               >
                 {aiOpen ? <XIcon /> : <SparkleIcon />}
               </GlassBubble>
@@ -564,19 +573,23 @@ export function Chrome({
             <div className="flex items-center gap-2">
               <GlassBubble
                 label={
-                  !purchased
-                    ? "Narration — premium"
-                    : audioPlaying
-                      ? "Pause narration (⌘L)"
-                      : "Play narration (⌘L)"
+                  COMING_SOON.audio
+                    ? "Narration — coming soon"
+                    : !purchased
+                      ? "Narration — premium"
+                      : audioPlaying
+                        ? "Pause narration (⌘L)"
+                        : "Play narration (⌘L)"
                 }
                 size="lg"
-                active={audioPlaying && purchased}
-                locked={!purchased}
+                active={audioPlaying && purchased && !COMING_SOON.audio}
+                locked={COMING_SOON.audio || !purchased}
                 dimmed={anyPanelOpen}
-                onClick={() =>
-                  purchased ? setAudioPlaying((v) => !v) : onOpenPaywall()
-                }
+                onClick={() => {
+                  if (COMING_SOON.audio) return;
+                  if (purchased) setAudioPlaying((v) => !v);
+                  else onOpenPaywall();
+                }}
               >
                 <PlayIcon />
               </GlassBubble>

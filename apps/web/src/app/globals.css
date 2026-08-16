@@ -124,6 +124,23 @@ body {
   margin-top: 1.1em;
 }
 
+/* In-chapter figures — transparent line-art PNGs. Centered, size-capped, and
+   inverted on dark themes so the dark strokes stay visible on a dark ground. */
+.reader-prose img {
+  display: block;
+  height: auto;
+  max-width: min(100%, 460px);
+  margin: 2.75em auto;
+}
+.reader-prose p:has(> img:only-child) {
+  margin: 0;
+  text-indent: 0;
+}
+[data-theme="dark"] .reader-prose img,
+[data-theme="oled"] .reader-prose img {
+  filter: invert(1);
+}
+
 .reader-prose h1,
 .reader-prose h2,
 .reader-prose h3 {

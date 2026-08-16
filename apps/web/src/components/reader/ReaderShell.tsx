@@ -35,9 +35,15 @@ export function ReaderShell({ stream }: Props) {
   const [purchasePending, setPurchasePending] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const restoredPosition = useRef<string | null>(null);
+  // Which content tier we've already fetched, so we re-fetch when the reader
+  // moves public → member (login) → full (purchase) but not on every render.
+  const fetchedTier = useRef<"member" | "full" | null>(null);
 
   useEffect(() => {
-    if (!purchased || unlockedStream) return;
+    // public tier is already server-rendered into `stream`; nothing to fetch.
+    if (!purchased && !loggedIn) return;
+    const tier: "member" | "full" = purchased ? "full" : "member";
+    if (fetchedTier.current === tier) return;
     let canceled = false;
 
     async function unlockContent() {
@@ -51,11 +57,14 @@ export function ReaderShell({ stream }: Props) {
         if (!response.ok) {
           throw new Error(data.error || "content_unavailable");
         }
-        if (!canceled) setUnlockedStream(data as ReaderStream);
+        if (!canceled) {
+          setUnlockedStream(data as ReaderStream);
+          fetchedTier.current = tier;
+        }
       } catch {
         if (!canceled) {
           setContentError(
-            "Your access is active, but the full book could not be loaded. Refresh to try again.",
+            "Your access is active, but the book could not be loaded. Refresh to try again.",
           );
         }
       }
@@ -65,7 +74,7 @@ export function ReaderShell({ stream }: Props) {
     return () => {
       canceled = true;
     };
-  }, [purchased, unlockedStream]);
+  }, [purchased, loggedIn]);
 
   // `?reset=1` clears local presentation preferences only. Ownership remains
   // server-derived and cannot be reset or granted in browser storage.

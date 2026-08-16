@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GlossaryEntry } from "@/content/glossary";
 import { RefreshIcon, SpeakerIcon } from "./icons";
 import { useReaderSettings } from "./SettingsContext";
+import { COMING_SOON } from "@/lib/comingSoon";
 
 const TYPE_INTERVAL = 18;
 
@@ -152,7 +153,7 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
           }}
         >
           {definition.text}
-          {purchased ? (
+          {purchased && !COMING_SOON.rewrites ? (
             <InlineRefresh
               onClick={() => refresh("definition")}
               spinning={spinningDef}
@@ -175,7 +176,7 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
           }}
         >
           {example.text || "—"}
-          {example.text && purchased ? (
+          {example.text && purchased && !COMING_SOON.rewrites ? (
             <InlineRefresh
               onClick={() => refresh("example")}
               spinning={spinningEx}

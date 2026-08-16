@@ -8,7 +8,7 @@ type Size = "sm" | "md" | "lg";
 
 const sizeMap: Record<Size, string> = {
   sm: "h-8 w-8 text-[15px]",
-  md: "h-[34px] w-[34px] text-[16px]",
+  md: "h-10 w-10 text-[16px]",
   lg: "h-11 w-11 text-[18px]",
 };
 

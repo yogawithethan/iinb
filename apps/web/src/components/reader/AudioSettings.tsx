@@ -1,5 +1,6 @@
 "use client";
 
+import { COMING_SOON } from "@/lib/comingSoon";
 import { useReaderSettings, type SleepTimer, type SkipInterval } from "./SettingsContext";
 import {
   LockedRow,
@@ -36,8 +37,10 @@ export function AudioSettings() {
   return (
     <div className="flex flex-col gap-5 px-4 py-4">
       <section className="flex flex-col gap-2">
-        <SectionLabel>Narration</SectionLabel>
-        {purchased ? (
+        <SectionLabel>
+          {COMING_SOON.audio ? "Narration · Coming soon" : "Narration"}
+        </SectionLabel>
+        {purchased && !COMING_SOON.audio ? (
           <>
             <ToggleRow
               label="Karaoke highlighting"
