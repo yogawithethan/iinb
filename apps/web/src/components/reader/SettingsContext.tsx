@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { clientPreviewState } from "@/lib/preview";
 
 export type Theme = "light" | "dark" | "sepia" | "oled";
 export type ReadingFont = "serif" | "sans";
@@ -204,6 +205,23 @@ export function ReaderSettingsProvider({
   const remoteLoadId = useRef(0);
 
   const refreshAccess = useCallback(async () => {
+    const preview = clientPreviewState();
+    if (preview) {
+      // Dev preview: force the tier without hitting the auth backend.
+      const loggedIn = preview !== "public";
+      const entitled = preview === "purchased";
+      setLoggedIn(loggedIn);
+      setSettings((prev) => ({
+        ...prev,
+        purchased: entitled,
+        userEmail: loggedIn ? "preview@iinb.local" : null,
+      }));
+      setReaderPosition(null);
+      setSyncedHighlights([]);
+      setRemoteSyncReady(false);
+      setAuthReady(true);
+      return { loggedIn, entitled };
+    }
     const loadId = ++remoteLoadId.current;
     setRemoteSyncReady(false);
     try {

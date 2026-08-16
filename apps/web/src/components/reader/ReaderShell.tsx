@@ -14,6 +14,7 @@ import { GlossaryProvider } from "./GlossaryContext";
 import { FootnoteController } from "./FootnoteController";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useReaderSettings } from "./SettingsContext";
+import { clientPreviewState } from "@/lib/preview";
 import type { ChapterMeta } from "@/content/chapters";
 import type { ReaderStream } from "@/content/stream";
 
@@ -43,6 +44,8 @@ export function ReaderShell({ stream }: Props) {
   const fetchedTier = useRef<"member" | "full" | null>(null);
 
   useEffect(() => {
+    // Dev preview: the SSR stream is already the forced tier — don't fetch.
+    if (clientPreviewState()) return;
     // public tier is already server-rendered into `stream`; nothing to fetch.
     if (!purchased && !loggedIn) return;
     const tier: "member" | "full" = purchased ? "full" : "member";

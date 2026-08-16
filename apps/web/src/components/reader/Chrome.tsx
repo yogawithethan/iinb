@@ -206,6 +206,30 @@ export function Chrome({
     return () => window.removeEventListener("scroll", onScroll);
   }, [isDesktop, anyPanelOpen]);
 
+  // Tap-to-reveal (mobile): tapping anywhere in the reading area toggles the
+  // chrome — works page-wide, not just the mask strips. Skips interactive
+  // affordances, open panels, and active text selections.
+  useEffect(() => {
+    if (isDesktop) return;
+    function onTap(e: MouseEvent) {
+      if (anyPanelOpen) return; // panels handle their own dismissal
+      const t = e.target as HTMLElement | null;
+      if (
+        !t ||
+        t.closest(
+          "button, a, input, textarea, select, [role='button'], .glass-bubble, .footnote-ref, .footnote-close, .gloss-term, .page-turn-edge",
+        )
+      ) {
+        return;
+      }
+      const sel = window.getSelection();
+      if (sel && sel.type === "Range" && !sel.isCollapsed) return;
+      setVisible((v) => !v);
+    }
+    document.addEventListener("click", onTap);
+    return () => document.removeEventListener("click", onTap);
+  }, [isDesktop, anyPanelOpen]);
+
   useEffect(() => {
     if (isDesktop || !visible || anyPanelOpen) return;
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
@@ -238,12 +262,9 @@ export function Chrome({
 
   function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target !== e.currentTarget) return;
-    if (anyPanelOpen) {
-      closeAllPanels();
-      return;
-    }
-    if (isDesktop) return;
-    setVisible((v) => !v);
+    if (anyPanelOpen) closeAllPanels();
+    // Visibility toggling is handled globally by the tap-to-reveal effect
+    // below so it works anywhere on the page, not just on the mask strips.
   }
 
   function toggleSettings() {
