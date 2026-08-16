@@ -9,6 +9,7 @@ import { TocPanel } from "./TocPanel";
 import { SearchPanel } from "./SearchPanel";
 import { HighlightsPanel } from "./HighlightsPanel";
 import { AiPanel } from "./AiPanel";
+import { ShareMenu } from "./ShareMenu";
 import { PaywallProvider } from "./PaywallContext";
 import { useOpenableState } from "@/hooks/useOpenableState";
 import { COMING_SOON } from "@/lib/comingSoon";
@@ -91,34 +92,7 @@ export function Chrome({
   const [aiOpen, setAiOpen] = useState(false);
   /** Toggled by the play bubble / ⌘L. Real audio engine TBD. */
   const [audioPlaying, setAudioPlaying] = useState(false);
-  const [shared, setShared] = useState(false);
-
-  async function handleShare() {
-    const url =
-      typeof window !== "undefined"
-        ? window.location.origin
-        : "https://iinb.yogawithethan.com";
-    const data = {
-      title: "Ignorance Is Not Bliss",
-      text: "Ignorance Is Not Bliss — by Ethan Hill",
-      url,
-    };
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share(data);
-      } catch {
-        /* user dismissed the share sheet — nothing to do */
-      }
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setShared(true);
-      setTimeout(() => setShared(false), 1800);
-    } catch {
-      /* clipboard blocked — no-op */
-    }
-  }
+  const [shareOpen, setShareOpen] = useState(false);
   const hideTimer = useRef<number | null>(null);
 
   const paywallValue = useMemo(
@@ -394,6 +368,8 @@ export function Chrome({
         </div>
       )}
 
+      <ShareMenu open={shareOpen} onClose={() => setShareOpen(false)} />
+
       {/* Ask (AI) popover — anchored top-right on desktop, centered on mobile */}
       {aiAnim.mounted && (
         <div className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-end md:px-8 lg:px-12">
@@ -632,10 +608,10 @@ export function Chrome({
                 {searchOpen ? <XIcon /> : <SearchIcon />}
               </GlassBubble>
               <GlassBubble
-                label={shared ? "Link copied" : "Share"}
-                active={shared}
+                label={shareOpen ? "Close share" : "Share"}
+                active={shareOpen}
                 dimmed={anyPanelOpen}
-                onClick={handleShare}
+                onClick={() => setShareOpen((v) => !v)}
               >
                 <ShareIcon />
               </GlassBubble>

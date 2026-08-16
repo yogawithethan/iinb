@@ -141,6 +141,57 @@ body {
   filter: invert(1);
 }
 
+/* Page-turn mode — hide the scrollbar so the reader reads as discrete pages. */
+html.reader-paged {
+  scrollbar-width: none;
+}
+html.reader-paged::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Edge page-turn buttons (ebook-style prev/next at the screen edges). */
+.page-turn-edge {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 46;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  width: 44px;
+  border-radius: 999px;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-secondary);
+  background: var(--bubble-fill, color-mix(in srgb, var(--bg) 70%, transparent));
+  border: 1px solid var(--bubble-border, var(--pill-border));
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 2px 7px rgba(26, 23, 18, 0.07);
+  opacity: 0.5;
+  transition: opacity 200ms ease;
+}
+.page-turn-edge:hover {
+  opacity: 1;
+}
+.page-turn-edge--left {
+  left: 10px;
+}
+.page-turn-edge--right {
+  right: 10px;
+}
+@media (min-width: 768px) {
+  .page-turn-edge--left {
+    left: 18px;
+  }
+  .page-turn-edge--right {
+    right: 18px;
+  }
+}
+
 .reader-prose h1,
 .reader-prose h2,
 .reader-prose h3 {

@@ -7,6 +7,7 @@ import { RsvpOverlay } from "./RsvpOverlay";
 import { PaywallSticky } from "./PaywallSticky";
 import { LoginGate } from "./LoginGate";
 import { CoverSection } from "./CoverSection";
+import { PageTurn } from "./PageTurn";
 import { SelectionPopover } from "./SelectionPopover";
 import { HighlightsProvider } from "./HighlightsContext";
 import { GlossaryProvider } from "./GlossaryContext";
@@ -25,7 +26,7 @@ type Anchor = {
 };
 
 export function ReaderShell({ stream }: Props) {
-  const { purchased, authReady, loggedIn, refreshAccess, readerPosition } = useReaderSettings();
+  const { purchased, authReady, loggedIn, refreshAccess, readerPosition, scrollMode, rsvpEnabled } = useReaderSettings();
   const [unlockedStream, setUnlockedStream] = useState<ReaderStream | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
   const activeStream = unlockedStream ?? stream;
@@ -362,6 +363,14 @@ export function ReaderShell({ stream }: Props) {
         open={authOpen}
         initialMode={authMode}
         onClose={() => setAuthOpen(false)}
+      />
+      <PageTurn
+        active={
+          scrollMode === "page-turn" &&
+          !anyPanelOpen &&
+          !authOpen &&
+          !(rsvpEnabled && purchased)
+        }
       />
       <RsvpOverlay nodes={nodes} />
       <SelectionPopover />
