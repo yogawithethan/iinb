@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   title: "Ignorance Is Not Bliss",
   description:
     "An interactive reader for Ethan Hill's Ignorance Is Not Bliss.",
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {

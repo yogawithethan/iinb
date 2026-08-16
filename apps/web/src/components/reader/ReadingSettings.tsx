@@ -1,6 +1,7 @@
 "use client";
 
 import { useReaderSettings } from "./SettingsContext";
+import { COMING_SOON } from "@/lib/comingSoon";
 import {
   LockedRow,
   PillGroup,
@@ -23,14 +24,23 @@ export function ReadingSettings() {
     <div className="flex flex-col gap-5 px-4 py-4">
       <section>
         <SectionLabel>Flow</SectionLabel>
-        <PillGroup
-          value={scrollMode}
-          onChange={(v) => update({ scrollMode: v })}
-          options={[
-            { value: "scroll", label: "Scroll" },
-            { value: "page-turn", label: "Page-turn" },
-          ]}
-        />
+        {COMING_SOON.pageTurn ? (
+          <LockedRow
+            label="Page-turn"
+            description="Turn pages instead of scrolling — coming soon."
+            badge="Soon"
+            interactive={false}
+          />
+        ) : (
+          <PillGroup
+            value={scrollMode}
+            onChange={(v) => update({ scrollMode: v })}
+            options={[
+              { value: "scroll", label: "Scroll" },
+              { value: "page-turn", label: "Page-turn" },
+            ]}
+          />
+        )}
       </section>
 
       <section className="flex flex-col gap-2">

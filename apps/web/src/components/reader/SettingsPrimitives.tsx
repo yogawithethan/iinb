@@ -65,12 +65,18 @@ export function ToggleRow({
 export function LockedRow({
   label,
   description,
+  badge = "Premium",
+  interactive = true,
 }: {
   label: string;
   description?: string;
+  /** Badge text — "Premium" for paid features, "Soon" for unbuilt ones. */
+  badge?: string;
+  /** When false, the row is inert (no paywall link) — for not-yet-built features. */
+  interactive?: boolean;
 }) {
   const paywall = usePaywall();
-  const clickable = !!paywall;
+  const clickable = interactive && !!paywall;
 
   const body = (
     <>
@@ -99,7 +105,7 @@ export function LockedRow({
         }}
       >
         <LockIcon size={12} />
-        Premium
+        {badge}
       </span>
     </>
   );

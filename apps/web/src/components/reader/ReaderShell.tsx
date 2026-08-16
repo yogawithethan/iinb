@@ -5,6 +5,8 @@ import { ReaderView } from "./ReaderView";
 import { Chrome } from "./Chrome";
 import { RsvpOverlay } from "./RsvpOverlay";
 import { PaywallSticky } from "./PaywallSticky";
+import { LoginGate } from "./LoginGate";
+import { CoverSection } from "./CoverSection";
 import { SelectionPopover } from "./SelectionPopover";
 import { HighlightsProvider } from "./HighlightsContext";
 import { GlossaryProvider } from "./GlossaryContext";
@@ -308,6 +310,7 @@ export function ReaderShell({ stream }: Props) {
     <HighlightsProvider>
       <GlossaryProvider entries={glossary}>
       <main className="reader-scroll min-h-[100dvh] w-full">
+        <CoverSection />
         <ReaderView nodes={nodes} />
         {purchased && !unlockedStream ? (
           <p
@@ -332,7 +335,16 @@ export function ReaderShell({ stream }: Props) {
         onOpenPaywall={openPaywall}
         onPanelStateChange={setAnyPanelOpen}
       />
-      {authReady && !purchased && (
+      {authReady && !purchased && !loggedIn && (
+        <LoginGate
+          hidden={anyPanelOpen || authOpen}
+          onLogin={() => {
+            setAuthMode("login");
+            setAuthOpen(true);
+          }}
+        />
+      )}
+      {authReady && !purchased && loggedIn && (
         <PaywallSticky
           expanded={paywallExpanded}
           onToggle={() => setPaywallExpanded((v) => !v)}

@@ -91,6 +91,34 @@ export function Chrome({
   const [aiOpen, setAiOpen] = useState(false);
   /** Toggled by the play bubble / ⌘L. Real audio engine TBD. */
   const [audioPlaying, setAudioPlaying] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  async function handleShare() {
+    const url =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://iinb.yogawithethan.com";
+    const data = {
+      title: "Ignorance Is Not Bliss",
+      text: "Ignorance Is Not Bliss — by Ethan Hill",
+      url,
+    };
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(data);
+      } catch {
+        /* user dismissed the share sheet — nothing to do */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      setTimeout(() => setShared(false), 1800);
+    } catch {
+      /* clipboard blocked — no-op */
+    }
+  }
   const hideTimer = useRef<number | null>(null);
 
   const paywallValue = useMemo(
@@ -604,9 +632,10 @@ export function Chrome({
                 {searchOpen ? <XIcon /> : <SearchIcon />}
               </GlassBubble>
               <GlassBubble
-                label="Share"
+                label={shared ? "Link copied" : "Share"}
+                active={shared}
                 dimmed={anyPanelOpen}
-                onClick={() => {}}
+                onClick={handleShare}
               >
                 <ShareIcon />
               </GlassBubble>

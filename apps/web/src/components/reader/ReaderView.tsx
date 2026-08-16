@@ -21,20 +21,11 @@ export function ReaderView({ nodes }: Props) {
   const { fontSize, readingWidth, bionicReading, purchased } =
     useReaderSettings();
 
-  // When not purchased, stop rendering at the first paid chapter so the
-  // sticky PaywallSticky becomes the visual end-state.
-  const visibleNodes = useMemo(() => {
-    if (purchased) return nodes;
-    const kept: ReaderNode[] = [];
-    for (const n of nodes) {
-      if (n.kind === "chapter" && !n.chapter.isFree) break;
-      if (n.kind === "part") break;
-      kept.push(n);
-    }
-    return kept;
-  }, [nodes, purchased]);
+  // The server already tailors the stream to this tier (public teaser /
+  // member / full), so render every node it sent. The sticky gate below
+  // (login or paywall) is the end-state for non-purchasers.
 
-  // Leave extra bottom space for the sticky paywall so the last paragraph
+  // Leave extra bottom space for the sticky gate so the last paragraph
   // isn't hidden behind the fixed card.
   const bottomPadding = purchased ? 180 : 200;
 
@@ -47,7 +38,7 @@ export function ReaderView({ nodes }: Props) {
         paddingBottom: `${bottomPadding}px`,
       }}
     >
-      {visibleNodes.map((node, idx) => {
+      {nodes.map((node, idx) => {
         if (node.kind === "dedication") {
           return (
             <DedicationSection

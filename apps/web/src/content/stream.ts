@@ -66,20 +66,47 @@ export async function getReaderStream(): Promise<ReaderStream> {
 // Public chapters are a hardcoded subset of the free chapters; the rest of the
 // free chapters (Ch 0, Ch 1) unlock on login via /api/content.
 const PUBLIC_CHAPTER_IDS = new Set(["preface"]);
+// Public visitors see the Preface, then the opening of Ch 0 as a teaser that
+// runs into the "log in for free" gate.
+const TEASER_CHAPTER_ID = "ch0";
+const TEASER_BLOCKS = 5;
 
-// Shrink a full stream down to only the chapters `visible()` allows: trailing
-// chapters are dropped from the flow, gated chapters are emptied of body, and
-// the glossary is scoped to what's readable.
+type Teaser = { id: string; blocks: number };
+
+// Shrink a full stream down to what `visible()` allows: the flow stops at the
+// first non-visible chapter (an optional `teaser` includes its opening blocks
+// first), gated chapters are emptied of body, and the glossary is scoped to
+// what's readable. Part dividers ride along only when a visible chapter follows.
 function gateStream(
   stream: ReaderStream,
   visible: (chapter: Chapter) => boolean,
+  teaser?: Teaser,
 ): ReaderStream {
   const nodes: ReaderNode[] = [];
   for (const node of stream.nodes) {
-    if (node.kind === "part") break;
-    if (node.kind === "chapter" && !visible(node.chapter)) break;
-    nodes.push(node);
+    if (node.kind === "chapter") {
+      if (visible(node.chapter)) {
+        nodes.push(node);
+      } else if (teaser && node.chapter.id === teaser.id) {
+        nodes.push({
+          kind: "chapter",
+          chapter: {
+            ...node.chapter,
+            blocks: node.chapter.blocks.slice(0, teaser.blocks),
+            isEmpty: false,
+          },
+        });
+        break; // the teaser is the last readable node before the gate
+      } else {
+        break;
+      }
+    } else {
+      nodes.push(node); // dedication, or a part divider before a visible chapter
+    }
   }
+  // Never end on a dangling part divider (a part heading with no chapter after).
+  while (nodes.length && nodes[nodes.length - 1].kind === "part") nodes.pop();
+
   const visibleNumbers = new Set(
     stream.chapters
       .filter(visible)
@@ -90,19 +117,30 @@ function gateStream(
   return {
     ...stream,
     nodes,
-    chapters: stream.chapters.map((chapter) =>
-      visible(chapter) ? chapter : { ...chapter, blocks: [], isEmpty: false },
-    ),
+    chapters: stream.chapters.map((chapter) => {
+      if (visible(chapter)) return chapter;
+      if (teaser && chapter.id === teaser.id) {
+        return {
+          ...chapter,
+          blocks: chapter.blocks.slice(0, teaser.blocks),
+          isEmpty: false,
+        };
+      }
+      return { ...chapter, blocks: [], isEmpty: false };
+    }),
     glossary: stream.glossary.filter((entry) =>
       visibleNumbers.has(entry.chapter),
     ),
   };
 }
 
-// No account: Preface only.
+// No account: Preface, then the opening of Ch 0 as a teaser.
 export async function getPublicReaderStream(): Promise<ReaderStream> {
   const stream = await getReaderStream();
-  return gateStream(stream, (chapter) => PUBLIC_CHAPTER_IDS.has(chapter.id));
+  return gateStream(stream, (chapter) => PUBLIC_CHAPTER_IDS.has(chapter.id), {
+    id: TEASER_CHAPTER_ID,
+    blocks: TEASER_BLOCKS,
+  });
 }
 
 // Signed in, not yet purchased: every free chapter (Preface + Ch 0 + Ch 1).
