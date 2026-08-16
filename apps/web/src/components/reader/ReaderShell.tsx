@@ -278,7 +278,9 @@ export function ReaderShell({ stream }: Props) {
       setAuthOpen(true);
       return;
     }
-    setPurchasePending(true);
+    // Open the checkout tab synchronously inside the click gesture (so the
+    // browser doesn't block it), then point it at the Stripe URL once ready.
+    const checkoutTab = window.open("", "_blank");
     try {
       let requestKey = sessionStorage.getItem("iinb:checkout-request");
       if (!requestKey) {
@@ -293,17 +295,24 @@ export function ReaderShell({ stream }: Props) {
       });
       const data = await response.json().catch(() => ({}));
       if (response.status === 409 && data.code === "already_entitled") {
+        checkoutTab?.close();
         await refreshAccess();
         return;
       }
       if (response.status === 401) {
+        checkoutTab?.close();
         setAuthMode("login");
         setAuthOpen(true);
         return;
       }
-      if (!response.ok || !data.url) throw new Error(data.error || "Checkout could not be opened.");
-      window.location.assign(data.url);
+      if (!response.ok || !data.url) {
+        checkoutTab?.close();
+        throw new Error(data.error || "Checkout could not be opened.");
+      }
+      if (checkoutTab) checkoutTab.location.href = data.url;
+      else window.open(data.url, "_blank");
     } catch (error) {
+      checkoutTab?.close();
       setPurchaseError(error instanceof Error ? error.message : "Checkout could not be opened.");
     } finally {
       setPurchasePending(false);

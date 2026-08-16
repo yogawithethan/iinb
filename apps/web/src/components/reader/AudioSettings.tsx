@@ -60,10 +60,14 @@ export function AudioSettings() {
             <LockedRow
               label="Karaoke highlighting"
               description="Highlight each word as it's narrated."
+              badge="Soon"
+              interactive={false}
             />
             <LockedRow
               label="Auto-scroll with audio"
               description="Keep the current word centered as narration plays."
+              badge="Soon"
+              interactive={false}
             />
           </>
         )}

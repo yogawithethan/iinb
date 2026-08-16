@@ -7,7 +7,6 @@ import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
 import { SearchPanel } from "./SearchPanel";
-import { HighlightsPanel } from "./HighlightsPanel";
 import { AiPanel } from "./AiPanel";
 import { ShareMenu } from "./ShareMenu";
 import { PaywallProvider } from "./PaywallContext";
@@ -17,7 +16,6 @@ import { useReaderSettings } from "./SettingsContext";
 import type { Chapter } from "@/content/chapters";
 import {
   BookIcon,
-  BookmarkIcon,
   GearIcon,
   MusicIcon,
   PlayIcon,
@@ -305,19 +303,6 @@ export function Chrome({
     }
   }
 
-  function toggleBookmarks() {
-    if (bookmarksOpen) {
-      setBookmarksOpen(false);
-    } else {
-      setBookmarksOpen(true);
-      setSettingsOpen(false);
-      setTocOpen(false);
-      setSearchOpen(false);
-      setAiOpen(false);
-      setVisible(true);
-    }
-  }
-
   return (
     <PaywallProvider value={paywallValue}>
       {/* Shared backdrop — blurs page when either TOC or Settings is open,
@@ -365,26 +350,6 @@ export function Chrome({
                 setTocOpen(false);
               }}
             />
-          </div>
-        </div>
-      )}
-
-      {/* Highlights & notes popover — anchored top-left (under bookmark bubble) */}
-      {bookmarksAnim.mounted && (
-        <div className="pointer-events-none fixed inset-x-0 top-[76px] z-[55] flex justify-center px-4 md:justify-start md:px-8 lg:px-12">
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
-            style={{
-              maxHeight: "60vh",
-              opacity: bookmarksAnim.animate ? 1 : 0,
-              transform: bookmarksAnim.animate
-                ? "scale(1) translateY(0)"
-                : "scale(0.95) translateY(-8px)",
-              transformOrigin: isDesktop ? "top left" : "top center",
-            }}
-          >
-            <HighlightsPanel onClose={() => setBookmarksOpen(false)} />
           </div>
         </div>
       )}
@@ -508,7 +473,7 @@ export function Chrome({
                 closeAllPanels();
               }
             }}
-            className="relative flex h-[88px] w-full items-start justify-between pl-4 pr-4 pt-4 md:pl-[74px] md:pr-8 md:pt-6 lg:pl-[74px] lg:pr-12"
+            className="relative flex h-[88px] w-full items-start justify-between pl-[64px] pr-4 pt-4 md:pl-[74px] md:pr-8 md:pt-6 lg:pl-[74px] lg:pr-12"
           >
             <div className="flex items-center gap-2">
               <GlassBubble
@@ -517,17 +482,6 @@ export function Chrome({
                 onClick={toggleToc}
               >
                 {tocOpen ? <XIcon /> : <TocIcon />}
-              </GlassBubble>
-              <GlassBubble
-                label={
-                  bookmarksOpen
-                    ? "Close highlights"
-                    : "Highlights & notes"
-                }
-                active={bookmarksOpen}
-                onClick={toggleBookmarks}
-              >
-                {bookmarksOpen ? <XIcon /> : <BookmarkIcon />}
               </GlassBubble>
             </div>
 

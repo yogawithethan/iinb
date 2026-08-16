@@ -224,5 +224,3 @@ what is happening inside me. I cannot even explain it to myself."
 burn to ashes all reactions to material activities."
 
 — Bhagavad Gita 4.37
-
-![](/images/fig-ch3.png)

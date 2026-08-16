@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  EyeIcon,
-  InfoIcon,
-  PlayIcon,
-  RefreshIcon,
-  SparkleIcon,
-  XIcon,
-} from "./icons";
+import { EyeIcon, PlayIcon, RefreshIcon, SparkleIcon } from "./icons";
 
 const PRICE_LABEL = "$22.00";
 const BOOK_TITLE = "Ignorance Is Not Bliss";
@@ -71,10 +64,10 @@ export function PaywallCard({
         className="w-full overflow-hidden rounded-[20px] transition-[box-shadow] duration-300"
         style={{
           border: "1px solid var(--card-border)",
-          background: "var(--bg-soft)",
+          background: "var(--bg)",
           boxShadow: expanded
-            ? "0 20px 48px rgba(0,0,0,0.10)"
-            : "0 4px 14px rgba(0,0,0,0.05)",
+            ? "0 20px 48px rgba(0,0,0,0.14)"
+            : "0 6px 18px rgba(0,0,0,0.09)",
         }}
       >
         {/* Header row — entire row toggles the expand */}
@@ -93,7 +86,7 @@ export function PaywallCard({
         >
           <div className="min-w-0 flex-1">
             <div
-              className="truncate text-[15px] font-semibold leading-tight"
+              className="text-[20px] font-semibold leading-tight"
               style={{
                 color: "var(--ink)",
                 fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
@@ -102,10 +95,14 @@ export function PaywallCard({
               {BOOK_TITLE}
             </div>
             <div
-              className="mt-0.5 truncate text-[12px] italic"
-              style={{ color: "var(--ink-secondary)" }}
+              className="mt-1 text-[13px] italic"
+              style={{
+                color: "var(--ink-secondary)",
+                fontFamily:
+                  'Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif',
+              }}
             >
-              {AUTHOR}
+              by {AUTHOR}
             </div>
           </div>
 
@@ -135,20 +132,33 @@ export function PaywallCard({
                 marginRight: expanded ? -6 : 0,
                 overflow: "hidden",
                 whiteSpace: "nowrap",
+                cursor: "pointer",
               }}
             >
-              {purchasePending ? "Opening…" : PRICE_LABEL}
+              {PRICE_LABEL}
             </button>
-            {/* Info / X indicator (not a separate button — the row is the button) */}
+            {/* Chevron indicator — points down when collapsed, up when expanded. */}
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-colors"
+              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-300"
               style={{
                 color: "var(--ink-secondary)",
                 border: "1px solid var(--pill-border)",
+                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
               }}
             >
-              {expanded ? <XIcon size={16} /> : <InfoIcon size={16} />}
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
             </span>
           </div>
         </div>
@@ -225,9 +235,10 @@ export function PaywallCard({
                 fontFamily:
                   "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
                 letterSpacing: "0.01em",
+                cursor: "pointer",
               }}
             >
-              {purchasePending ? "Opening secure checkout…" : PRICE_LABEL}
+              {PRICE_LABEL}
             </button>
 
             {purchaseError ? <p role="alert" className="mt-3 text-center text-[12px]" style={{ color: "#a23a2f" }}>{purchaseError}</p> : null}

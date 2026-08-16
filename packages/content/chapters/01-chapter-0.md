@@ -108,5 +108,3 @@ If the answer is yes!—or even a hesitant, half-terrified maybe—congratulatio
 — The Very Hungry Caterpillar, Eric Carle
 
 "Not even if it rained gold coins would we have our fill of sensual pleasures." — Dhammapada 186
-
-![A caterpillar inching along a branch](/images/fig-caterpillar.png)

@@ -135,7 +135,7 @@ Despite these speed bumps, surrendering desire is still a project worth taking o
 
 To help you see how this might be so, consider another thought experiment. Let’s say that each moment of your life can somehow be given an Objective Rating of Happiness—ORH—on a scale from 1 → 10, where the bounds are constrained by your most (10) and least (1) happy moments on record. Here’s a visual:
 
-Graph
+![Objective Rating of Happiness — a moment-to-moment happiness curve rising and falling around a midpoint](/images/orh-image.jpg)
 
 Let's imagine you have an extremely pleasurable experience—one with an ORH of 9.5. Now watch what happens next: the mind, having tasted that high, immediately starts trying to get back there. But the laws of regression to the mean (as briefly described above) make this nearly impossible. Peaks are, by definition, exceptional. The promotion glow dulls by the second paycheck. The new relationship butterflies become Tuesday night reruns. The mountain-top vista, captured on a thousand phones, fades into just another desktop wallpaper.
 
@@ -146,8 +146,6 @@ The trouble only compounds from here, for the mind, by default, doesn't measure 
 Actually, the cruelest part is that most experiences fall in between these extremes. The majority of waking life is punctuated by dull, ordinary moments. It's only because emotional experiences graft themselves so strongly onto memory that one expects a world overflowing with extremes. In reality, the vast majority of what one does is pretty damn average—washing dishes and popping pimples in the mirror.
 
 The good news? There is another axis to this chart that is so often overlooked. And this axis isn't subject to regression to the mean, doesn't oscillate, and can't be ruined by comparison. It’s the axis of sukkha—whether or not one is truly equanimous with what’s arising, be it happy, sad, terrified, or some shade in-between.
-
-Graph 2
 
 To state it more plainly, contentment doesn't depend on where you are on the happiness scale. A 9.5 experience can come with contentment or without it. A 1.3 experience can come with contentment or without it. The ORH will inevitably fluctuate—duality and regression to the mean guarantees it—but contentment doesn't have to. Why? Because contentment isn't a position on the happiness scale; it's a meta perspective towards the position itself. Being okay with this moment doesn't necessitate being not-okay with the next one. Contentment can perpetuate itself precisely because it asks for nothing, depends on nothing, and therefore can't be disappointed by anything.[[Importantly, acceptance doesn’t mean inaction. Just because you accept the sensational discomfort of being without air on your exhale doesn’t mean you don’t inhale. It just means you don’t hate the moment, or cling to what could have been. By all means: keep doing things! Just don’t reject or cast sensations out because they are not what you would have chosen for yourself.]]
 

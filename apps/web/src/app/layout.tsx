@@ -4,6 +4,7 @@ import Script from "next/script";
 import { createElement } from "react";
 import "./globals.css";
 import { ReaderSettingsProvider } from "@/components/reader/SettingsContext";
+import { HeaderTuning } from "@/components/HeaderTuning";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -53,6 +54,7 @@ export default function RootLayout({
           preset: "immersive-detail",
           "mobile-title": "Ignorance Is Not Bliss",
         })}
+        <HeaderTuning />
         <ReaderSettingsProvider>{children}</ReaderSettingsProvider>
       </body>
     </html>

@@ -577,5 +577,81 @@
       "moksha",
       "samadhi"
     ]
+  },
+  {
+    "term": "the-kingdom",
+    "display": "The Kingdom",
+    "lang": "English",
+    "pronunciation": "The Kingdom",
+    "definition": "The landscape of non-dual perception — reality seen from the inside-out, no longer as a separate me looking at a separate you but as the one awareness remembering itself in everything it sees. In the book it is the territory one first visits only in glimpses, before body and mind can hold the door open.",
+    "example": "This recontextualization is what the sages meant by the Kingdom — having viewed the glass from the inside-out.",
+    "used_in_sentence": "This recontextualization is what the sages meant by the Kingdom — having viewed the glass from the inside-out.",
+    "chapter": 7,
+    "order": 2,
+    "also_see": [
+      "the-christ",
+      "bliss",
+      "monad"
+    ]
+  },
+  {
+    "term": "the-christ",
+    "display": "The Christ",
+    "lang": "English",
+    "pronunciation": "The Christ",
+    "definition": "The reflection of God within creation — the divine light present inside the field of manifestation rather than beyond it. As Yogananda framed it, if God is an infinite sun of white light, the Christ is that same light shining within the world of form; in that sense every reflected spark of it is Christ.",
+    "example": "The reflection of God within the field of manifestation rather than beyond it is the Christ.",
+    "used_in_sentence": "The reflection of God within the field of manifestation rather than beyond it is the Christ.",
+    "chapter": 8,
+    "order": 1,
+    "also_see": [
+      "the-kingdom",
+      "monad"
+    ]
+  },
+  {
+    "term": "the-new-earth",
+    "display": "The New Earth",
+    "lang": "English",
+    "pronunciation": "The New Earth",
+    "definition": "The transformed world the collective senses is incoming — not something uploaded or implanted by technology, but the flowering that awakening makes possible on the far side of civilizational upheaval. Not the goal of a personal project so much as its prerequisite.",
+    "example": "Perhaps the New Earth, this very special place we all sense is incoming, is neither uploaded nor implanted.",
+    "used_in_sentence": "Perhaps the New Earth, this very special place we all sense is incoming, is neither uploaded nor implanted.",
+    "chapter": 9,
+    "order": 2,
+    "also_see": [
+      "the-kingdom",
+      "bliss"
+    ]
+  },
+  {
+    "term": "bliss",
+    "display": "Bliss",
+    "lang": "English",
+    "pronunciation": "Bliss",
+    "definition": "The book's final state: to be permanently throned in the Kingdom rather than merely visiting it — non-dual perception stabilized and the door held open for good. Named in the tradition as glorification and final liberation.",
+    "example": "The final liberation. Bliss.",
+    "used_in_sentence": "The final liberation. Bliss.",
+    "chapter": 9,
+    "order": 3,
+    "also_see": [
+      "the-kingdom",
+      "the-new-earth"
+    ]
+  },
+  {
+    "term": "monad",
+    "display": "Monad",
+    "lang": "English",
+    "pronunciation": "Monad",
+    "definition": "The single, undivided awareness that looks out through every pair of eyes — that which looks, remembering itself in everything it sees. The one seer behind the appearance of many separate subjects.",
+    "example": "A monad of that which looks, remembering itself in everything it sees.",
+    "used_in_sentence": "A monad of that which looks, remembering itself in everything it sees.",
+    "chapter": 7,
+    "order": 3,
+    "also_see": [
+      "the-kingdom",
+      "the-christ"
+    ]
   }
 ]

@@ -216,5 +216,3 @@ And when it does come online for you—and trust me, it will—what it illuminat
 “Behold, I make all things new.”
 
 — Revelation 21:5
-
-![](/images/fig-ch6.png)

@@ -66,7 +66,7 @@ export function PaywallSticky({
       >
         <div
           className={`${hidden ? "pointer-events-none" : "pointer-events-auto"} mx-auto w-full px-6 md:px-10`}
-          style={{ maxWidth: `${WIDTH_PX[readingWidth]}px` }}
+          style={{ maxWidth: `${Math.min(WIDTH_PX[readingWidth], 460)}px` }}
         >
           <div className="pb-[24px] md:pb-[28px]">
             <PaywallCard

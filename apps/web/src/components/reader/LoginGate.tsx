@@ -29,15 +29,15 @@ export function LoginGate({ onLogin, hidden = false }: Props) {
     >
       <div
         className={`${hidden ? "pointer-events-none" : "pointer-events-auto"} mx-auto w-full px-6 md:px-10`}
-        style={{ maxWidth: `${WIDTH_PX[readingWidth]}px` }}
+        style={{ maxWidth: `${Math.min(WIDTH_PX[readingWidth], 460)}px` }}
       >
         <div className="pb-[24px] md:pb-[28px]">
           <div
             className="flex w-full items-center gap-3 rounded-[16px] px-4 py-3"
             style={{
               border: "1px solid var(--card-border)",
-              background: "var(--card-bg, var(--bg-soft))",
-              boxShadow: "0 8px 28px rgba(26, 23, 18, 0.14)",
+              background: "var(--bg)",
+              boxShadow: "0 8px 28px rgba(26, 23, 18, 0.18)",
             }}
           >
             <div className="min-w-0 flex-1">
