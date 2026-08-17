@@ -7,12 +7,28 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// Surface forms a term can appear as in the body: the ASCII slug (e.g.
+// "ishvara-pranidhana") AND the diacritic display (e.g. "Īśvara-Praṇidhāna").
+// Matching only the ASCII slug meant diacritic prose never linked. Longest
+// first so the more specific form wins at a given position.
+function surfaceForms(term: GlossaryEntry): string[] {
+  const forms = [term.term, term.display]
+    .filter((s): s is string => !!s && s.trim().length > 0)
+    .map((s) => s.trim().normalize("NFC"));
+  return Array.from(new Set(forms)).sort((a, b) => b.length - a.length);
+}
+
 /**
  * Walk a chapter's blocks in order. For each glossary term (ordered by
- * .order), find the first paragraph/heading/blockquote that contains it
- * (case-insensitive, allowing a trailing "s") and wrap only that first
- * occurrence in a gloss-term span. Each term is wrapped at most once per
- * chapter.
+ * .order), find the first *prose* paragraph that contains it and wrap only
+ * that first occurrence in a gloss-term span. Each term is wrapped at most
+ * once per chapter.
+ *
+ * Matching is case-insensitive and Unicode-aware (so "Īśvara-praṇidhāna"
+ * links via its diacritic display form), allows a trailing "s", and uses
+ * letter/mark boundaries instead of ASCII \b (which never forms a boundary
+ * next to a non-ASCII letter). Headings and blockquotes (titles, epigraphs)
+ * are skipped so a term never underlines inside a chapter title.
  */
 export function wrapGlossaryInChapter(
   blocks: ChapterBlock[],
@@ -27,7 +43,14 @@ export function wrapGlossaryInChapter(
 
   for (let i = 0; i < out.length && remaining.size > 0; i++) {
     const block = out[i];
-    if (block.type === "separator") continue;
+    // Only link inside body prose — never titles, headings, or epigraphs.
+    if (
+      block.type === "separator" ||
+      block.type === "audio" ||
+      block.type === "heading" ||
+      block.type === "blockquote"
+    )
+      continue;
 
     // For each term, try to wrap its first occurrence in this block.
     // We sort by chapter-first-occurrence order so earlier terms win the race
@@ -35,11 +58,13 @@ export function wrapGlossaryInChapter(
     const terms = Array.from(remaining.values()).sort(
       (a, b) => a.order - b.order,
     );
-    let html = block.html;
+    let html = block.html.normalize("NFC");
     for (const term of terms) {
+      const alts = surfaceForms(term).map(escapeRegExp).join("|");
+      if (!alts) continue;
       const pattern = new RegExp(
-        `\\b(${escapeRegExp(term.term)})s?\\b`,
-        "i",
+        `(?<![\\p{L}\\p{M}])(${alts})s?(?![\\p{L}\\p{M}])`,
+        "iu",
       );
       const next = replaceOutsideTags(html, pattern, (match) => {
         const attr = term.term.replace(/"/g, "&quot;");

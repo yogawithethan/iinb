@@ -1,5 +1,6 @@
 import { memo } from "react";
 import type { ChapterBlock } from "@/content/chapters";
+import { AudioClip } from "./AudioClip";
 
 type Props = { block: ChapterBlock; anchor?: string };
 
@@ -33,6 +34,8 @@ function BlockRendererImpl({ block, anchor }: Props) {
           dangerouslySetInnerHTML={{ __html: block.html }}
         />
       );
+    case "audio":
+      return <AudioClip src={block.src} label={block.label} />;
     case "separator":
       return (
         <hr

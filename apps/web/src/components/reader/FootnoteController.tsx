@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 
 // The whole footnote types in (and out) over this fixed duration, regardless
-// of length — a long note reveals fast, a short one slower, but both take ~1s.
-const DURATION = 1000;
+// of length — a long note reveals fast, a short one slower. Kept snappy.
+const DURATION = 350;
 
 type Active = {
   ref: HTMLElement;
@@ -48,7 +48,9 @@ export function FootnoteController() {
         if (p < 1) {
           a.raf = requestAnimationFrame(tick);
         } else {
-          a.raf = null;
+          // Completed on time — cancel the safety fallback so `done` runs once
+          // (a stray second run appended a duplicate × close button).
+          stopAnim(a);
           done();
         }
       };

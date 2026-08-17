@@ -237,6 +237,17 @@ export function Chrome({
     return () => document.removeEventListener("click", onTap);
   }, [isDesktop, anyPanelOpen]);
 
+  // Keep the global site header in lockstep with the reader chrome. The header
+  // exposes an `.is-hidden` class on its host that runs its own slide-away
+  // animation; driving it from the reader's visibility means the sidebar button
+  // hides on tap (not just scroll) and enters/exits together with the rest.
+  useEffect(() => {
+    const hdr = document.querySelector("ywe-header");
+    if (!hdr) return;
+    hdr.classList.toggle("is-hidden", !effectiveVisible);
+    return () => hdr.classList.remove("is-hidden");
+  }, [effectiveVisible]);
+
   function closeAllPanels() {
     setSettingsOpen(false);
     setTocOpen(false);
@@ -483,10 +494,12 @@ export function Chrome({
         {/* TOP MASK */}
         <div
           onClick={handleStageClick}
-          className="pointer-events-auto absolute inset-x-0 top-0 min-h-[140px] mask-top transition-[transform,opacity] duration-300 ease-out"
+          className="pointer-events-auto absolute inset-x-0 top-0 min-h-[140px] mask-top"
           style={{
             opacity: effectiveVisible ? 1 : 0,
             transform: effectiveVisible ? "translateY(0)" : "translateY(-115%)",
+            // Match the global header's entrance exactly so they move as one.
+            transition: "transform 0.26s ease-in, opacity 0.2s ease-in",
           }}
         >
           <div
@@ -561,10 +574,11 @@ export function Chrome({
             NOT active (paywall handles its own fade). Bubbles always visible. */}
         <div
           onClick={handleStageClick}
-          className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] transition-[transform,opacity] duration-300 ease-out"
+          className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom"
           style={{
             opacity: effectiveVisible ? 1 : 0,
             transform: effectiveVisible ? "translateY(0)" : "translateY(115%)",
+            transition: "transform 0.26s ease-in, opacity 0.2s ease-in",
           }}
         >
           <div

@@ -280,11 +280,28 @@ export function ReaderSettingsProvider({
   }, []);
 
   useEffect(() => {
+    let loaded = false;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setSettings(sanitize(JSON.parse(raw)));
+      if (raw) {
+        setSettings(sanitize(JSON.parse(raw)));
+        loaded = true;
+      }
     } catch {
       // ignore parse errors; defaults remain
+    }
+    // First visit to the reader: seed the theme from the site-wide preference
+    // (yweThemeMode) so a returning reader who set dark elsewhere starts dark.
+    // Once the reader has its own saved settings, THEY are the source of truth.
+    if (!loaded) {
+      try {
+        const mode = localStorage.getItem("yweThemeMode");
+        if (mode === "dark" || mode === "light") {
+          setSettings((prev) => ({ ...prev, theme: mode }));
+        }
+      } catch {
+        /* storage disabled */
+      }
     }
     setHydrated(true);
   }, []);
@@ -313,12 +330,56 @@ export function ReaderSettingsProvider({
     } else {
       root.style.removeProperty("--accent");
     }
+    // Single source of truth: mirror the reader's theme onto the site-wide
+    // store the global header reads/writes, so the header (its own toggle,
+    // its drawer, its next boot) always agrees with the reader. dark/oled map
+    // to the header's "dark"; light/sepia map to "light".
+    const resolvedMode =
+      settings.theme === "dark" || settings.theme === "oled"
+        ? "dark"
+        : "light";
+    try {
+      localStorage.setItem("yweThemeMode", resolvedMode);
+      localStorage.setItem("yweThemeResolved", resolvedMode);
+    } catch {
+      /* storage disabled */
+    }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(presentationSettings(settings)));
     } catch {
       // storage full / disabled
     }
   }, [settings, hydrated]);
+
+  // Runtime bridge for the global header's OWN light/dark toggle (the pill
+  // switch inside its menu). When tapped, the header mutates
+  // documentElement[data-theme]; we adopt that into the reader's settings so it
+  // becomes the single source of truth and re-persists (including mirroring back
+  // to yweThemeMode via the apply effect above). The reader's own theme changes
+  // set data-theme to settings.theme, so those are no-ops here. sepia/oled are
+  // reader-only and never emitted by the header. First-visit seeding lives in
+  // the hydrate effect, so we intentionally do NOT adopt on mount here —
+  // otherwise a stale header value could override the reader's saved theme.
+  useEffect(() => {
+    if (!hydrated) return;
+    const root = document.documentElement;
+    const adopt = (val: string | null) => {
+      if (val !== "dark" && val !== "light") return;
+      setSettings((prev) => {
+        // Only react when the light/dark AXIS flips. If the reader is on a
+        // specific dark theme (oled) or light theme (sepia) and the header
+        // merely echoes the same axis, keep the reader's precise choice.
+        const prevMode =
+          prev.theme === "dark" || prev.theme === "oled" ? "dark" : "light";
+        if (prevMode === val) return prev;
+        const next = sanitize({ ...prev, theme: val, purchased: false, userEmail: null });
+        return { ...next, purchased: prev.purchased, userEmail: prev.userEmail };
+      });
+    };
+    const obs = new MutationObserver(() => adopt(root.getAttribute("data-theme")));
+    obs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, [hydrated]);
 
   useEffect(() => {
     if (!hydrated || !settings.purchased || !remoteSyncReady) return;

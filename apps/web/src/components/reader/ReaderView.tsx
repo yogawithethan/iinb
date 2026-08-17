@@ -5,6 +5,7 @@ import { useReaderSettings, type ReadingWidth } from "./SettingsContext";
 import { BlockRenderer } from "./BlockRenderer";
 import { PartTitleSection } from "./PartTitleSection";
 import { DedicationSection } from "./DedicationSection";
+import { TableOfContentsSection } from "./TableOfContentsSection";
 import { bionify } from "./bionic";
 import type { Chapter } from "@/content/chapters";
 import type { ReaderNode } from "@/content/stream";
@@ -44,6 +45,15 @@ export function ReaderView({ nodes }: Props) {
             <DedicationSection
               key={`dedication-${node.dedication.id}`}
               dedication={node.dedication}
+            />
+          );
+        }
+        if (node.kind === "toc") {
+          return (
+            <TableOfContentsSection
+              key="toc"
+              chapters={node.chapters}
+              parts={node.parts}
             />
           );
         }

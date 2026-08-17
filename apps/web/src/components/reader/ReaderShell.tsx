@@ -135,6 +135,9 @@ export function ReaderShell({ stream }: Props) {
         if (n.kind === "dedication") {
           return { id: n.dedication.id, title: "", subtitle: "" };
         }
+        if (n.kind === "toc") {
+          return { id: "contents", title: "Contents", subtitle: "" };
+        }
         if (n.kind === "part") {
           return {
             id: n.part.id,

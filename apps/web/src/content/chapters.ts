@@ -8,7 +8,18 @@ export type ChapterBlock =
   | { type: "heading"; level: 1 | 2 | 3; html: string }
   | { type: "paragraph"; html: string }
   | { type: "blockquote"; html: string }
+  | { type: "audio"; src: string; label: string }
   | { type: "separator" };
+
+// Inline audio clips referenced from markdown via a {{audio:name}} marker on
+// its own line. Kept tiny and explicit so a stray marker can never point at an
+// arbitrary URL.
+const AUDIO_CLIPS: Record<string, { src: string; label: string }> = {
+  kookaburra: {
+    src: "/audio/kookaburra.mp3",
+    label: "The call of the kookaburra",
+  },
+};
 
 export type ChapterMeta = {
   id: string;
@@ -94,6 +105,14 @@ function parseBlocks(md: string): ChapterBlock[] {
     switch (t.type) {
       case "paragraph": {
         const p = t as Tokens.Paragraph;
+        // A lone {{audio:name}} marker becomes an inline audio player.
+        const audioMatch = p.text.trim().match(/^\{\{audio:([a-z0-9-]+)\}\}$/i);
+        if (audioMatch) {
+          const clip = AUDIO_CLIPS[audioMatch[1].toLowerCase()];
+          if (clip)
+            out.push({ type: "audio", src: clip.src, label: clip.label });
+          break;
+        }
         const lines = p.text
           .split(/\n/)
           .map((l) => l.trim())

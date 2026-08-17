@@ -33,7 +33,7 @@ function runSearch(
   for (const ch of chapters) {
     for (let i = 0; i < ch.blocks.length; i++) {
       const b = ch.blocks[i];
-      if (b.type === "separator") continue;
+      if (b.type === "separator" || b.type === "audio") continue;
       const text = htmlToText(b.html);
       const lt = text.toLowerCase();
       const idx = lt.indexOf(lower);

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getAllChapters, type Chapter } from "./chapters";
+import { getAllChapters, type Chapter, type ChapterMeta } from "./chapters";
 import { getAllParts, type Part } from "./parts";
 import { getDedication, type Dedication } from "./dedication";
 import { getGlossary, type GlossaryEntry } from "./glossary";
@@ -8,6 +8,7 @@ import { wrapGlossaryInChapter } from "./glossaryWrap";
 
 export type ReaderNode =
   | { kind: "dedication"; dedication: Dedication }
+  | { kind: "toc"; chapters: ChapterMeta[]; parts: Part[] }
   | { kind: "part"; part: Part }
   | { kind: "chapter"; chapter: Chapter };
 
@@ -45,6 +46,24 @@ export async function getReaderStream(): Promise<ReaderStream> {
   const nodes: ReaderNode[] = [];
 
   if (dedication) nodes.push({ kind: "dedication", dedication });
+
+  // A book-style Table of Contents page, right after the dedication and before
+  // the Preface. Lists the full structure (all parts + chapters) regardless of
+  // tier, so readers see the whole map from the start.
+  nodes.push({
+    kind: "toc",
+    parts,
+    chapters: chapters.map(
+      ({ id, order, title, subtitle, part, isFree }) => ({
+        id,
+        order,
+        title,
+        subtitle,
+        part,
+        isFree,
+      }),
+    ),
+  });
 
   let lastPart = "";
   for (const chapter of chapters) {

@@ -24,7 +24,7 @@ function buildStream(nodes: ReaderNode[]): WordEntry[] {
     const { chapter } = node;
     for (let i = 0; i < chapter.blocks.length; i++) {
       const b = chapter.blocks[i];
-      if (b.type === "separator") continue;
+      if (b.type === "separator" || b.type === "audio") continue;
       const text = htmlToText(b.html);
       const words = text.split(/\s+/).filter(Boolean);
       const anchor = `${chapter.id}::${i}`;

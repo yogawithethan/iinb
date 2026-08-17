@@ -17,7 +17,7 @@ export function PartTitleSection({ part }: { part: Part }) {
       id={part.id}
       data-chapter-anchor={part.id}
       data-anchor-kind="part"
-      className="relative my-24 flex flex-col items-center justify-center text-center"
+      className="relative my-24 flex min-h-[100svh] flex-col items-center justify-center text-center"
       style={{ scrollMarginTop: "120px" }}
     >
       {emblem ? (

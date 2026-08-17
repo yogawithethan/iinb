@@ -43,6 +43,17 @@
   --accent-ink: color-mix(in srgb, var(--accent) 92%, white 8%);
   --bubble-fill: rgba(40, 40, 44, 0.72);
   --bubble-border: rgba(255, 255, 255, 0.08);
+  --frost-border: rgba(255, 255, 255, 0.14);
+  --frost-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 18px rgba(0, 0, 0, 0.42);
+  --iinb-opal:
+    radial-gradient(circle at 8% -6%, rgba(150, 120, 190, 0.16), transparent 42%),
+    radial-gradient(circle at 96% 6%, rgba(96, 140, 200, 0.16), transparent 44%),
+    linear-gradient(135deg, rgba(42, 42, 49, 0.94), rgba(30, 30, 35, 0.9));
+  --iinb-opal-control:
+    linear-gradient(135deg, rgba(46, 46, 52, 0.92), rgba(34, 34, 39, 0.88));
+  --capsule-border: rgba(255, 255, 255, 0.1);
+  --capsule-highlight: rgba(255, 255, 255, 0.08);
   --bubble-ink: #ededed;
   --mask-stop: rgba(18, 18, 20, 1);
   --card-border: rgba(255, 255, 255, 0.08);
@@ -77,6 +88,17 @@
   --accent-ink: color-mix(in srgb, var(--accent) 92%, white 8%);
   --bubble-fill: rgba(28, 28, 30, 0.72);
   --bubble-border: rgba(255, 255, 255, 0.08);
+  --frost-border: rgba(255, 255, 255, 0.14);
+  --frost-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+  --iinb-opal:
+    radial-gradient(circle at 8% -6%, rgba(120, 100, 160, 0.14), transparent 42%),
+    radial-gradient(circle at 96% 6%, rgba(80, 120, 180, 0.14), transparent 44%),
+    linear-gradient(135deg, rgba(22, 22, 26, 0.95), rgba(10, 10, 13, 0.93));
+  --iinb-opal-control:
+    linear-gradient(135deg, rgba(24, 24, 28, 0.93), rgba(12, 12, 15, 0.9));
+  --capsule-border: rgba(255, 255, 255, 0.09);
+  --capsule-highlight: rgba(255, 255, 255, 0.06);
   --bubble-ink: #f2f2f2;
   --mask-stop: rgba(0, 0, 0, 1);
   --card-border: rgba(255, 255, 255, 0.08);
@@ -370,6 +392,66 @@ html.reader-paged::-webkit-scrollbar {
   transform: translateY(-1px);
 }
 
+/* Inline audio clip (e.g. the kookaburra call) — slim, barely-there frosted
+   capsule matching the reader chrome (no loud rainbow). ~24px tall. */
+.iinb-audioclip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  min-width: 190px;
+  max-width: 260px;
+  height: 34px;
+  /* Centered, with extra breathing room top/bottom. */
+  margin: 22px auto 26px;
+  padding: 0 14px 0 4px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--bubble-fill);
+  border: 1px solid var(--frost-border, rgba(255, 255, 255, 0.5));
+  box-shadow:
+    0 2px 8px rgba(48, 38, 33, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+.iinb-audioclip__btn {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 0.5px;
+  color: var(--bubble-ink);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 140ms ease-out;
+}
+.iinb-audioclip__btn:hover {
+  transform: scale(1.12);
+}
+.iinb-audioclip__btn:active {
+  transform: scale(0.9);
+}
+.iinb-audioclip__track {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-tertiary) 32%, transparent);
+  overflow: hidden;
+}
+.iinb-audioclip__fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-secondary) 70%, transparent);
+  transition: width 120ms linear;
+}
+
 /* Locked rows: hover gets a subtle accent wash and border shift */
 .paywall-locked-row {
   transition:
@@ -427,24 +509,33 @@ html.reader-paged::-webkit-scrollbar {
   scrollbar-width: none;
 }
 
-/* Glass bubble primitive */
+/* Glass bubble primitive — mirrors the global drsti-header control treatment
+   (transparent frost + blur(18px) saturate(1.16) + bright rim + inset
+   highlight/lowlight + soft drop) so the reader buttons read as the same set
+   as the header's sidebar trigger. */
 .glass-bubble {
-  background: var(--iinb-opal-control, var(--bubble-fill));
-  border: 1px solid var(--bubble-border);
-  backdrop-filter: blur(16px) saturate(1.3);
-  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  background: var(--bubble-fill);
+  border: 1px solid var(--frost-border, rgba(255, 255, 255, 0.58));
+  backdrop-filter: blur(18px) saturate(1.16);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
   color: var(--bubble-ink);
-  box-shadow: 0 2px 7px rgba(26, 23, 18, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  box-shadow: var(
+    --frost-shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 1.5px rgba(56, 43, 35, 0.07),
+    0 4px 14px rgba(20, 14, 8, 0.1)
+  );
 }
 
 .glass-capsule {
   border-radius: 28px;
   corner-shape: squircle;
   background: var(--iinb-opal, var(--bubble-fill));
-  border: 1px solid rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--capsule-border, rgba(255, 255, 255, 0.88));
   backdrop-filter: blur(20px) saturate(1.3);
   -webkit-backdrop-filter: blur(20px) saturate(1.3);
-  box-shadow: 0 18px 44px rgba(48, 38, 33, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 44px rgba(48, 38, 33, 0.12),
+    inset 0 1px 0 var(--capsule-highlight, rgba(255, 255, 255, 0.96));
 }
 
 #paywall > div {

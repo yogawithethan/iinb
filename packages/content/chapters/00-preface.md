@@ -19,6 +19,8 @@ Until…
 
 Hoo-hoo-hoo-hoo-hoo-hoo-hoo-hoo-HAH-HAH-HAH-HAH!
 
+{{audio:kookaburra}}
+
 A hysterical cackle right outside my hotel door broke the spell. Interpreting the noise as a monkey call I leapt from the bed, giddy like the curious little boy I’d forgotten I was, shocked— no, delighted—that monkeys also inhabited this magical little island![[To my inner child’s utter disappointment, I later learned that this cackle was actually the impressive call of a kookaburra bird, and not a monkey. Still cool, though.]]
 
 The thrill of this mind lasted all of two seconds before turning back on itself, at once addressing its own inconsistency: “Wait…weren't you sobbing just moments ago, and now you’re tickled at the thought of monkeys?”
@@ -43,11 +45,11 @@ So what is this book, anyways? I hesitate to say, because whatever I call it wil
 
 Call this book non-fiction and you’ll look for proof. Call it wisdom and you’ll expect to automatically get wiser from reading. Call it spiritual and you’ll identify with it. Call it prophetic and you’ll take it literally.
 
-I want to avoid these pitfalls, so rather than telling you what this book is, let me tell you what it isn’t. Perhaps then you will see the forest despite the trees.
+I want to avoid these pitfalls, so rather than telling you what this book is, let me tell you what it *isn’t*. Perhaps then you will see the forest despite the trees.
 
 This is not a self-help or personal development book, for the Self does not need help, nor the personality need developing to become worthy of what is being called Bliss. The Bouncer at the gate is not double-checking that you have an attractive body, cool hobbies or trendy opinions; It is checking only that you are righteous and true to your word, both of which get forged while walking along the spiritual path.
 
-This book is also not a scholarly or historical analysis on the teachings of the Buddha, yogic traditions, or Christianity. Solely trying to certify spiritual truths intellectually proves to be as effective as trying to bite your own teeth. Better to actually see for oneself than to think about what might happen when one sees for oneself…you see?
+This book is also not a scholarly or historical analysis on the teachings of the Buddha, yogic traditions, or Christianity. Solely trying to certify spiritual truths intellectually proves to be as effective as trying to bite your own teeth. Better to actually see for yourself than to think about what might happen when you see for yourself…you see?
 
 Nor is this book fantasy or science fiction. However wild some of the claims herein may seem on the surface, metaphysical experiences and insight become both commonplace and obvious as one ventures along the Path. Past life memories, exorcisms, alien encounters, astral travel, mind-reading, prophetic dreams, spontaneous healings, you name it. Indeed, while they are occurring, such experiences seem far more real than anything one might normally call reality.
 
@@ -61,7 +63,7 @@ Nevertheless, there must be a way through—there must be a world beyond one’s
 
 So again what is this book?
 
-As unprofound as this sounds: this book is what it is to you.
+As unprofound as this sounds: *this book is what it is to you*.
 
 Perhaps it will function as a gentle tap on the shoulder, pointing out that if happiness is your goal, you're looking in the wrong spot. Or perhaps it will be a basic map—far simpler than the ancient religious traditions, but sufficient to get one walking in the right direction. Maybe it will inspire you to try harder in your seeking. Maybe it will convince you that your seeking is getting in the way. Maybe the intention behind each word will serve as an attunement you can feel and align to. Maybe the book will be seen as merely the author's final vain attempt at putting words to the wordless before he slips across his own nirvanic event horizon and disappears forever.
 
@@ -71,7 +73,7 @@ Only time will tell.
 
 Here’s what I can say for certain: this book is written for those of you who perk up at the words “end of suffering,” “real peace,” and “true happiness.” For whatever reason not everyone does, and it is strictly against spiritual law to shake someone by the shoulders to rip them out of the dream. Why pick the fruit before it ripens? Why stop the movie before the director yells wrap? If you’re ready to make the transition to a new modus operandi, great. If not, also great. Moreover, this book is written for those of you with the courage to be led down the Path that the Masters so neatly set out for us, even if (when) that Path becomes intensely, mind-crushingly uncomfortable.
 
-Actually, to be more precise, it is written for those of you with a willingness to die for the sake of Truth. Not necessarily a physical death, but certainly an ideological one. In order for one to ascend the mountainous heights where Bliss is located, one needs to forsake all identifications and false idols. All identifications and false idols, not just the obvious ones like possessions and fame. One needs to be stripped bare of any and all ideas that something like safety, being right, being seen, being held, or even being holy will bring lasting fulfillment. They won’t. Actually, they can’t. At best these identifications kick the can down the road for a future you to let go of. At worst, they generate an intense, black hole of misery that even light cannot penetrate. By the way, if any of this sounds horrible or exaggerated, rest assured that it is neither. As the heavy chains of misery melt from your shoulders, you will happily discover that ideological death was nothing to be afraid of, and that all of the so-called sacrifices pale in comparison to the reward waiting on the “other side”. Why? Well, as it turns out, the whole process is just a matter of exchanging thoughts which make you miserable for a steady, indescribable experience of quiet presence without anyone present—exchanging ignorance for bliss.
+Actually, to be more precise, it is written for those of you with a willingness to die for the sake of Truth. Not necessarily a physical death, but certainly an ideological one. In order for one to ascend the mountainous heights where Bliss is located, one needs to forsake all identifications and false idols. All identifications and false idols, not just the obvious ones like possessions and fame. One needs to be stripped bare of any and all ideas that something like safety, being right, being seen, being held, or even being holy will bring lasting fulfillment. They won’t. Actually, they *can’t*. At best these identifications kick the can down the road for a future you to let go of. At worst, they generate an intense, black hole of misery that even light cannot penetrate. By the way, if any of this sounds horrible or exaggerated, rest assured that it is neither. As the heavy chains of misery melt from your shoulders, you will happily discover that ideological death was nothing to be afraid of, and that all of the so-called sacrifices pale in comparison to the reward waiting on the “other side”. Why? Well, as it turns out, the whole process is just a matter of exchanging thoughts which make you miserable for a steady, indescribable experience of quiet presence without anyone present—exchanging ignorance for bliss.
 
 Not a bad trade!
 

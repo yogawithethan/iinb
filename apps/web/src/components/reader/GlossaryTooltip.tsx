@@ -113,6 +113,10 @@ export function GlossaryTooltip({
         left: pos?.left ?? -9999,
         width: TOOLTIP_WIDTH,
         zIndex: 70,
+        // Fully opaque — this popover sits directly over body text, so any
+        // translucency makes the definition unreadable.
+        background: "var(--bg)",
+        boxShadow: "0 18px 44px rgba(26, 23, 18, 0.22)",
         opacity: animate && pos ? 1 : 0,
         transform: animate && pos ? "translateY(0)" : "translateY(4px)",
         transition:
@@ -129,14 +133,6 @@ export function GlossaryTooltip({
         >
           {entry.display}
         </span>
-        {entry.pronunciation ? (
-          <span
-            className="text-[12px]"
-            style={{ color: "var(--ink-tertiary)" }}
-          >
-            {entry.pronunciation}
-          </span>
-        ) : null}
       </div>
       <div
         className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.12em]"

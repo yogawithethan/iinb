@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GlossaryEntry } from "@/content/glossary";
-import { RefreshIcon, SpeakerIcon } from "./icons";
+import { RefreshIcon } from "./icons";
 import { useReaderSettings } from "./SettingsContext";
 import { COMING_SOON } from "@/lib/comingSoon";
 
@@ -60,16 +60,6 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
   const [spinningDef, setSpinningDef] = useState(false);
   const [spinningEx, setSpinningEx] = useState(false);
 
-  function speak() {
-    if (typeof window === "undefined" || !("speechSynthesis" in window))
-      return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(entry.display || entry.term);
-    u.rate = 0.85;
-    u.pitch = 1;
-    window.speechSynthesis.speak(u);
-  }
-
   async function refresh(kind: "definition" | "example") {
     if (kind === "definition") setSpinningDef(true);
     else setSpinningEx(true);
@@ -110,38 +100,6 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
         background: "color-mix(in srgb, var(--accent) 5%, var(--bg-soft))",
       }}
     >
-      {/* Pronounce */}
-      <section className="flex flex-col gap-1.5">
-        <SectionLabel>Pronounce</SectionLabel>
-        <div className="flex items-center gap-2">
-          <span
-            className="text-[14px]"
-            style={{
-              color: "var(--ink)",
-              fontFamily:
-                "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
-            }}
-          >
-            {entry.pronunciation}
-          </span>
-          <button
-            type="button"
-            onClick={speak}
-            aria-label="Play pronunciation"
-            title="Play pronunciation"
-            className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-            style={{
-              color: "var(--accent-ink)",
-              background: "var(--accent-soft)",
-            }}
-          >
-            <SpeakerIcon size={14} />
-          </button>
-        </div>
-      </section>
-
-      <Divider />
-
       {/* Definition */}
       <section className="flex flex-col gap-1.5">
         <SectionLabel>Definition</SectionLabel>
