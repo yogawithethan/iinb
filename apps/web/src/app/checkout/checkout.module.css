@@ -1,0 +1,18 @@
+.page {
+  min-height: 100dvh;
+  padding: max(12px, env(safe-area-inset-top)) 0 max(24px, env(safe-area-inset-bottom));
+  background: #fdf9f4;
+}
+
+.checkout {
+  display: block;
+  width: 100%;
+  min-height: 720px;
+  border: 0;
+  background: #fdf9f4;
+}
+
+@media (min-width: 900px) {
+  .page { padding-inline: 18px; }
+  .checkout { max-width: 1180px; margin-inline: auto; }
+}
