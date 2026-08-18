@@ -26,7 +26,9 @@ function tuningCss(): string {
     .mt-frame a,
     .mt-frame [role="button"] { pointer-events: auto !important; }
 
-    /* (c) Show the sidebar glyph (not a hamburger) on mobile, matching desktop. */
+    /* (c) Show the sidebar glyph (not a hamburger) on mobile, matching desktop.
+       Also give it the same frosted-glass treatment as the reader's own buttons
+       (Settings, Ask) so the group looks unified. */
     .mt-frame .sidebar-trigger .ham-morph { display: none !important; }
     .mt-frame .sidebar-trigger::before {
       content: "";
@@ -36,6 +38,18 @@ function tuningCss(): string {
       background: currentColor;
       -webkit-mask: ${mask} center / 18px 18px no-repeat;
       mask: ${mask} center / 18px 18px no-repeat;
+    }
+    @media (max-width: 767px) {
+      .mt-frame .sidebar-trigger {
+        background: rgba(255, 255, 255, 0.76) !important;
+        border: 1px solid rgba(255, 255, 255, 0.58) !important;
+        box-shadow: rgba(255, 255, 255, 0.96) 0 1px 0 0 inset,
+                    rgba(56, 43, 35, 0.07) 0 -1px 1.5px 0 inset,
+                    rgba(20, 14, 8, 0.1) 0 4px 14px 0 !important;
+        border-radius: 50%;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
     }
 
     /* (d) Dark-mode the mobile drawer. The shared header only applies its dark
@@ -115,6 +129,18 @@ export function HeaderTuning() {
         style.textContent = tuningCss();
         root.appendChild(style);
       }
+      // Kill the header's built-in scroll-hide — the reader drives visibility
+      // via tap-to-reveal and sets is-hidden itself.
+      const hdr = header as unknown as {
+        _scrollHandler?: EventListener;
+        _scrollHandlerInstalled?: boolean;
+      };
+      if (hdr._scrollHandler) {
+        window.removeEventListener("scroll", hdr._scrollHandler);
+        hdr._scrollHandler = undefined;
+        hdr._scrollHandlerInstalled = false;
+      }
+
       // Mirror the reader's dark/oled theme onto the header host so the
       // drawer-dark rules above apply (the header's own dark theming misses
       // the drawer surfaces).

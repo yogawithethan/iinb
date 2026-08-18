@@ -38,7 +38,7 @@ export async function yweRequest(
 export async function jsonFromYwe(response: Response) {
   const data = await response.json().catch(() => ({
     ok: false,
-    error: "Yoga With Ethan services returned an invalid response.",
+    error: "Yoga with Ethan services returned an invalid response.",
   }));
   const headers = new Headers({ "Cache-Control": "no-store" });
   const retryAfter = response.headers.get("retry-after");

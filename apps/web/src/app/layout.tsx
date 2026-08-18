@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Lora, Poppins } from "next/font/google";
 import Script from "next/script";
 import { createElement } from "react";
 import "./globals.css";
@@ -18,6 +18,13 @@ const lora = Lora({
   display: "swap",
 });
 
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
 const OG_TITLE = "Ignorance is not Bliss by Ethan Hill";
 const OG_DESCRIPTION =
   "Suffering, purification, and the future of our species.";
@@ -29,11 +36,12 @@ export const metadata: Metadata = {
   description: OG_DESCRIPTION,
   icons: {
     icon: [
-      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/icon.png", sizes: "1080x1080", type: "image/png" },
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: "/apple-touch-icon.png",
   },
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     url: "https://iinb.yogawithethan.com",
@@ -48,6 +56,11 @@ export const metadata: Metadata = {
         alt: OG_TITLE,
       },
     ],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "IINB",
+    statusBarStyle: "default",
   },
   twitter: {
     card: "summary_large_image",
@@ -71,7 +84,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${lora.variable} h-full antialiased`}
+      className={`${inter.variable} ${lora.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <Script src="/shared-components/loader.js" strategy="beforeInteractive" />

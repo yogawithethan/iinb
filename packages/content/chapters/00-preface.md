@@ -41,39 +41,39 @@ And yet, I believe we’re still tripping over the same spiritual potholes that 
 
 ---
 
-So what is this book, anyways? I hesitate to say, because whatever I call it will inform how you read it—and there are so many ways to read it wrong.
+So what is Ignorance is not Bliss, anyways? I hesitate to say, because whatever I call it will inform how you read it. And there are so many ways to read this book wrong.
 
-Call this book non-fiction and you’ll look for proof. Call it wisdom and you’ll expect to automatically get wiser from reading. Call it spiritual and you’ll identify with it. Call it prophetic and you’ll take it literally.
+Call it non-fiction and you’ll look for proof. Call it wisdom and you’ll expect to automatically get wiser from reading. Call it spiritual and you’ll identify with it. Call it prophetic and you’ll take it literally.
 
-I want to avoid these pitfalls, so rather than telling you what this book is, let me tell you what it *isn’t*. Perhaps then you will see the forest despite the trees.
+I want to avoid these pitfalls, so rather than telling you what this book *is*, let me tell you what it *isn’t*. Perhaps then you will see the forest despite the trees.
 
 This is not a self-help or personal development book, for the Self does not need help, nor the personality need developing to become worthy of what is being called Bliss. The Bouncer at the gate is not double-checking that you have an attractive body, cool hobbies or trendy opinions; It is checking only that you are righteous and true to your word, both of which get forged while walking along the spiritual path.
 
 This book is also not a scholarly or historical analysis on the teachings of the Buddha, yogic traditions, or Christianity. Solely trying to certify spiritual truths intellectually proves to be as effective as trying to bite your own teeth. Better to actually see for yourself than to think about what might happen when you see for yourself…you see?
 
-Nor is this book fantasy or science fiction. However wild some of the claims herein may seem on the surface, metaphysical experiences and insight become both commonplace and obvious as one ventures along the Path. Past life memories, exorcisms, alien encounters, astral travel, mind-reading, prophetic dreams, spontaneous healings, you name it. Indeed, while they are occurring, such experiences seem far more real than anything one might normally call reality.
+Nor is this book fantasy or science fiction. However wild some of the claims herein may seem on the surface, metaphysical experiences and insight become both commonplace and obvious as you ventures along the Path. Past life memories, exorcisms, alien encounters, astral travel, mind-reading, prophetic dreams, spontaneous healings, you name it. Indeed, while they are occurring, such experiences seem far more real than anything you might normally call reality.
 
 This book is also not an instruction manual on attaining enlightenment. There is no secret formula for becoming free, no shortcuts or “3-step protocols” for transcending the ego. If there were, we’d all be Buddhas by now. The whole Path must be both improvised and walked by foot.
 
 By analogy, because the number of potential chessboard configurations and situations is astronomical, chess teachers rarely teach specifics. Instead, they teach their students fundamentals and overall strategy to prepare them for when the opponent makes an unexpected, cunning move.
 
-Ahh, if only the mind were as simple as a chess match and not of an all-out cosmic war. And if only the ego—that which distracts or convinces one not to take the next necessary step towards Bliss—were not some kind of military genius! Alas, until one fully abides in the Kingdom, this is the reality one faces. The ego knows every weakness, desire, flaw, and aversion in one’s psyche. It has access to one’s entire memory bank. It can mimic any voice or conjure any image. It can dodge, deflect, camouflage, and overpower. And perhaps most dangerous of all, when its back is against the wall, it can deploy some damn cute puppy dog eyes.
+Ahh, if only the mind were as simple as a chess match and not of an all-out cosmic war. And if only the ego—that which distracts or convinces you not to take the next necessary step towards Bliss were not some kind of military genius! Alas, until you and I fully abide in the Kingdom, this is the reality we face. The ego knows every weakness, desire, flaw, and aversion in your psyche. It has access to your entire memory bank. It can mimic any voice or conjure any image. It can dodge, deflect, camouflage, and overpower. And perhaps most dangerous of all, when its back is against the wall, it can deploy some damn cute puppy dog eyes.
 
-Nevertheless, there must be a way through—there must be a world beyond one’s everyday sufferings. Otherwise the whole setup would be cruel: A war that is fundamentally unwinnable? Who or what would create such a scenario?
+Nevertheless, there must be a way through—there must be a world beyond your everyday sufferings. Otherwise the whole setup would be cruel: A war that is fundamentally unwinnable? Who or what would create such a scenario?
 
 So again what is this book?
 
-As unprofound as this sounds: *this book is what it is to you*.
+As unprofound as it sounds: *this book is what it is to you*.
 
-Perhaps it will function as a gentle tap on the shoulder, pointing out that if happiness is your goal, you're looking in the wrong spot. Or perhaps it will be a basic map—far simpler than the ancient religious traditions, but sufficient to get one walking in the right direction. Maybe it will inspire you to try harder in your seeking. Maybe it will convince you that your seeking is getting in the way. Maybe the intention behind each word will serve as an attunement you can feel and align to. Maybe the book will be seen as merely the author's final vain attempt at putting words to the wordless before he slips across his own nirvanic event horizon and disappears forever.
+Perhaps it will function as a gentle tap on the shoulder, pointing out that if happiness is your goal, you're looking in the wrong spot. Or perhaps it will be a basic map—far simpler than the ancient religious traditions, but sufficient to get you walking in the right direction. Maybe it will inspire you to try harder in your seeking. Maybe it will convince you that your seeking is getting in the way. Maybe the intention behind each word will serve as an attunement you can feel and align to. Maybe the book will be seen as merely the author's final vain attempt at putting words to the wordless before he slips across his own nirvanic event horizon and disappears forever.
 
-Or maybe it will be none of these things, and the reader will find it utterly nonsensical and useless.
+Or maybe it will be none of these things, and you'll find it utterly nonsensical and useless.
 
 Only time will tell.
 
 Here’s what I can say for certain: this book is written for those of you who perk up at the words “end of suffering,” “real peace,” and “true happiness.” For whatever reason not everyone does, and it is strictly against spiritual law to shake someone by the shoulders to rip them out of the dream. Why pick the fruit before it ripens? Why stop the movie before the director yells wrap? If you’re ready to make the transition to a new modus operandi, great. If not, also great. Moreover, this book is written for those of you with the courage to be led down the Path that the Masters so neatly set out for us, even if (when) that Path becomes intensely, mind-crushingly uncomfortable.
 
-Actually, to be more precise, it is written for those of you with a willingness to die for the sake of Truth. Not necessarily a physical death, but certainly an ideological one. In order for one to ascend the mountainous heights where Bliss is located, one needs to forsake all identifications and false idols. All identifications and false idols, not just the obvious ones like possessions and fame. One needs to be stripped bare of any and all ideas that something like safety, being right, being seen, being held, or even being holy will bring lasting fulfillment. They won’t. Actually, they *can’t*. At best these identifications kick the can down the road for a future you to let go of. At worst, they generate an intense, black hole of misery that even light cannot penetrate. By the way, if any of this sounds horrible or exaggerated, rest assured that it is neither. As the heavy chains of misery melt from your shoulders, you will happily discover that ideological death was nothing to be afraid of, and that all of the so-called sacrifices pale in comparison to the reward waiting on the “other side”. Why? Well, as it turns out, the whole process is just a matter of exchanging thoughts which make you miserable for a steady, indescribable experience of quiet presence without anyone present—exchanging ignorance for bliss.
+Actually, to be more precise, it is written for those of you with a willingness to die for the sake of Truth. Not necessarily a physical death, but certainly an ideological one. In order for you to ascend the mountainous heights where Bliss is located, you need to forsake all identifications and false idols. All identifications and false idols, not just the obvious ones like possessions and fame. You needs to be stripped bare of any and all ideas that something like safety, being right, being seen, being held, or even being holy will bring lasting fulfillment. They won’t. Actually, they *can’t*. At best these identifications kick the can down the road for a future you to let go of. At worst, they generate an intense, black hole of misery that even light cannot penetrate. By the way, if any of this sounds horrible or exaggerated, rest assured that it is neither. As the heavy chains of misery melt from your shoulders, you will happily discover that ideological death was nothing to be afraid of, and that all of the so-called sacrifices pale in comparison to the reward waiting on the “other side”. Why? Well, as it turns out, the whole process is just a matter of exchanging thoughts which make you miserable for a steady, indescribable experience of quiet presence without anyone present—exchanging ignorance for bliss.
 
 Not a bad trade!
 
@@ -85,7 +85,7 @@ This book is split into three parts.
 
 Part 1 attempts to make clear the philosophy of suffering—why it happens, how it happens, and who it actually happens to. It addresses the fact that modernity is fueling our unhappiness and trapping us into an anxious cycle, a cycle that is becoming increasingly difficult to escape from. It is largely based on Buddhist wisdom.
 
-Part 2 tries to detail how one gets free from this cycle. It teaches the fundamentals of physical, mental, emotional and spiritual purification by which the chain reaction of discontentment slows and eventually stops. It draws more so on the structure and language of yogic thought and practice.
+Part 2 tries to detail how to get free from this cycle. It teaches the fundamentals of physical, mental, emotional and spiritual purification by which the chain reaction of discontentment slows and eventually stops. It draws more so on the structure and language of yogic thought and practice.
 
 Part 3 does its best to describe what life is like beyond the purification process, atop the mountain. How does one view themselves at this elevation? How does one view others? What might the planet look like once our species abides there? It leans more on Christian terminology and doctrine.
 
@@ -105,7 +105,7 @@ If five honest men can produce five irreconcilable descriptions of a single elep
 
 Perhaps, then, the great traditions are not competing answers to the same questions, but answers to subtly different questions shaped by the time, culture, and particular texture of suffering that pressed on the seekers of each age and civilization.
 
-Of course, no amount of intellectual reconciliation will deliver one to the pearly gates. The traditions can be endlessly compared, contrasted, and stitched into elegant philosophies without one ever having moved an inch themselves on the Path. Thus, it’s only by virtue of continuous practice and surrender that one actually experience the Great Realization for oneself —after which this book, and every book, loses all necessity.
+Of course, no amount of intellectual reconciliation will deliver you to the pearly gates. The traditions can be endlessly compared, contrasted, and stitched into elegant philosophies without you ever having moved an inch themselves on the Path. Thus, it’s only by virtue of continuous practice and surrender that you actually experience the Great Realization for yourself—after which this book, and every book, loses all necessity.
 
 And that, dear reader, would be the greatest outcome I could hope for.
 

@@ -65,21 +65,24 @@ export function TableOfContentsSection({
           ) : (
             <div
               key={`c-${row.ch.id}`}
-              className="flex w-full items-baseline gap-3 py-2"
+              className="py-2 leading-snug"
             >
               <span
-                className="text-[1.02em] leading-snug"
+                className="text-[1.02em]"
                 style={{ color: "var(--ink)" }}
               >
                 {row.ch.title}
               </span>
               {row.ch.subtitle ? (
-                <span
-                  className="text-[0.82em] italic"
-                  style={{ color: "var(--ink-tertiary)" }}
-                >
-                  {row.ch.subtitle}
-                </span>
+                <>
+                  {"  "}
+                  <span
+                    className="text-[0.78em] italic"
+                    style={{ color: "var(--ink-tertiary)" }}
+                  >
+                    {row.ch.subtitle}
+                  </span>
+                </>
               ) : null}
             </div>
           ),
@@ -123,6 +126,55 @@ export function TableOfContentsSection({
           <span style={{ color: "var(--accent-ink)" }}>&times;</span> when
           you&rsquo;re done and it tucks itself back away. They&rsquo;re little
           detours &mdash; take them or leave them.
+        </p>
+      </div>
+
+      {/* Add to Home Screen explainer for Apple devices */}
+      <div
+        className="mt-6 rounded-2xl px-5 py-5"
+        style={{
+          border: "1px solid var(--card-border)",
+          background: "var(--bg-soft)",
+        }}
+      >
+        <div
+          className="mb-2 text-[0.7em] font-semibold uppercase tracking-[0.18em]"
+          style={{
+            color: "var(--ink-tertiary)",
+            fontFamily:
+              "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+          }}
+        >
+          Read it like a book
+        </div>
+        <p
+          className="text-[0.92em] leading-relaxed"
+          style={{ color: "var(--ink-secondary)" }}
+        >
+          On an iPhone or iPad, tap the{" "}
+          <span style={{ fontSize: "1.1em" }} aria-label="share icon">
+            <svg
+              width="14"
+              height="16"
+              viewBox="0 0 14 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ display: "inline", verticalAlign: "-2px" }}
+              aria-hidden="true"
+            >
+              <path
+                d="M7 1v9M7 1L4 4M7 1l3 3M1 8v5a2 2 0 002 2h8a2 2 0 002-2V8"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>{" "}
+          share button in Safari, then scroll down and choose{" "}
+          <strong>Add to Home Screen</strong>. On a Mac, go to{" "}
+          <strong>File &rarr; Add to Dock</strong>. The book will open
+          full-screen with no browser chrome &mdash; just the text.
         </p>
       </div>
     </section>

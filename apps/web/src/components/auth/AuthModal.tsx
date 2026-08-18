@@ -112,7 +112,7 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
         setError(data.error ?? "Could not sign in.");
         return;
       }
-      setNotice("Check your email for a secure Yoga With Ethan sign-in link. It works for 30 minutes.");
+      setNotice("Check your email for a secure Yoga with Ethan sign-in link. It works for 24 hours.");
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -384,7 +384,7 @@ function EntryStep(props: {
         className="mb-5 text-center text-[12px]"
         style={{ color: "var(--ink-tertiary)" }}
       >
-        One Yoga With Ethan account for your reader and the wider ecosystem.
+        One Yoga with Ethan account for your reader and the wider ecosystem.
       </p>
 
       <TabSwitcher
@@ -428,7 +428,7 @@ function EntryStep(props: {
             className="mt-1 text-center text-[11px]"
             style={{ color: "var(--ink-tertiary)" }}
           >
-            The key is bound to this verified Yoga With Ethan account when redeemed.
+            The key is bound to this verified Yoga with Ethan account when redeemed.
           </p>
         </form>
       ) : (
@@ -1646,16 +1646,41 @@ function PrimaryButton({
     <button
       type="submit"
       disabled={loading}
-      className="w-full rounded-full py-2.5 text-[14px] font-semibold transition-transform active:scale-[0.98]"
+      className="flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-[14px] font-semibold transition-transform active:scale-[0.98]"
       style={{
         background: "var(--accent)",
         color: "#fff",
         fontFamily:
           "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
-        opacity: loading ? 0.6 : 1,
+        opacity: loading ? 0.7 : 1,
       }}
     >
-      {loading ? "…" : label}
+      {loading ? (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          style={{ animation: "spin 0.8s linear infinite" }}
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="3"
+          />
+          <path
+            d="M12 2a10 10 0 0 1 10 10"
+            stroke="#fff"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        </svg>
+      ) : (
+        label
+      )}
     </button>
   );
 }
@@ -1674,13 +1699,30 @@ function ErrorText({ children }: { children: React.ReactNode }) {
 
 function NoticeText({ children }: { children: React.ReactNode }) {
   return (
-    <p
+    <div
       role="status"
-      className="rounded-xl px-3 py-2 text-center text-[12px] leading-snug"
-      style={{ color: "var(--accent-ink)", background: "var(--accent-soft)" }}
+      className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-[12px] leading-snug"
+      style={{ color: "#2d6a4f", background: "#d8f3dc" }}
     >
-      {children}
-    </p>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="mt-px flex-shrink-0"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="10" fill="#2d6a4f" />
+        <path
+          d="M8 12.5l2.5 2.5L16 9.5"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>{children}</span>
+    </div>
   );
 }
 

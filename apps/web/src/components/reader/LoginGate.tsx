@@ -33,7 +33,7 @@ export function LoginGate({ onLogin, hidden = false }: Props) {
       >
         <div className="pb-[24px] md:pb-[28px]">
           <div
-            className="flex w-full items-center gap-3 rounded-[16px] px-4 py-3"
+            className="login-gate flex w-full items-center gap-3 rounded-[16px] px-4 py-3"
             style={{
               border: "1px solid var(--card-border)",
               background: "var(--bg)",
@@ -51,7 +51,7 @@ export function LoginGate({ onLogin, hidden = false }: Props) {
                 Keep reading
               </div>
               <div
-                className="mt-0.5 truncate text-[12px]"
+                className="mt-0.5 text-[12px]"
                 style={{
                   color: "var(--ink-secondary)",
                   fontFamily:

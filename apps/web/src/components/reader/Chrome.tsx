@@ -197,34 +197,16 @@ export function Chrome({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchOpen, anyPanelOpen, aiOpen, audioPlaying]);
 
+  // Tap-to-reveal: tapping anywhere in the reading area toggles the chrome.
+  // Skips interactive affordances, open panels, and active text selections.
   useEffect(() => {
-    if (anyPanelOpen) return;
-    let last = window.scrollY;
-    function onScroll() {
-      const y = window.scrollY;
-      const delta = y - last;
-      last = y;
-      // Slide the chrome by scroll direction, like the site header.
-      if (y < 80) setVisible(true);
-      else if (delta > 5) setVisible(false); // scrolling down → slide out
-      else if (delta < -5) setVisible(true); // scrolling up → slide in
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [anyPanelOpen]);
-
-  // Tap-to-reveal (mobile): tapping anywhere in the reading area toggles the
-  // chrome — works page-wide, not just the mask strips. Skips interactive
-  // affordances, open panels, and active text selections.
-  useEffect(() => {
-    if (isDesktop) return;
     function onTap(e: MouseEvent) {
       if (anyPanelOpen) return; // panels handle their own dismissal
       const t = e.target as HTMLElement | null;
       if (
         !t ||
         t.closest(
-          "button, a, input, textarea, select, [role='button'], .glass-bubble, .footnote-ref, .footnote-close, .gloss-term, .page-turn-edge",
+          "button, a, input, textarea, select, [role='button'], .glass-bubble, .footnote-ref, .footnote-close, .gloss-term, .page-turn-edge, .login-gate",
         )
       ) {
         return;
@@ -235,7 +217,7 @@ export function Chrome({
     }
     document.addEventListener("click", onTap);
     return () => document.removeEventListener("click", onTap);
-  }, [isDesktop, anyPanelOpen]);
+  }, [anyPanelOpen]);
 
   // Keep the global site header in lockstep with the reader chrome. The header
   // exposes an `.is-hidden` class on its host that runs its own slide-away

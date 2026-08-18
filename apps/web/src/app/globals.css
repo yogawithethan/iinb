@@ -7,6 +7,7 @@
 
 :root,
 [data-theme="light"] {
+  --ywe-font-ui: var(--font-poppins), 'Poppins', system-ui, -apple-system, sans-serif;
   --bg: #fdf9f4;
   --bg-soft: rgba(255, 255, 255, 0.72);
   --ink: #1a1712;
@@ -574,4 +575,8 @@ html.reader-paged::-webkit-scrollbar {
     color-mix(in srgb, var(--mask-stop) 60%, transparent) 75%,
     transparent 100%
   );
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
