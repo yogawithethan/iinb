@@ -1,26 +1,22 @@
 // Meta pixel — the browser half. Worker mirror: worker/lib/meta-capi.js
 //
-// One file so the pixel id exists in exactly one place. Every surface that
-// tracks loads this in <head>; it installs fbq and fires PageView itself, so a
-// page never pastes the base snippet again.
+// One file so the pixel id exists in exactly one place. Every public surface
+// loads this in <head>; it installs fbq and fires PageView itself, so a page
+// never pastes the base snippet again.
 //
-// The event vocabulary is deliberate and documented in docs/SPEC_META_PIXEL.md:
-//
-//   Schedule   a class registration COMPLETED — fires for the $11 purchase, the
-//              trial's free class, and a member spending a class credit alike.
-//              This is the campaign objective: it is the union of every route
-//              to the thing the ads actually want, so it is also the event with
-//              enough volume for Meta to learn from.
-//   StartTrial the 7-day Ruby/Om trial opened.
-//   Purchase   money actually moved. NEVER fired at $0 — a free trial class or
-//              a credit booking is a Schedule, not a Purchase. Keeping this
-//              clean is what makes Purchase-revenue mean revenue a year from now.
+// The event vocabulary (docs/SPEC_META_PIXEL.md):
+//   Lead        an email given for a freebie
+//   Schedule    a class registration completed, by any route ($11, trial, credit)
+//   StartTrial  the 7-day Ruby/Om trial opened
+//   Purchase    money actually moved. NEVER fired at $0.
 //
 // window.ywePixel.track() is a no-op until fbq loads, so call sites never guard.
+// window.ywePixel.cookies() returns {fbp, fbc} for hand-off to the Worker, which
+// is not on the cookie domain and would otherwise report a conversion Meta
+// cannot tie back to the click.
 (function () {
   // Ethan's original pixel, carried over from the Framer site. Its conversion
-  // history is the thing Meta optimises from, so this id must not be replaced
-  // with a freshly minted one. Server mirror: meta-capi.js META_PIXEL_ID.
+  // history is what Meta optimises from, so this id must not be replaced.
   var PIXEL_ID = '1345928067443807';
 
   if (window.ywePixel) return;
@@ -39,9 +35,9 @@
   fbq('init', PIXEL_ID);
   fbq('track', 'PageView');
 
-  // Every event this session already sent, so a back-button return or a re-render
-  // cannot double-count. The server sends the same event_id, and Meta dedupes
-  // across the two — but it does NOT dedupe two identical browser sends.
+  // Every event this session already sent, so a back-button return or a
+  // re-render cannot double-count. The server sends the same event_id and Meta
+  // dedupes across the two — but it does NOT dedupe two identical browser sends.
   var sent = {};
 
   function track(name, params, eventId) {
@@ -54,5 +50,18 @@
     } catch (_) { /* an ad pixel must never break a checkout */ }
   }
 
-  window.ywePixel = { id: PIXEL_ID, track: track };
+  function cookie(name) {
+    try {
+      var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    } catch (_) { return ''; }
+  }
+
+  function cookies() { return { fbp: cookie('_fbp'), fbc: cookie('_fbc') }; }
+
+  function eventId(prefix) {
+    return (prefix || 'ev') + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
+  window.ywePixel = { id: PIXEL_ID, track: track, cookies: cookies, eventId: eventId };
 })();
