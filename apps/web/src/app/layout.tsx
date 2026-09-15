@@ -41,6 +41,7 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <Script src="/shared-components/loader.js" strategy="beforeInteractive" />
+        <Script src="/ywe-pixel.js?v=20260906-base-only" strategy="afterInteractive" />
         {createElement("ywe-header", {
           active: "iinb",
           preset: "immersive-detail",
