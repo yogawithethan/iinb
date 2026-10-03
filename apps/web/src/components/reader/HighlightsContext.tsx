@@ -127,18 +127,28 @@ export function HighlightsProvider({ children }: { children: ReactNode }) {
     // Re-anchor highlights whose paragraph wasn't in the DOM yet (paid
     // chapters arrive after /api/content resolves) or whose Range was
     // orphaned by a re-render (e.g. toggling bionic reading swaps the
-    // paragraph's child nodes). `range` is client-only, so patching it in
-    // place is safe and avoids a state update on every DOM mutation.
+    // paragraph's child nodes).
+    const fixes = new Map<string, Range>();
     for (const h of highlightsRef.current) {
       const stale =
         !h.range ||
         h.range.collapsed ||
         !h.range.startContainer.isConnected ||
         !h.range.endContainer.isConnected;
-      if (stale && h.anchor) h.range = restoreRange(h as SyncedHighlight);
+      if (!stale || !h.anchor) continue;
+      const restored = restoreRange(h as SyncedHighlight);
+      if (restored) fixes.set(h.id, restored);
+    }
+    if (fixes.size) {
+      setHighlights((prev) =>
+        prev.map((h) => {
+          const range = fixes.get(h.id);
+          return range ? { ...h, range } : h;
+        }),
+      );
     }
     const ranges = highlightsRef.current
-      .map((h) => h.range)
+      .map((h) => fixes.get(h.id) ?? h.range)
       .filter((r): r is Range => Boolean(r));
     if (ranges.length === 0) {
       CSS.highlights.delete(HIGHLIGHT_NAME);

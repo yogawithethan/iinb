@@ -38,6 +38,23 @@ export function ReaderShell({ stream }: Props) {
   const [authMode, setAuthMode] = useState<"login" | "license">("license");
   const [purchasePending, setPurchasePending] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+
+  // Sign-in is the site-wide Yoga with Ethan sheet owned by the shared
+  // <ywe-header>, so the reader looks and behaves exactly like every other
+  // page. The reader's own form is only a fallback for the moment before the
+  // shared component has loaded.
+  const openSignIn = useCallback(() => {
+    const header = document.querySelector("ywe-header") as
+      | (HTMLElement & { openAuth?: (mode: "signin" | "signup") => void })
+      | null;
+    if (typeof header?.openAuth === "function") {
+      header.classList.remove("is-hidden");
+      header.openAuth("signin");
+      return;
+    }
+    setAuthMode("login");
+    setAuthOpen(true);
+  }, []);
   const restoredPosition = useRef<string | null>(null);
   // Set once the saved position has been applied (or there was none), so the
   // autosave can't overwrite it with "top of the book" while the full
@@ -243,12 +260,11 @@ export function ReaderShell({ stream }: Props) {
   const navigateTo = useCallback((id: string) => {
     if (scrollToAnchor(id)) return;
     if (!loggedIn) {
-      setAuthMode("login");
-      setAuthOpen(true);
+      openSignIn();
     } else if (!purchased) {
       openPaywall();
     }
-  }, [scrollToAnchor, loggedIn, purchased, openPaywall]);
+  }, [scrollToAnchor, loggedIn, purchased, openPaywall, openSignIn]);
 
   const navigateParagraph = useCallback((anchor: string) => {
     const el = document.querySelector<HTMLElement>(
@@ -321,8 +337,7 @@ export function ReaderShell({ stream }: Props) {
   const startPurchase = useCallback(async () => {
     setPurchaseError(null);
     if (!loggedIn) {
-      setAuthMode("login");
-      setAuthOpen(true);
+      openSignIn();
       return;
     }
     if (purchasePending) return;
@@ -351,8 +366,7 @@ export function ReaderShell({ stream }: Props) {
       }
       if (response.status === 401) {
         checkoutTab?.close();
-        setAuthMode("login");
-        setAuthOpen(true);
+        openSignIn();
         return;
       }
       if (!response.ok || !data.url) {
@@ -367,7 +381,17 @@ export function ReaderShell({ stream }: Props) {
     } finally {
       setPurchasePending(false);
     }
-  }, [loggedIn, refreshAccess, purchasePending]);
+  }, [loggedIn, refreshAccess, purchasePending, openSignIn]);
+
+  // The shared header announces sign-in changes; pick them up without a reload.
+  useEffect(() => {
+    const onAuthState = (e: Event) => {
+      const detail = (e as CustomEvent<{ loggedIn?: boolean }>).detail;
+      if (detail && detail.loggedIn !== loggedIn) void refreshAccess().catch(() => null);
+    };
+    document.addEventListener("ywe:auth-state", onAuthState);
+    return () => document.removeEventListener("ywe:auth-state", onAuthState);
+  }, [loggedIn, refreshAccess]);
 
   // Checkout completes in another tab; when the reader comes back to this
   // one, re-check access so the paywall lifts without a manual refresh.
@@ -412,10 +436,7 @@ export function ReaderShell({ stream }: Props) {
       {authReady && !purchased && !loggedIn && (
         <LoginGate
           hidden={anyPanelOpen || authOpen}
-          onLogin={() => {
-            setAuthMode("login");
-            setAuthOpen(true);
-          }}
+          onLogin={openSignIn}
         />
       )}
       {authReady && !purchased && loggedIn && (

@@ -101,9 +101,11 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
     if (!open) return;
     const opener = document.activeElement as HTMLElement | null;
     const frame = requestAnimationFrame(() => {
-      dialogRef.current
-        ?.querySelector<HTMLElement>("input, button:not([aria-label='Close'])")
-        ?.focus();
+      const root = dialogRef.current;
+      (
+        root?.querySelector<HTMLElement>("input") ??
+        root?.querySelector<HTMLElement>("button:not([aria-label='Close'])")
+      )?.focus();
     });
     return () => {
       cancelAnimationFrame(frame);
