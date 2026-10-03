@@ -10,11 +10,13 @@ type WordEntry = {
   anchor: string; // "{chapterId}::{blockIdx}"
 };
 
+// DOMParser documents are inert: unlike a detached <div>.innerHTML they don't
+// start fetching every <img> in the book. Footnote markers (†) aren't words.
 function htmlToText(html: string): string {
-  if (typeof document === "undefined") return html.replace(/<[^>]*>/g, "");
-  const div = document.createElement("div");
-  div.innerHTML = html;
-  return div.textContent ?? "";
+  if (typeof DOMParser === "undefined") return html.replace(/<[^>]*>/g, "");
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll(".footnote-ref").forEach((n) => n.remove());
+  return doc.body.textContent ?? "";
 }
 
 function buildStream(nodes: ReaderNode[]): WordEntry[] {
@@ -36,14 +38,26 @@ function buildStream(nodes: ReaderNode[]): WordEntry[] {
 
 export function RsvpOverlay({ nodes }: { nodes: ReaderNode[] }) {
   const { rsvpEnabled, rsvpWpm, update } = useReaderSettings();
-  const words = useMemo(() => buildStream(nodes), [nodes]);
+  // Only tokenize the book while RSVP is actually open.
+  const words = useMemo(
+    () => (rsvpEnabled ? buildStream(nodes) : []),
+    [rsvpEnabled, nodes],
+  );
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(true);
   const timerRef = useRef<number | null>(null);
+  const startedRef = useRef(false);
 
-  // Pick starting index from current scroll position when RSVP enables.
+  // Pick starting index from current scroll position when RSVP enables —
+  // once per session, so the full book arriving mid-read doesn't snap the
+  // reader back to wherever the page happens to be scrolled.
   useEffect(() => {
-    if (!rsvpEnabled || typeof window === "undefined") return;
+    if (!rsvpEnabled) {
+      startedRef.current = false;
+      return;
+    }
+    if (startedRef.current || !words.length || typeof window === "undefined") return;
+    startedRef.current = true;
     const scrollThreshold = window.scrollY + 140;
     const anchors = Array.from(
       document.querySelectorAll<HTMLElement>("[data-p-anchor]"),

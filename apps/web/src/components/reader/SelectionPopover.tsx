@@ -120,11 +120,14 @@ export function SelectionPopover() {
     overlappingIdRef.current = overlap;
     setOverlappingId(overlap);
 
-    const top = Math.max(12, rect.top + window.scrollY - 52);
-    const rawLeft = rect.left + window.scrollX + rect.width / 2;
+    // The popover is position:fixed, so work in viewport coordinates. When
+    // the selection sits too close to the top edge, drop below it instead of
+    // covering the selected text.
+    const top = rect.top - 52 >= 12 ? rect.top - 52 : rect.bottom + 12;
+    const rawLeft = rect.left + rect.width / 2;
     const half = POPOVER_WIDTH / 2;
-    const minLeft = window.scrollX + half + 12;
-    const maxLeft = window.scrollX + window.innerWidth - half - 12;
+    const minLeft = half + 12;
+    const maxLeft = window.innerWidth - half - 12;
     const left = Math.max(minLeft, Math.min(maxLeft, rawLeft));
     setPos({ top, left });
   }, []);
@@ -148,7 +151,20 @@ export function SelectionPopover() {
     document.addEventListener("touchend", onUp);
     document.addEventListener("keyup", onUp);
     document.addEventListener("selectionchange", onSelectionChange);
+    // Keep the fixed-position popover glued to the selection while reading
+    // scrolls underneath it.
+    let scrollFrame = 0;
+    function onScroll() {
+      if (!rangeRef.current || scrollFrame) return;
+      scrollFrame = window.requestAnimationFrame(() => {
+        scrollFrame = 0;
+        syncFromSelection();
+      });
+    }
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     return () => {
+      window.cancelAnimationFrame(scrollFrame);
+      window.removeEventListener("scroll", onScroll, { capture: true });
       document.removeEventListener("pointerup", onUp);
       document.removeEventListener("mouseup", onUp);
       document.removeEventListener("touchend", onUp);

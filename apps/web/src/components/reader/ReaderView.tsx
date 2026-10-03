@@ -134,6 +134,17 @@ function ChapterSection({
 }
 
 function EmptyState({ chapter }: { chapter: Chapter }) {
+  // The authoring hint below is for the author, never for readers.
+  if (process.env.NODE_ENV === "production") {
+    return (
+      <p
+        className="text-center"
+        style={{ color: "var(--ink-tertiary)", fontSize: "14px" }}
+      >
+        Coming soon.
+      </p>
+    );
+  }
   return (
     <div
       className="rounded-2xl px-6 py-8 text-center"

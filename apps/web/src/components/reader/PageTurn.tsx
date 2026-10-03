@@ -50,10 +50,18 @@ export function PageTurn({ active }: { active: boolean }) {
   useEffect(() => {
     if (!active) return;
 
+    // One trackpad swipe emits a long tail of inertia wheel events that
+    // outlasts the turn animation; treat events closer than 200ms apart as
+    // the same gesture so one swipe turns one page. Ctrl+wheel is pinch /
+    // browser zoom — never hijack it.
+    let lastWheel = 0;
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) < 4) return;
+      if (e.ctrlKey || Math.abs(e.deltaY) < 4) return;
       e.preventDefault();
-      turn(e.deltaY > 0 ? 1 : -1);
+      const now = performance.now();
+      const freshGesture = now - lastWheel > 200;
+      lastWheel = now;
+      if (freshGesture) turn(e.deltaY > 0 ? 1 : -1);
     };
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
@@ -64,6 +72,13 @@ export function PageTurn({ active }: { active: boolean }) {
       if (inField || e.metaKey || e.ctrlKey || e.altKey) {
         return;
       }
+      // Space/Enter on a focused control should activate it, not turn.
+      if (
+        e.key === " " &&
+        t?.closest?.("button, a, [role='button'], [role='switch'], [role='tab']")
+      ) {
+        return;
+      }
       if (["ArrowRight", "ArrowDown", "PageDown", " "].includes(e.key)) {
         e.preventDefault();
         turn(1);
@@ -72,25 +87,41 @@ export function PageTurn({ active }: { active: boolean }) {
         turn(-1);
       }
     };
+    let touchX = 0;
     let touchY = 0;
+    let tracking = false;
     const onTouchStart = (e: TouchEvent) => {
+      const t = e.target as Element | null;
+      // Multi-touch is pinch-zoom; taps on controls aren't swipes.
+      tracking =
+        e.touches.length === 1 &&
+        !t?.closest?.("a, button, input, [role='button'], [role='switch']");
+      touchX = e.touches[0]?.clientX ?? 0;
       touchY = e.touches[0]?.clientY ?? 0;
     };
     const onTouchEnd = (e: TouchEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = touchX - (e.changedTouches[0]?.clientX ?? touchX);
       const dy = touchY - (e.changedTouches[0]?.clientY ?? touchY);
-      if (Math.abs(dy) > 44) turn(dy > 0 ? 1 : -1);
+      if (Math.abs(dy) > 44 && Math.abs(dy) > Math.abs(dx)) turn(dy > 0 ? 1 : -1);
+    };
+    const onTouchCancel = () => {
+      tracking = false;
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKey);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchCancel, { passive: true });
     document.documentElement.classList.add("reader-paged");
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchCancel);
       document.documentElement.classList.remove("reader-paged");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

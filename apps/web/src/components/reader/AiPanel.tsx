@@ -23,6 +23,8 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
   const [loading, setLoading] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   // Focus input on mount
   useEffect(() => {
@@ -43,8 +45,12 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
     setMessages(next);
     setInput("");
     setLoading(true);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const res = await fetch("/api/ask", {
+        signal: controller.signal,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -52,7 +58,8 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
           chapterId,
         }),
       });
-      const data = (await res.json()) as { text?: string; error?: string };
+      // A non-JSON 5xx used to surface as a raw "Unexpected token <" error.
+      const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
       if (!res.ok) throw new Error(data.error || "Ask the book is unavailable.");
       setMessages((prev) => [
         ...prev,
@@ -62,6 +69,7 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
         },
       ]);
     } catch (error) {
+      if (controller.signal.aborted) return;
       setMessages((prev) => [
         ...prev,
         {
@@ -70,7 +78,7 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
         },
       ]);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }
 

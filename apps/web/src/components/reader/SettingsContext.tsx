@@ -101,11 +101,18 @@ const DEFAULTS: ReaderSettings = {
 
 const SettingsCtx = createContext<Ctx | null>(null);
 
-function clampSize(n: number) {
-  return Math.max(12, Math.min(28, Math.round(n)));
+function clampSize(n: unknown) {
+  const v = Number(n);
+  return Number.isFinite(v) ? Math.max(12, Math.min(28, Math.round(v))) : DEFAULTS.fontSize;
 }
-function clampWpm(n: number) {
-  return Math.max(200, Math.min(800, Math.round(n)));
+function clampWpm(n: unknown) {
+  const v = Number(n);
+  return Number.isFinite(v) ? Math.max(200, Math.min(800, Math.round(v))) : DEFAULTS.rsvpWpm;
+}
+// Stored/synced settings are untrusted: an unknown enum value used to flow
+// straight into lookups like WIDTH_PX[readingWidth] → "undefinedpx".
+function pick<T>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
 function sanitizeAccents(
@@ -140,15 +147,14 @@ function sanitizeAccents(
 function sanitize(
   raw: Partial<ReaderSettings> & { accentColor?: unknown },
 ): ReaderSettings {
-  const theme = (raw.theme as Theme) ?? DEFAULTS.theme;
+  const theme = pick<Theme>(raw.theme, ["light", "dark", "sepia", "oled"], DEFAULTS.theme);
   return {
     theme,
-    fontFamily: (raw.fontFamily as ReadingFont) ?? DEFAULTS.fontFamily,
+    fontFamily: pick<ReadingFont>(raw.fontFamily, ["serif", "sans"], DEFAULTS.fontFamily),
     fontSize: clampSize(raw.fontSize ?? DEFAULTS.fontSize),
-    readingWidth:
-      (raw.readingWidth as ReadingWidth) ?? DEFAULTS.readingWidth,
+    readingWidth: pick<ReadingWidth>(raw.readingWidth, ["narrow", "medium", "wide"], DEFAULTS.readingWidth),
     accentByTheme: sanitizeAccents(raw.accentByTheme, raw.accentColor, theme),
-    scrollMode: (raw.scrollMode as ScrollMode) ?? DEFAULTS.scrollMode,
+    scrollMode: pick<ScrollMode>(raw.scrollMode, ["scroll", "page-turn"], DEFAULTS.scrollMode),
     bionicReading: Boolean(raw.bionicReading ?? DEFAULTS.bionicReading),
     rsvpEnabled: Boolean(raw.rsvpEnabled ?? DEFAULTS.rsvpEnabled),
     rsvpWpm: clampWpm(raw.rsvpWpm ?? DEFAULTS.rsvpWpm),
@@ -158,8 +164,8 @@ function sanitize(
     autoScrollWithAudio: Boolean(
       raw.autoScrollWithAudio ?? DEFAULTS.autoScrollWithAudio,
     ),
-    sleepTimer: (raw.sleepTimer as SleepTimer) ?? DEFAULTS.sleepTimer,
-    skipInterval: (raw.skipInterval as SkipInterval) ?? DEFAULTS.skipInterval,
+    sleepTimer: pick<SleepTimer>(raw.sleepTimer, [15, 30, 60, "end", null], DEFAULTS.sleepTimer),
+    skipInterval: pick<SkipInterval>(raw.skipInterval, [10, 15, 30, 45], DEFAULTS.skipInterval),
     // Ownership is never restored from browser storage. The shared YWE
     // session refresh below is the only source of truth.
     purchased: false,
@@ -186,8 +192,10 @@ function sanitizeRefreshProfile(raw: unknown): RefreshProfile {
   return out;
 }
 
+// RSVP is a mode you enter, not a preference: persisting it re-opened a
+// full-screen overlay on every load (and on other devices via sync).
 function presentationSettings(settings: ReaderSettings): ReaderSettings {
-  return { ...settings, purchased: false, userEmail: null };
+  return { ...settings, purchased: false, userEmail: null, rsvpEnabled: false };
 }
 
 export function ReaderSettingsProvider({
@@ -255,7 +263,7 @@ export function ReaderSettingsProvider({
             const remoteSettings = stateData.state.settings;
             if (remoteSettings && typeof remoteSettings === "object") {
               setSettings((prev) => ({
-                ...sanitize({ ...prev, ...remoteSettings }),
+                ...sanitize({ ...prev, ...remoteSettings, rsvpEnabled: prev.rsvpEnabled }),
                 purchased: true,
                 userEmail: next.email || null,
               }));
@@ -284,7 +292,7 @@ export function ReaderSettingsProvider({
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        setSettings(sanitize(JSON.parse(raw)));
+        setSettings({ ...sanitize(JSON.parse(raw)), rsvpEnabled: false });
         loaded = true;
       }
     } catch {

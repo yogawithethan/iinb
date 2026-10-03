@@ -143,7 +143,21 @@ export function FootnoteController() {
     }
 
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") collapse();
+      if (e.key === "Escape") {
+        collapse();
+        return;
+      }
+      // Markers are role="button" tabindex="0" spans — make them behave
+      // like buttons for keyboard readers.
+      if (e.key === "Enter" || e.key === " ") {
+        const t = (e.target as Element | null)?.closest?.(
+          ".footnote-ref, .footnote-close",
+        ) as HTMLElement | null;
+        if (t) {
+          e.preventDefault();
+          t.click();
+        }
+      }
     }
 
     document.addEventListener("click", onClick);

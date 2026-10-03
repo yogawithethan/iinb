@@ -6,6 +6,9 @@ import { useEffect, useRef, useState } from "react";
 // capsule. Used for short clips embedded in the prose via a {{audio:name}}
 // marker — e.g. the kookaburra call in the Preface. The `label` is used only
 // for accessibility; it is not displayed.
+// Only one inline clip plays at a time.
+let currentClip: HTMLAudioElement | null = null;
+
 export function AudioClip({ src, label }: { src: string; label: string }) {
   const ref = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -37,8 +40,11 @@ export function AudioClip({ src, label }: { src: string; label: string }) {
   function toggle() {
     const a = ref.current;
     if (!a) return;
-    if (a.paused) void a.play();
-    else a.pause();
+    if (a.paused) {
+      if (currentClip && currentClip !== a) currentClip.pause();
+      currentClip = a;
+      a.play().catch(() => setPlaying(false));
+    } else a.pause();
   }
 
   return (

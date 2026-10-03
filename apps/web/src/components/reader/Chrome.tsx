@@ -137,6 +137,12 @@ export function Chrome({
   // defaults so the in-app versions fire instead.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Escape always closes, even from inside a panel's text field.
+      if (e.key === "Escape") {
+        if (anyPanelOpen) closeAllPanels();
+        if (audioPlaying) setAudioPlaying(false);
+        return;
+      }
       // Skip when focus is inside a form field so the user can still type.
       const target = e.target as HTMLElement | null;
       if (
@@ -151,15 +157,8 @@ export function Chrome({
 
       if (mod && k === "f") {
         e.preventDefault();
-        if (searchOpen) {
-          setSearchOpen(false);
-        } else {
-          setSearchOpen(true);
-          setSettingsOpen(false);
-          setTocOpen(false);
-          setBookmarksOpen(false);
-          setVisible(true);
-        }
+        if (searchOpen) setSearchOpen(false);
+        else openOnly("search");
       } else if (mod && k === "k") {
         e.preventDefault();
         if (COMING_SOON.ai) return;
@@ -167,16 +166,8 @@ export function Chrome({
           onOpenPaywall();
           return;
         }
-        if (aiOpen) {
-          setAiOpen(false);
-        } else {
-          setAiOpen(true);
-          setSettingsOpen(false);
-          setTocOpen(false);
-          setSearchOpen(false);
-          setBookmarksOpen(false);
-          setVisible(true);
-        }
+        if (aiOpen) setAiOpen(false);
+        else openOnly("ai");
       } else if (mod && k === "l") {
         e.preventDefault();
         if (COMING_SOON.audio) return;
@@ -186,16 +177,14 @@ export function Chrome({
         }
         setAudioPlaying((v) => !v);
         setVisible(true);
-      } else if (e.key === "Escape") {
-        if (anyPanelOpen) closeAllPanels();
-        if (audioPlaying) setAudioPlaying(false);
-        if (aiOpen) setAiOpen(false);
       }
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+    // purchased/onOpenPaywall were missing here, so ⌘K/⌘L kept the
+    // pre-login `purchased=false` and sent paying readers to the paywall.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchOpen, anyPanelOpen, aiOpen, audioPlaying]);
+  }, [searchOpen, anyPanelOpen, aiOpen, audioPlaying, purchased, onOpenPaywall]);
 
   // Tap-to-reveal: tapping anywhere in the reading area toggles the chrome.
   // Skips interactive affordances, open panels, and active text selections.
@@ -230,6 +219,17 @@ export function Chrome({
     return () => hdr.classList.remove("is-hidden");
   }, [effectiveVisible]);
 
+  type Panel = "settings" | "toc" | "search" | "bookmarks" | "ai" | "share";
+  function openOnly(panel: Panel) {
+    setSettingsOpen(panel === "settings");
+    setTocOpen(panel === "toc");
+    setSearchOpen(panel === "search");
+    setBookmarksOpen(panel === "bookmarks");
+    setAiOpen(panel === "ai");
+    setShareOpen(panel === "share");
+    setVisible(true);
+  }
+
   function closeAllPanels() {
     setSettingsOpen(false);
     setTocOpen(false);
@@ -240,29 +240,13 @@ export function Chrome({
   }
 
   function toggleShare() {
-    if (shareOpen) {
-      setShareOpen(false);
-    } else {
-      setShareOpen(true);
-      setSettingsOpen(false);
-      setTocOpen(false);
-      setSearchOpen(false);
-      setAiOpen(false);
-      setVisible(true);
-    }
+    if (shareOpen) setShareOpen(false);
+    else openOnly("share");
   }
 
   function toggleAi() {
-    if (aiOpen) {
-      setAiOpen(false);
-    } else {
-      setAiOpen(true);
-      setSettingsOpen(false);
-      setTocOpen(false);
-      setSearchOpen(false);
-      setBookmarksOpen(false);
-      setVisible(true);
-    }
+    if (aiOpen) setAiOpen(false);
+    else openOnly("ai");
   }
 
   function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -276,38 +260,19 @@ export function Chrome({
     if (settingsOpen) {
       setSettingsOpen(false);
     } else {
-      setSettingsOpen(true);
+      openOnly("settings");
       setSettingsTab("display");
-      setTocOpen(false);
-      setSearchOpen(false);
-      setBookmarksOpen(false);
-      setVisible(true);
     }
   }
 
   function toggleToc() {
-    if (tocOpen) {
-      setTocOpen(false);
-    } else {
-      setTocOpen(true);
-      setSettingsOpen(false);
-      setSearchOpen(false);
-      setBookmarksOpen(false);
-      setVisible(true);
-    }
+    if (tocOpen) setTocOpen(false);
+    else openOnly("toc");
   }
 
   function toggleSearch() {
-    if (searchOpen) {
-      setSearchOpen(false);
-    } else {
-      setSearchOpen(true);
-      setSettingsOpen(false);
-      setTocOpen(false);
-      setBookmarksOpen(false);
-      setAiOpen(false);
-      setVisible(true);
-    }
+    if (searchOpen) setSearchOpen(false);
+    else openOnly("search");
   }
 
   return (
@@ -335,7 +300,7 @@ export function Chrome({
             onClick={(e) => e.stopPropagation()}
             className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
             style={{
-              maxHeight: "55vh",
+              maxHeight: "55dvh",
               opacity: tocAnim.animate ? 1 : 0,
               transform: tocAnim.animate
                 ? "scale(1) translateY(0)"
@@ -376,7 +341,7 @@ export function Chrome({
             onClick={(e) => e.stopPropagation()}
             className="glass-capsule pointer-events-auto flex w-full max-w-[480px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
             style={{
-              height: "min(calc(100vh - 140px), 640px)",
+              height: "min(calc(100dvh - 140px), 640px)",
               opacity: aiAnim.animate ? 1 : 0,
               transform: aiAnim.animate
                 ? "scale(1) translateY(0)"
@@ -400,7 +365,7 @@ export function Chrome({
             onClick={(e) => e.stopPropagation()}
             className="glass-capsule pointer-events-auto flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[220ms] ease-out"
             style={{
-              maxHeight: "55vh",
+              maxHeight: "55dvh",
               opacity: searchAnim.animate ? 1 : 0,
               transform: searchAnim.animate
                 ? "scale(1) translateY(0)"
@@ -427,7 +392,7 @@ export function Chrome({
             onClick={(e) => e.stopPropagation()}
             className="glass-capsule pointer-events-auto flex w-full max-w-[420px] flex-col overflow-hidden rounded-[22px] transition-[opacity,transform] duration-[200ms] ease-out"
             style={{
-              maxHeight: "calc(100vh - 120px)",
+              maxHeight: "calc(100dvh - 120px)",
               opacity: settingsAnim.animate ? 1 : 0,
               transform: settingsAnim.animate
                 ? "scale(1) translateY(0)"

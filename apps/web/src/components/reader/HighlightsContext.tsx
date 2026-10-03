@@ -124,6 +124,19 @@ export function HighlightsProvider({ children }: { children: ReactNode }) {
   // inline text spans that sit between a highlight's boundary points).
   const rebuildCssHighlights = useCallback(() => {
     if (typeof CSS === "undefined" || !("highlights" in CSS)) return;
+    // Re-anchor highlights whose paragraph wasn't in the DOM yet (paid
+    // chapters arrive after /api/content resolves) or whose Range was
+    // orphaned by a re-render (e.g. toggling bionic reading swaps the
+    // paragraph's child nodes). `range` is client-only, so patching it in
+    // place is safe and avoids a state update on every DOM mutation.
+    for (const h of highlightsRef.current) {
+      const stale =
+        !h.range ||
+        h.range.collapsed ||
+        !h.range.startContainer.isConnected ||
+        !h.range.endContainer.isConnected;
+      if (stale && h.anchor) h.range = restoreRange(h as SyncedHighlight);
+    }
     const ranges = highlightsRef.current
       .map((h) => h.range)
       .filter((r): r is Range => Boolean(r));

@@ -75,6 +75,15 @@ export function ColorPicker({ value, onChange }: Props) {
   );
   // Keep local hue so saturation/value at h=0 doesn't snap (common picker UX)
   const [hue, setHue] = useState(h);
+  // The hex field needs its own draft: bound straight to `value`, every
+  // partial keystroke (backspace, typing "ff…") was reverted on re-render,
+  // so only pasting a full code worked.
+  const [hexDraft, setHexDraft] = useState(value.replace(/^#/, ""));
+  const [hexDraftFor, setHexDraftFor] = useState(value);
+  if (hexDraftFor !== value) {
+    setHexDraftFor(value);
+    setHexDraft(value.replace(/^#/, ""));
+  }
   useEffect(() => {
     // If incoming value has saturation > 0, sync the hue too; otherwise keep local
     if (sSat > 0.02) setHue(h);
@@ -123,9 +132,9 @@ export function ColorPicker({ value, onChange }: Props) {
   }
 
   function handleHexInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.value.trim();
-    const withHash = raw.startsWith("#") ? raw : `#${raw}`;
-    if (/^#[0-9a-f]{6}$/i.test(withHash)) onChange(withHash.toLowerCase());
+    const raw = e.target.value.replace(/[^0-9a-f]/gi, "").slice(0, 6);
+    setHexDraft(raw);
+    if (raw.length === 6) onChange(`#${raw.toLowerCase()}`);
   }
 
   const pointerX = `${sSat * 100}%`;
@@ -238,10 +247,10 @@ export function ColorPicker({ value, onChange }: Props) {
           </span>
           <input
             type="text"
-            value={value.replace(/^#/, "")}
+            value={hexDraft}
             onChange={handleHexInput}
+            onBlur={() => setHexDraft(value.replace(/^#/, ""))}
             aria-label="Hex color"
-            maxLength={6}
             className="w-full rounded-[10px] px-6 py-2 text-[13px] uppercase tracking-[0.04em] outline-none"
             style={{
               color: "var(--ink)",

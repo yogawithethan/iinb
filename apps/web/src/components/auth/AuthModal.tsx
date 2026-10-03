@@ -94,6 +94,31 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
     if (userEmail) setEmail(userEmail);
   }, [userEmail]);
 
+  // Escape closes the sign-in step (onboarding steps must be finished or
+  // skipped explicitly); focus returns to whatever opened the modal.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const frame = requestAnimationFrame(() => {
+      dialogRef.current
+        ?.querySelector<HTMLElement>("input, button:not([aria-label='Close'])")
+        ?.focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      opener?.focus?.();
+    };
+  }, [open]);
+  useEffect(() => {
+    if (!open || step !== "entry") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, step, onClose]);
+
   if (!mounted || !open) return null;
 
   async function submitLogin(e: React.FormEvent) {
@@ -162,9 +187,11 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
 
   return createPortal(
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-[80] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
+      aria-label={step === "entry" ? "Sign in" : "Welcome"}
     >
       {/* Backdrop */}
       <div
@@ -181,7 +208,7 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
       {/* Modal */}
       <div
         className="glass-capsule relative flex w-full max-w-[440px] flex-col overflow-hidden rounded-[22px]"
-        style={{ maxHeight: "calc(100vh - 48px)" }}
+        style={{ maxHeight: "calc(100dvh - 48px)" }}
       >
         {/* Close X (always present except during onboarding "welcome") */}
         {step === "entry" && (
@@ -296,35 +323,31 @@ function StepTransition({
   stepKey: string;
   children: React.ReactNode;
 }) {
+  // Render `children` directly. Copying them into state via an effect made
+  // every controlled input one commit behind, so the caret jumped to the
+  // end when editing mid-string and IME composition broke.
   const [renderedKey, setRenderedKey] = useState(stepKey);
-  const [renderedChildren, setRenderedChildren] = useState(children);
   const [entering, setEntering] = useState(false);
-  const firstRun = useRef(true);
+  if (stepKey !== renderedKey) {
+    setRenderedKey(stepKey);
+    setEntering(true);
+  }
 
   useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false;
-      return;
-    }
-    if (stepKey === renderedKey) {
-      // content may have changed without the key — refresh
-      setRenderedChildren(children);
-      return;
-    }
-    // Key changed — swap content and run enter animation.
-    setEntering(true);
-    setRenderedKey(stepKey);
-    setRenderedChildren(children);
-    const id = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setEntering(false));
+    if (!entering) return;
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setEntering(false));
     });
-    return () => cancelAnimationFrame(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepKey, children]);
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+    };
+  }, [entering]);
 
   return (
     <div
-      key={renderedKey}
+      key={stepKey}
       style={{
         opacity: entering ? 0 : 1,
         transform: entering ? "translateY(8px)" : "translateY(0)",
@@ -332,7 +355,7 @@ function StepTransition({
           "opacity 260ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.34, 1.24, 0.64, 1)",
       }}
     >
-      {renderedChildren}
+      {children}
     </div>
   );
 }
@@ -1217,8 +1240,8 @@ function HighlightsDemoCard() {
       }
       rangeRef.current = range.cloneRange();
       setPopover({
-        top: rect.top + window.scrollY - 44,
-        left: rect.left + window.scrollX + rect.width / 2,
+        top: rect.top - 44,
+        left: rect.left + rect.width / 2,
       });
     }
     function onUp() {

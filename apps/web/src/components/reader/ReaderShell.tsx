@@ -39,6 +39,10 @@ export function ReaderShell({ stream }: Props) {
   const [purchasePending, setPurchasePending] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const restoredPosition = useRef<string | null>(null);
+  // Set once the saved position has been applied (or there was none), so the
+  // autosave can't overwrite it with "top of the book" while the full
+  // stream is still loading.
+  const positionSettled = useRef(false);
   // Which content tier we've already fetched, so we re-fetch when the reader
   // moves public → member (login) → full (purchase) but not on every render.
   const fetchedTier = useRef<"member" | "full" | null>(null);
@@ -186,7 +190,10 @@ export function ReaderShell({ stream }: Props) {
     if (typeof window === "undefined") return;
     function update() {
       const els = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-chapter-anchor]"),
+        // Scope to the prose: the fixed-position paywall card also carries
+        // data-chapter-anchor and would otherwise win once you scroll past
+        // the last visible chapter, blanking the chrome title.
+        document.querySelectorAll<HTMLElement>(".reader-prose [data-chapter-anchor]"),
       );
       if (!els.length) return;
       const threshold = window.scrollY + 140;
@@ -218,12 +225,30 @@ export function ReaderShell({ stream }: Props) {
 
   const active = anchors.find((a) => a.id === activeId) ?? anchors[0];
 
-  const navigateTo = useCallback((id: string) => {
+  const scrollToAnchor = useCallback((id: string) => {
     const el = document.querySelector<HTMLElement>(
       `[data-chapter-anchor="${CSS.escape(id)}"]`,
     );
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return Boolean(el);
   }, []);
+
+  const openPaywall = useCallback(() => {
+    setPaywallExpanded(true);
+    scrollToAnchor("paywall");
+  }, [scrollToAnchor]);
+
+  // A TOC entry whose chapter isn't in this reader's stream (signed out, not
+  // purchased, or the full book still loading) used to silently do nothing.
+  const navigateTo = useCallback((id: string) => {
+    if (scrollToAnchor(id)) return;
+    if (!loggedIn) {
+      setAuthMode("login");
+      setAuthOpen(true);
+    } else if (!purchased) {
+      openPaywall();
+    }
+  }, [scrollToAnchor, loggedIn, purchased, openPaywall]);
 
   const navigateParagraph = useCallback((anchor: string) => {
     const el = document.querySelector<HTMLElement>(
@@ -238,41 +263,60 @@ export function ReaderShell({ stream }: Props) {
     if (restoredPosition.current === key) return;
     restoredPosition.current = key;
     const frame = window.requestAnimationFrame(() => {
+      positionSettled.current = true;
       if (Number.isFinite(readerPosition.scrollY)) {
         window.scrollTo({ top: Math.max(0, Number(readerPosition.scrollY)), behavior: "auto" });
       } else {
         document.getElementById(readerPosition.chapterId || "")?.scrollIntoView({ block: "start" });
       }
     });
-    return () => window.cancelAnimationFrame(frame);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      // Let a re-run retry instead of treating a cancelled frame as done.
+      if (!positionSettled.current) restoredPosition.current = null;
+    };
   }, [purchased, unlockedStream, readerPosition]);
 
   useEffect(() => {
     if (!purchased || !activeId) return;
     let timer = 0;
-    const save = () => {
+    let dirty = false;
+    const canSave = () =>
+      Boolean(unlockedStream) &&
+      (positionSettled.current || !readerPosition?.chapterId);
+    const flush = (keepalive = false) => {
       window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        void fetch("/api/reader-state", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ position: { chapterId: activeId, scrollY: Math.round(window.scrollY) } }),
-        }).catch(() => null);
-      }, 1200);
+      if (!dirty || !canSave()) return;
+      dirty = false;
+      void fetch("/api/reader-state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        keepalive,
+        body: JSON.stringify({ position: { chapterId: activeId, scrollY: Math.round(window.scrollY) } }),
+      }).catch(() => null);
+    };
+    const save = () => {
+      dirty = true;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => flush(), 1200);
+    };
+    // Closing the tab (especially on iOS) used to drop the last ~1s of
+    // reading; flush with keepalive when the page is hidden.
+    const onHide = () => {
+      if (document.visibilityState === "hidden") flush(true);
     };
     save();
     window.addEventListener("scroll", save, { passive: true });
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
     return () => {
       window.removeEventListener("scroll", save);
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onHide);
       window.clearTimeout(timer);
     };
-  }, [purchased, activeId]);
-
-  const openPaywall = useCallback(() => {
-    setPaywallExpanded(true);
-    navigateTo("paywall");
-  }, [navigateTo]);
+  }, [purchased, activeId, unlockedStream, readerPosition]);
 
   const startPurchase = useCallback(async () => {
     setPurchaseError(null);
@@ -281,9 +325,12 @@ export function ReaderShell({ stream }: Props) {
       setAuthOpen(true);
       return;
     }
+    if (purchasePending) return;
+    setPurchasePending(true);
     // Open the checkout tab synchronously inside the click gesture (so the
     // browser doesn't block it), then point it at the Stripe URL once ready.
     const checkoutTab = window.open("", "_blank");
+    if (checkoutTab) checkoutTab.opener = null;
     try {
       let requestKey = sessionStorage.getItem("iinb:checkout-request");
       if (!requestKey) {
@@ -320,7 +367,18 @@ export function ReaderShell({ stream }: Props) {
     } finally {
       setPurchasePending(false);
     }
-  }, [loggedIn, refreshAccess]);
+  }, [loggedIn, refreshAccess, purchasePending]);
+
+  // Checkout completes in another tab; when the reader comes back to this
+  // one, re-check access so the paywall lifts without a manual refresh.
+  useEffect(() => {
+    if (purchased || !loggedIn) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshAccess().catch(() => null);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [purchased, loggedIn, refreshAccess]);
 
   return (
     <HighlightsProvider>

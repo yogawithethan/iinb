@@ -77,6 +77,9 @@ export function PaywallCard({
           aria-expanded={expanded}
           onClick={onToggle}
           onKeyDown={(e) => {
+            // Keys pressed on the price pill / inner buttons bubble here;
+            // swallowing them made the purchase button keyboard-dead.
+            if (e.target !== e.currentTarget) return;
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               onToggle();

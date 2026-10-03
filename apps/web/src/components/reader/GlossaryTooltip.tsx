@@ -69,10 +69,11 @@ export function GlossaryTooltip({
       recompute();
     }
     window.addEventListener("resize", onUpdate);
-    window.addEventListener("scroll", onUpdate, { passive: true });
+    // Capture phase so scrolling inside panels/inner scrollers counts too.
+    window.addEventListener("scroll", onUpdate, { passive: true, capture: true });
     return () => {
       window.removeEventListener("resize", onUpdate);
-      window.removeEventListener("scroll", onUpdate);
+      window.removeEventListener("scroll", onUpdate, { capture: true });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry, anchor]);

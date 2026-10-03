@@ -113,6 +113,9 @@ function parseBlocks(md: string): ChapterBlock[] {
             out.push({ type: "audio", src: clip.src, label: clip.label });
           break;
         }
+        // Any other lone {{marker}} (e.g. an unfilled {{Image}} placeholder)
+        // is authoring scaffolding — never render the braces to readers.
+        if (/^\{\{[^{}]*\}\}$/.test(p.text.trim())) break;
         const lines = p.text
           .split(/\n/)
           .map((l) => l.trim())
@@ -141,6 +144,22 @@ function parseBlocks(md: string): ChapterBlock[] {
           type: "blockquote",
           html: marked.parse(q.text, { async: false }) as string,
         });
+        break;
+      }
+      case "list": {
+        // The manuscript has no real lists — a "- " or "+ " line is prose
+        // (the Preface sign-off, the Ch 2 "+ •" cross-and-dot figure).
+        // Render each line verbatim instead of silently dropping it.
+        const lines = (t as Tokens.List).raw
+          .split(/\n/)
+          .map((l) => l.trim())
+          .filter(Boolean);
+        for (const line of lines) {
+          out.push({
+            type: "paragraph",
+            html: renderInlineWithFootnotes(line, nextFootnoteNumber),
+          });
+        }
         break;
       }
       case "hr":

@@ -167,6 +167,13 @@ body {
 /* Page-turn mode — hide the scrollbar so the reader reads as discrete pages. */
 html.reader-paged {
   scrollbar-width: none;
+  overscroll-behavior: none;
+}
+/* Swipes turn pages via PageTurn; without this the browser also pans and
+   momentum-scrolls, so one swipe overshot by a page or two. Scoped to the
+   prose so popover panels (their own scroll containers) still pan. */
+html.reader-paged .reader-scroll {
+  touch-action: pinch-zoom;
 }
 html.reader-paged::-webkit-scrollbar {
   width: 0;

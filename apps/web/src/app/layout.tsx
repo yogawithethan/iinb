@@ -74,7 +74,7 @@ export const viewport: Viewport = {
   themeColor: "#fdf9f4",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // No maximumScale: locking zoom fails WCAG 1.4.4 for low-vision readers.
 };
 
 export default function RootLayout({
@@ -86,6 +86,16 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${lora.variable} ${poppins.variable} h-full antialiased`}
     >
+      <head>
+        {/* Apply the saved theme/font/accent before first paint. Without
+            this every load painted the light theme, then faded to dark or
+            sepia once React hydrated. Mirrors SettingsContext's effect. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var s=JSON.parse(localStorage.getItem("iinb:reader-settings:v2")||"null");if(s&&typeof s==="object"){var r=document.documentElement,t=s.theme;if(["light","dark","sepia","oled"].indexOf(t)>-1){r.setAttribute("data-theme",t);var a=s.accentByTheme&&s.accentByTheme[t];if(typeof a==="string"&&/^#[0-9a-f]{6}$/i.test(a))r.style.setProperty("--accent",a)}if(s.fontFamily==="serif"||s.fontFamily==="sans")r.setAttribute("data-reading-font",s.fontFamily);if(s.bionicReading)r.setAttribute("data-bionic","on")}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full">
         <Script src="/shared-components/loader.js" strategy="beforeInteractive" />
         <Script src="/ywe-pixel.js?v=20260906-base-only" strategy="afterInteractive" />

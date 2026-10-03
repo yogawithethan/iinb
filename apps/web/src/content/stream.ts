@@ -20,7 +20,21 @@ export type ReaderStream = {
   glossary: GlossaryEntry[];
 };
 
-export async function getReaderStream(): Promise<ReaderStream> {
+// The manuscript is bundled at build time and never changes at runtime, so
+// parse it once per isolate instead of on every request — re-running marked
+// + the glossary wrap over the whole book per hit burns Worker CPU budget.
+// Callers must treat the result as read-only (gateStream builds new objects).
+let cachedStream: Promise<ReaderStream> | null = null;
+
+export function getReaderStream(): Promise<ReaderStream> {
+  cachedStream ??= buildReaderStream().catch((error) => {
+    cachedStream = null;
+    throw error;
+  });
+  return cachedStream;
+}
+
+async function buildReaderStream(): Promise<ReaderStream> {
   const [rawChapters, parts, dedication, glossary] = await Promise.all([
     getAllChapters(),
     getAllParts(),
