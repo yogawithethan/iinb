@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReaderView } from "./ReaderView";
 import { Chrome } from "./Chrome";
 import { RsvpOverlay } from "./RsvpOverlay";
+import { RefreshController } from "./RefreshController";
 import { PaywallSticky } from "./PaywallSticky";
 import { LoginGate } from "./LoginGate";
 import { CoverSection } from "./CoverSection";
@@ -453,6 +454,7 @@ export function ReaderShell({ stream }: Props) {
           }}
         />
       )}
+      <RefreshController onSignIn={openSignIn} onPaywall={openPaywall} />
       <AuthModal
         open={authOpen}
         initialMode={authMode}

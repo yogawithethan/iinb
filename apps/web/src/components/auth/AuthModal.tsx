@@ -8,6 +8,11 @@ import {
   type Decade,
 } from "@/components/reader/SettingsContext";
 import { ColorPicker } from "@/components/reader/ColorPicker";
+import {
+  CULTURE_OPTIONS,
+  DECADES,
+  HUMOR_OPTIONS,
+} from "@/components/reader/RefreshProfileSettings";
 import { bionify } from "@/components/reader/bionic";
 import {
   BookmarkIcon,
@@ -38,18 +43,6 @@ type Props = {
   onClose: () => void;
 };
 
-const DECADES: Decade[] = ["70s", "80s", "90s", "00s", "10s"];
-const HUMOR_OPTIONS = ["Dry / deadpan", "Absurdist", "Pop-culture", "Keep it serious"];
-const CULTURE_OPTIONS = [
-  "Gaming",
-  "Sports",
-  "Cooking",
-  "Music",
-  "Tech",
-  "Fitness",
-  "Film/TV",
-  "Parenting",
-];
 const THEME_PREVIEWS: { id: Theme; label: string; bg: string; ink: string }[] = [
   { id: "light", label: "Light", bg: "#ffffff", ink: "#1a1a1a" },
   { id: "dark", label: "Dark", bg: "#18181b", ink: "#ededed" },

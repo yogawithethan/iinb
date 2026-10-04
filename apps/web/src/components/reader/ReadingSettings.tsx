@@ -9,6 +9,7 @@ import {
   SliderRow,
   ToggleRow,
 } from "./SettingsPrimitives";
+import { RefreshProfileSettings } from "./RefreshProfileSettings";
 
 export function ReadingSettings() {
   const {
@@ -79,6 +80,7 @@ export function ReadingSettings() {
           disabled={!rsvpEnabled || !purchased}
         />
       </section>
+      <RefreshProfileSettings />
     </div>
   );
 }

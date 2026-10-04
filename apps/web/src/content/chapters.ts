@@ -187,12 +187,26 @@ function renderInlineWithFootnotes(
   nextNum: () => number,
 ): string {
   const footnotes: Array<{ num: number; text: string }> = [];
-  const pre = text.replace(/\[\[([^\]]+(?:\](?!\])[^\]]+)*)\]\]/g, (_, t) => {
+  const withFootnotes = text.replace(/\[\[([^\]]+(?:\](?!\])[^\]]+)*)\]\]/g, (_, t) => {
     const num = nextNum();
     footnotes.push({ num, text: String(t).trim() });
     return `@@FN${footnotes.length - 1}@@`;
   });
+  // `{{ an example }}` inside a sentence marks a span the author chose for
+  // "new example" refreshes (same convention as the native app). Wrap the
+  // span so the RefreshController can swap just that text; the braces never
+  // reach readers. Lone markers ({{audio:…}}, {{Image}}) are handled above.
+  const pre = withFootnotes
+    .replace(/\{\{\s*([^{}]+?)\s*\}\}/g, "@@RS@@$1@@RE@@");
   let html = marked.parseInline(pre) as string;
+  // Any punctuation right after the span stays attached to it, and the ↻
+  // button follows the punctuation ("lives. ↻", not "lives ↻ .").
+  html = html.replace(
+    /@@RS@@([\s\S]*?)@@RE@@([.,;:!?…”’)\]]*)/g,
+    (_, inner: string, punct: string) =>
+      `<span class="refresh-span" data-refresh-span>${inner}</span>${punct}` +
+      `<button type="button" class="refresh-btn" data-refresh-btn aria-label="New example">↻</button>`,
+  );
   html = html.replace(/@@FN(\d+)@@/g, (_, idxStr) => {
     const idx = parseInt(idxStr, 10);
     const fn = footnotes[idx];
