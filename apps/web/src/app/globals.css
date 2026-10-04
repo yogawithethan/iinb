@@ -315,8 +315,10 @@ html.reader-paged::-webkit-scrollbar {
   cursor: pointer;
   transition: background-color 120ms ease-out;
 }
+/* Neutral hover: the accent tint is reserved for real highlights, so a
+   hovered glossary term never looks "already highlighted". */
 .gloss-term:hover {
-  background-color: var(--accent-soft);
+  background-color: color-mix(in srgb, var(--ink) 7%, transparent);
 }
 /* Refresher: a term's first appearance in a chapter AFTER the one that
    introduced it. Same tap target, quieter dash. */

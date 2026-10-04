@@ -109,15 +109,17 @@ export function SelectionPopover() {
     }
     rangeRef.current = range.cloneRange();
 
-    // Detect any existing highlight that intersects this selection.
+    // Offer "Remove" only when the selection sits entirely inside one
+    // existing highlight. A selection that merely touches or extends a
+    // highlight gets "Highlight", which merges them (see highlight()).
     let overlap: string | null = null;
     for (const h of highlightsRef.current) {
       if (!h.range) continue;
       try {
-        const cmpEnd = range.compareBoundaryPoints(Range.START_TO_END, h.range);
-        const cmpStart = range.compareBoundaryPoints(Range.END_TO_START, h.range);
-        // Overlap = this.start < other.end && this.end > other.start
-        if (cmpEnd > 0 && cmpStart < 0) {
+        if (
+          h.range.comparePoint(range.startContainer, range.startOffset) === 0 &&
+          h.range.comparePoint(range.endContainer, range.endOffset) === 0
+        ) {
           overlap = h.id;
           break;
         }
@@ -206,8 +208,35 @@ export function SelectionPopover() {
       );
       return;
     }
-    registerHighlight(range);
-    addHighlight(range.toString(), range);
+    // Merge with any highlight this selection overlaps or touches, so
+    // extending "word" to "word and its neighbors" yields one highlight.
+    const union = range.cloneRange();
+    const merged: typeof highlightsRef.current = [];
+    for (const h of highlightsRef.current) {
+      if (!h.range) continue;
+      try {
+        const touches =
+          union.compareBoundaryPoints(Range.START_TO_END, h.range) >= 0 &&
+          union.compareBoundaryPoints(Range.END_TO_START, h.range) <= 0;
+        if (!touches) continue;
+        if (union.compareBoundaryPoints(Range.START_TO_START, h.range) > 0) {
+          union.setStart(h.range.startContainer, h.range.startOffset);
+        }
+        if (union.compareBoundaryPoints(Range.END_TO_END, h.range) < 0) {
+          union.setEnd(h.range.endContainer, h.range.endOffset);
+        }
+        merged.push(h);
+      } catch {
+        // Ranges from detached documents can throw — ignore.
+      }
+    }
+    const note = merged
+      .map((h) => h.note)
+      .filter(Boolean)
+      .join("\n\n") || undefined;
+    for (const h of merged) removeHighlight(h.id);
+    registerHighlight(union);
+    addHighlight(union.toString(), union, note);
     dismiss();
   }
 
@@ -291,10 +320,7 @@ export function SelectionPopover() {
           aria-label="Highlight"
           title="Highlight"
           className="iinb-selpop-btn relative flex h-8 w-8 items-center justify-center rounded-full transition-colors"
-          style={{
-            color: "var(--accent-ink)",
-            background: "var(--accent-soft)",
-          }}
+          style={{ color: "var(--ink)" }}
         >
           <HighlightIcon size={15} />
           {purchased ? null : <LockBadge />}
