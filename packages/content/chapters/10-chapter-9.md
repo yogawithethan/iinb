@@ -31,13 +31,13 @@ Which means that perhaps everyone is right—not about the specifics of their pr
 
 ## Spring Cleaning
 
-Upon discovering the beauty and power of language, alongside their clever little ability to wield it, most children enter their ‘why’ phase: “Why won’t you play with me?” “Why not?” “Why because I said so?”
+Upon discovering the beauty and power of language, alongside their clever little ability to wield it, most children enter their ‘why’ phase: {{“Why won’t you play with me?” “Why not?” “Why because I said so?”}}
 
 A similar phase occurs in the spiritual seeker who, after discovering a world beyond their senses, begins demanding deeper explanations: “Why did we forget?” “Why is the body so important?” “Why is the Awakening happening now as opposed to then?”
 
 Duality demands that every question have an answer. Whatever curiosities still lie dormant in your heart rest assured that their resolution also exists, even if that resolution is not what you would have it be. Alas, answering each question individually—plucking one thread at a time, hoping the tapestry reveals itself—is like trying to understand the weather by studying a single raindrop.
 
-What would be far more useful than any single answer is a framework—the way a mathematician who grasps a handful of root axioms can derive an entire field from them, or the way a musician who truly understands key signatures can sit down at any piano and play in any key without sheet music. Not more data, but a deeper foundation from which all the data becomes self-organizing.[[Christianity offers a great moral architecture for what is happening, but lacks the mechanics for why now. Ask a theologian why the Rapture is approaching in this century rather than the fourth or the fortieth, and the honest answer is ‘because God wills it,’ which, while obviously true, doesn't quite scratch the itch which initially prompted the question. Science, for its part, would trace the upheaval to its constituent causes—social media algorithms, economic incentive structures, network effects, resource depletion—each one emerging from the one before it, turtles all the way down, with no deeper unifying field beneath them.]]
+What would be far more useful than any single answer is a framework—the way a mathematician who grasps a handful of root axioms can derive an entire field from them, {{or the way a musician who truly understands key signatures can sit down at any piano and play in any key without sheet music}}. Not more data, but a deeper foundation from which all the data becomes self-organizing.[[Christianity offers a great moral architecture for what is happening, but lacks the mechanics for why now. Ask a theologian why the Rapture is approaching in this century rather than the fourth or the fortieth, and the honest answer is ‘because God wills it,’ which, while obviously true, doesn't quite scratch the itch which initially prompted the question. Science, for its part, would trace the upheaval to its constituent causes—social media algorithms, economic incentive structures, network effects, resource depletion—each one emerging from the one before it, turtles all the way down, with no deeper unifying field beneath them.]]
 
 Such a foundation exists and, lucky for us, is not hidden in a vault or guarded by a secret society. It has been taught openly in the yogic tradition for millennia, though it was largely ignored by the West and, frankly, miscalculated by much of the East.
 
@@ -89,7 +89,7 @@ Call it a rude awakening.
 
 ## SiC
 
-We have, as a species, put all of our eggs into one flimsy basket, dangled it by a loose thread over a cliff, and then juggled chainsaws next to it.
+We have, as a species, {{put all of our eggs into one flimsy basket, dangled it by a loose thread over a cliff, and then juggled chainsaws next to it}}.
 
 We believe that what makes us special—what elevates us above every other organism, and therefore what defines our worth—is our intelligence. Not necessarily raw processing power (plenty of species outperform us in specific cognitive tasks) but something more composite: the ability to recognize patterns, abstract them into concepts, and—crucially—communicate them to one another with enough fidelity that they accumulate across generations. A single human’s ability to observe the sky is weaker than a crow’s. But a million humans sharing observations about the sky through language, mathematics, and institutions—building on each other's pattern recognition across centuries, passing down not just data but frameworks for organizing data? Now you have something special. Now you have something that can build pyramids, periodic tables, and particle accelerators.
 

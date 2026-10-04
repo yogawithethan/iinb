@@ -47,7 +47,7 @@ Call it non-fiction and you’ll look for proof. Call it wisdom and you’ll exp
 
 I want to avoid these pitfalls, so rather than telling you what this book *is*, let me tell you what it *isn’t*. Perhaps then you will see the forest despite the trees.
 
-This is not a self-help or personal development book, for the Self does not need help, nor the personality need developing to become worthy of what is being called Bliss. The Bouncer at the gate is not double-checking that you have an attractive body, cool hobbies or trendy opinions; It is checking only that you are righteous and true to your word, both of which get forged while walking along the spiritual path.
+This is not a self-help or personal development book, for the Self does not need help, nor the personality need developing to become worthy of what is being called Bliss. The Bouncer at the gate is not double-checking that {{you have an attractive body, cool hobbies or trendy opinions}}; It is checking only that you are righteous and true to your word, both of which get forged while walking along the spiritual path.
 
 This book is also not a scholarly or historical analysis on the teachings of the Buddha, yogic traditions, or Christianity. Solely trying to certify spiritual truths intellectually proves to be as effective as trying to bite your own teeth. Better to actually see for yourself than to think about what might happen when you see for yourself…you see?
 
@@ -57,7 +57,7 @@ This book is also not an instruction manual on attaining enlightenment. There is
 
 By analogy, because the number of potential chessboard configurations and situations is astronomical, chess teachers rarely teach specifics. Instead, they teach their students fundamentals and overall strategy to prepare them for when the opponent makes an unexpected, cunning move.
 
-Ahh, if only the mind were as simple as a chess match and not of an all-out cosmic war. And if only the ego—that which distracts or convinces you not to take the next necessary step towards Bliss were not some kind of military genius! Alas, until you and I fully abide in the Kingdom, this is the reality we face. The ego knows every weakness, desire, flaw, and aversion in your psyche. It has access to your entire memory bank. It can mimic any voice or conjure any image. It can dodge, deflect, camouflage, and overpower. And perhaps most dangerous of all, when its back is against the wall, it can deploy some damn cute puppy dog eyes.
+Ahh, if only the mind were as simple as a chess match and not of an all-out cosmic war. And if only the ego—that which distracts or convinces you not to take the next necessary step towards Bliss were not some kind of military genius! Alas, until you and I fully abide in the Kingdom, this is the reality we face. The ego knows every weakness, desire, flaw, and aversion in your psyche. It has access to your entire memory bank. It can mimic any voice or conjure any image. It can dodge, deflect, camouflage, and overpower. And perhaps most dangerous of all, when its back is against the wall, {{it can deploy some damn cute puppy dog eyes}}.
 
 Nevertheless, there must be a way through—there must be a world beyond your everyday sufferings. Otherwise the whole setup would be cruel: A war that is fundamentally unwinnable? Who or what would create such a scenario?
 
