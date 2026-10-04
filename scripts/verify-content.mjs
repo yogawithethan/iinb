@@ -70,9 +70,11 @@ const actualFree = chapters
   .filter((chapter) => chapter.data.isFree)
   .map((chapter) => chapter.data.id)
   .sort();
-const expectedFree = ['ch0', 'preface'];
+// Preface + Ch 0 are public; Ch 1 unlocks with a free account (decided
+// 2026-10-04 when the August tiered-access reader went live).
+const expectedFree = ['ch0', 'ch1', 'preface'];
 if (JSON.stringify(actualFree) !== JSON.stringify(expectedFree)) {
-  fail(`free access must be preface + ch0; found ${actualFree.join(', ') || 'none'}`);
+  fail(`free access must be preface + ch0 + ch1; found ${actualFree.join(', ') || 'none'}`);
 }
 
 const partNames = new Set(parts.map((part) => part.data.matchesChapterPart));
@@ -110,7 +112,10 @@ for (const chapter of chapters) {
   for (const match of chapter.body.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
     const source = match[1].trim();
     if (/^(https?:|data:)/.test(source)) continue;
-    if (!existsSync(join(CONTENT, 'images', basename(source)))) {
+    // Figures are served from the web app's public/images as /images/*.
+    const found = [join(CONTENT, 'images', basename(source)), join(ROOT, 'apps', 'web', 'public', 'images', basename(source))]
+      .some((candidate) => existsSync(candidate));
+    if (!found) {
       fail(`chapters/${chapter.file}: missing image asset ${source}`);
     }
   }

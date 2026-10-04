@@ -14,7 +14,7 @@ The Yoga With Ethan repository registers IINB as a governed product surface and 
 
 ## Access and commerce contract
 
-- Preface and Chapter 0 are readable without purchase; Chapter 1 onward requires an active IINB entitlement.
+- Preface and the opening of Chapter 0 are public. A free YWE account unlocks Chapter 0 and Chapter 1; Chapter 2 onward requires an active IINB entitlement.
 - Web and non-iOS checkout uses the authenticated YWE Stripe route at a fixed **$22.00 USD** one-time price.
 - iOS digital purchases remain StoreKit purchases; the YWE Worker verifies Apple receipts and grants the same D1 entitlement used by web.
 - Existing license keys are imported as hashed, auditable records and become attached to a verified YWE email when claimed.

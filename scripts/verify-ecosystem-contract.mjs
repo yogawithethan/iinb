@@ -53,7 +53,8 @@ assert.match(loader, /X-YWE-Shared-Component-Proxy/);
 assert.match(loader, /stable-loader/);
 assert.match(loader, /immutable-asset/);
 assert.match(loader, /source\.replaceAll/);
-assert.match(chrome, /pl-\[76px\][\s\S]*md:pl-\[104px\]/);
+// Reader chrome must leave room for the shared header's sidebar button.
+assert.match(chrome, /pl-\[64px\][\s\S]*md:pl-\[74px\]/);
 assert.match(nativeAccess, /FREE_GATE_ORDER = 1/);
 assert.match(nativeAuth, /requestNativeSignInLink/);
 assert.match(nativeIap, /yweFetch\('\/iinb\/iap\/verify'/);
