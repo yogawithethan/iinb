@@ -68,7 +68,8 @@ async function buildReaderStream(): Promise<ReaderStream> {
   // quieter refresher on its first appearance in every later chapter.
   const chapters = rawChapters.map((ch, i) => {
     const introduced = glossary.filter((g) => introIndex.get(g.term) === i);
-    const refreshers = glossary
+    // Back matter (acknowledgements) isn't teaching; no refreshers there.
+    const refreshers = (ch.id === "acknowledgements" ? [] : glossary)
       .filter((g) => (introIndex.get(g.term) ?? i) < i)
       .map((g) => ({
         entry: g,

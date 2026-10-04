@@ -1,10 +1,10 @@
 "use client";
 
-import { useReaderSettings, type Decade } from "./SettingsContext";
-import { PillGroup, SectionLabel } from "./SettingsPrimitives";
+import { ABOUT_MAX, useReaderSettings, type Decade } from "./SettingsContext";
+import { SectionLabel } from "./SettingsPrimitives";
 
 // The reader's "new examples" profile. Sent with every refresh so rewritten
-// examples land in the reader's own era, humour and interests. Shared by the
+// examples land in the reader's own era, humor and interests. Shared by the
 // onboarding step and Settings → Reading so the options can't drift apart.
 export const DECADES: Decade[] = ["70s", "80s", "90s", "00s", "10s"];
 export const HUMOR_OPTIONS = ["Dry / deadpan", "Absurdist", "Pop-culture", "Keep it serious"];
@@ -39,16 +39,15 @@ export function RefreshProfileSettings() {
       </div>
 
       <FieldLabel>Decade you grew up in</FieldLabel>
-      <PillGroup
-        columns={4}
-        value={refreshProfile.decade}
-        onChange={(decade) =>
-          set({ decade: decade === refreshProfile.decade ? null : decade })
+      <Chips
+        options={DECADES}
+        selected={refreshProfile.decade ? [refreshProfile.decade] : []}
+        onToggle={(d) =>
+          set({ decade: d === refreshProfile.decade ? null : (d as Decade) })
         }
-        options={DECADES.map((d) => ({ value: d as Decade | null, label: d }))}
       />
 
-      <FieldLabel>Humour (pick any)</FieldLabel>
+      <FieldLabel>Humor (pick any)</FieldLabel>
       <Chips
         options={HUMOR_OPTIONS}
         selected={refreshProfile.humor}
@@ -61,6 +60,24 @@ export function RefreshProfileSettings() {
         selected={refreshProfile.culture}
         onToggle={(c) => set({ culture: toggle(refreshProfile.culture, c) })}
       />
+
+      <FieldLabel>About you (optional)</FieldLabel>
+      <textarea
+        value={refreshProfile.about}
+        onChange={(e) => set({ about: e.target.value.slice(0, ABOUT_MAX) })}
+        rows={3}
+        maxLength={ABOUT_MAX}
+        placeholder="e.g. Nurse in Chicago, two kids, obsessed with trail running and old Pixar movies."
+        className="w-full resize-none rounded-[16px] bg-transparent px-3 py-2.5 text-[13px] leading-snug outline-none"
+        style={{
+          color: "var(--ink)",
+          border: "1px solid var(--pill-border)",
+          fontFamily: "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+        }}
+      />
+      <p className="-mt-2 text-right text-[11px]" style={{ color: "var(--ink-tertiary)" }}>
+        {refreshProfile.about.length}/{ABOUT_MAX}
+      </p>
     </section>
   );
 }

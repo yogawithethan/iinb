@@ -146,14 +146,16 @@ export function ColorPicker({ value, onChange }: Props) {
       {/* Saturation × Value area */}
       <div
         ref={svRef}
-        className="relative w-full cursor-crosshair touch-none overflow-hidden rounded-[12px]"
+        className="relative w-full cursor-crosshair touch-none overflow-hidden rounded-[18px]"
         style={{
           height: 140,
           background: `
             linear-gradient(to top, #000 0%, transparent 100%),
             linear-gradient(to right, #fff 0%, ${hueColor} 100%)
           `,
-          border: "1px solid var(--pill-border)",
+          // Inner hairline instead of a translucent border: the border used
+          // to read as a light halo around the gradient (worst in dark mode).
+          boxShadow: "inset 0 0 0 1px rgba(0, 0, 0, 0.08)",
         }}
         onPointerDown={handleSvDown}
         onPointerMove={handleSvMove}
@@ -203,7 +205,8 @@ export function ColorPicker({ value, onChange }: Props) {
               #ff0000 100%
             );
             outline: none;
-            border: 1px solid var(--pill-border);
+            border: 0;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
           }
           .iinb-hue-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -212,8 +215,8 @@ export function ColorPicker({ value, onChange }: Props) {
             height: 16px;
             border-radius: 50%;
             background: #fff;
-            border: 2px solid ${value};
-            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+            border: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
             cursor: pointer;
           }
           .iinb-hue-slider::-moz-range-thumb {
@@ -221,8 +224,8 @@ export function ColorPicker({ value, onChange }: Props) {
             height: 16px;
             border-radius: 50%;
             background: #fff;
-            border: 2px solid ${value};
-            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+            border: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
             cursor: pointer;
           }
         `}</style>
@@ -251,7 +254,7 @@ export function ColorPicker({ value, onChange }: Props) {
             onChange={handleHexInput}
             onBlur={() => setHexDraft(value.replace(/^#/, ""))}
             aria-label="Hex color"
-            className="w-full rounded-[10px] px-6 py-2 text-[13px] uppercase tracking-[0.04em] outline-none"
+            className="w-full rounded-full px-6 py-2 text-[13px] uppercase tracking-[0.04em] outline-none"
             style={{
               color: "var(--ink)",
               border: "1px solid var(--pill-border)",

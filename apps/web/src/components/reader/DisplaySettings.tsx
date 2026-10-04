@@ -188,7 +188,7 @@ export function DisplaySettings() {
                 type="button"
                 onClick={() => update({ readingWidth: w.id })}
                 aria-pressed={selected}
-                className="rounded-[12px] px-3 py-2 text-[13px] transition-all active:scale-[0.98]"
+                className="rounded-full px-3 py-2 text-[13px] transition-all active:scale-[0.98]"
                 style={{
                   border: selected
                     ? "1.5px solid var(--accent)"
@@ -223,7 +223,7 @@ export function DisplaySettings() {
                 type="button"
                 onClick={() => update({ fontFamily: f })}
                 aria-pressed={selected}
-                className="rounded-[12px] px-3 py-2.5 text-[14px] transition-all active:scale-[0.98]"
+                className="rounded-full px-3 py-2.5 text-[14px] transition-all active:scale-[0.98]"
                 style={{
                   border: selected
                     ? "1.5px solid var(--accent)"

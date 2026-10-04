@@ -105,7 +105,7 @@ Enough of this insanity. Time to let go.
 
 ## Letting Go
 
-As a child, I once ran at full-speed across a concrete driveway, turned a corner, tripped over a fence post I didn’t know was there, and gouged my right knee straight into the rough pavement. Seconds later I was awash in pain, the cold, grey cement now flowing with rivulets of my blood. Now here I am, safely typing these words into a machine in a cabin out in rural New Zealand, two decades later, with nothing to show for that fateful day but a faint discoloration on my kneecap.
+As a child, I once ran at full-speed across a concrete driveway, turned a corner, tripped over a fence post I didn’t know was there, and gouged my right knee straight into the rough pavement. Seconds later I was awash in pain, the cold, gray cement now flowing with rivulets of my blood. Now here I am, safely typing these words into a machine in a cabin out in rural New Zealand, two decades later, with nothing to show for that fateful day but a faint discoloration on my kneecap.
 
 How did my body heal so completely? I wasn’t supervising the intricate process of cells clotting and stitching, collagen fibers weaving and white blood cells marshaling, that’s for sure. If I had been, I would have required a verbosely detailed checklist of what came after what to oversee the whole operation. And even then, I undoubtedly would have skipped a step or two or million out of pure distraction or laziness.
 

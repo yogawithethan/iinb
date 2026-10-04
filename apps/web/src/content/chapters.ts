@@ -182,6 +182,10 @@ function parseBlocks(md: string): ChapterBlock[] {
  * and a sequential number; a client-side controller handles open/close +
  * typing animation.
  */
+// Same arrow as the bottom-bar chapter refresh, so both spin identically.
+const REFRESH_ICON =
+  '<svg class="refresh-btn__icon" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>';
+
 function renderInlineWithFootnotes(
   text: string,
   nextNum: () => number,
@@ -205,7 +209,7 @@ function renderInlineWithFootnotes(
     /@@RS@@([\s\S]*?)@@RE@@([.,;:!?…”’)\]]*)/g,
     (_, inner: string, punct: string) =>
       `<span class="refresh-span" data-refresh-span>${inner}</span>${punct}` +
-      `<button type="button" class="refresh-btn" data-refresh-btn aria-label="New example">↻</button>`,
+      `<button type="button" class="refresh-btn" data-refresh-btn aria-label="New example">${REFRESH_ICON}</button>`,
   );
   html = html.replace(/@@FN(\d+)@@/g, (_, idxStr) => {
     const idx = parseInt(idxStr, 10);

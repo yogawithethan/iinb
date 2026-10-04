@@ -98,7 +98,7 @@ export function AiPanel({ chapterId, chapterTitle, quote, onClearQuote }: Props)
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col" style={{ fontFamily: "var(--reader-font)" }}>
       {/* Header */}
       <div
         className="flex items-center justify-between gap-2 px-4 py-3"
@@ -119,7 +119,7 @@ export function AiPanel({ chapterId, chapterTitle, quote, onClearQuote }: Props)
             style={{
               color: "var(--ink)",
               fontFamily:
-                "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                "var(--reader-font)",
             }}
           >
             Ask the book
@@ -165,7 +165,7 @@ export function AiPanel({ chapterId, chapterTitle, quote, onClearQuote }: Props)
             </div>
             <p
               className="line-clamp-4 text-[13px] italic leading-snug"
-              style={{ color: "var(--ink)", fontFamily: "var(--font-lora), ui-serif, Georgia, serif" }}
+              style={{ color: "var(--ink)", fontFamily: "var(--reader-font)" }}
             >
               “{quote}”
             </p>
@@ -209,7 +209,7 @@ export function AiPanel({ chapterId, chapterTitle, quote, onClearQuote }: Props)
             color: "var(--ink)",
             border: "1px solid var(--pill-border)",
             fontFamily:
-              "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+              "var(--reader-font)",
             lineHeight: 1.4,
             maxHeight: 100,
           }}
@@ -271,7 +271,7 @@ function EmptyState({
         className="mb-1 text-[15px] font-medium"
         style={{
           color: "var(--ink)",
-          fontFamily: "var(--font-lora), ui-serif, Georgia, serif",
+          fontFamily: "var(--reader-font)",
         }}
       >
         Ask anything
@@ -294,7 +294,7 @@ function EmptyState({
               border: "1px solid var(--pill-border)",
               color: "var(--ink-secondary)",
               fontFamily:
-                "var(--font-inter), ui-sans-serif, system-ui, sans-serif",
+                "var(--reader-font)",
             }}
           >
             {p}

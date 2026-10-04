@@ -132,6 +132,15 @@ body {
   background-attachment: fixed;
 }
 
+/* The book's reading font as a token, so panels that show book-ish text
+   (Ask the book) match the page. Follows Settings → Display → Font. */
+:root {
+  --reader-font: var(--font-lora), ui-serif, Georgia, "Times New Roman", serif;
+}
+[data-reading-font="sans"] {
+  --reader-font: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
 /* Book text: serif by default, sans when [data-reading-font="sans"] */
 [data-reading-font="sans"] .reader-prose {
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -606,24 +615,37 @@ html.reader-paged::-webkit-scrollbar {
 }
 
 /* Gradient masks that fade page text behind the chrome */
+/* Reader chrome masks: a faint ink tint plus a light blur under the
+   header/footer controls, both fading out toward the text. The blur covers
+   only these short strips (not the viewport), so it stays cheap. */
+.mask-top,
+.mask-bottom {
+  --mask-tint: color-mix(in srgb, var(--mask-stop) 94%, var(--ink) 6%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
 .mask-top {
   background: linear-gradient(
     to bottom,
-    var(--mask-stop) 0%,
-    var(--mask-stop) 45%,
-    color-mix(in srgb, var(--mask-stop) 60%, transparent) 75%,
+    var(--mask-tint) 0%,
+    color-mix(in srgb, var(--mask-tint) 85%, transparent) 40%,
+    color-mix(in srgb, var(--mask-tint) 45%, transparent) 72%,
     transparent 100%
   );
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
 }
 
 .mask-bottom {
   background: linear-gradient(
     to top,
-    var(--mask-stop) 0%,
-    var(--mask-stop) 45%,
-    color-mix(in srgb, var(--mask-stop) 60%, transparent) 75%,
+    var(--mask-tint) 0%,
+    color-mix(in srgb, var(--mask-tint) 85%, transparent) 40%,
+    color-mix(in srgb, var(--mask-tint) 45%, transparent) 72%,
     transparent 100%
   );
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 55%, transparent 100%);
 }
 
 @keyframes spin {
@@ -643,11 +665,24 @@ html.reader-paged::-webkit-scrollbar {
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
+/* While a new example is being written: a soft accent sheen sweeps across
+   the words being replaced. */
 .refresh-span.is-loading {
-  animation: refresh-pulse 1.1s ease-in-out infinite;
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--accent) 22%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  animation: refresh-sheen 1.3s cubic-bezier(0.364, 0, 0.164, 1) infinite;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
-@keyframes refresh-pulse {
-  50% { opacity: 0.45; }
+@keyframes refresh-sheen {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
 }
 .refresh-btn,
 .refresh-original {
@@ -663,18 +698,30 @@ html.reader-paged::-webkit-scrollbar {
   vertical-align: baseline;
 }
 .refresh-btn {
-  width: 1.4em;
-  height: 1.4em;
+  width: 1.5em;
+  height: 1.5em;
   border-radius: 999px;
-  font-size: 0.82em;
+  font-size: 0.9em;
   line-height: 1;
   transition: background-color 120ms ease-out, transform 200ms cubic-bezier(0.364, 0, 0.164, 1);
 }
 .refresh-btn:hover {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
-.refresh-btn[aria-busy="true"] {
-  transform: rotate(180deg);
+/* ↻ spins full 360° turns while a new example is on its way. */
+.refresh-btn__icon,
+.chapter-refresh__icon {
+  display: block;
+}
+.refresh-btn[aria-busy="true"] .refresh-btn__icon,
+.chapter-refresh[aria-busy="true"] .chapter-refresh__icon {
+  animation: spin 0.9s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+.chapter-refresh {
+  transition: background-color 120ms ease-out;
+}
+.chapter-refresh:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 .refresh-original {
   font-size: 0.7em;
@@ -689,4 +736,14 @@ html.reader-paged::-webkit-scrollbar {
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.72em;
   color: var(--ink-secondary);
+}
+
+/* While a reader panel is open the page behind it doesn't scroll; panels
+   scroll on their own and never chain the scroll out to the page. */
+html[data-reader-panel-open] {
+  overflow: hidden;
+}
+.glass-capsule .overflow-y-auto,
+.glass-capsule [class*="overflow-y-auto"] {
+  overscroll-behavior: contain;
 }

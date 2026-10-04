@@ -97,6 +97,15 @@ function tuningCss(): string {
     }
     :host(.iinb-dark) .card,
     :host(.iinb-dark) .card.primary,
+    /* Reader tap-to-reveal: match the reader chrome's motion exactly
+       (Chrome.tsx chromeTransition) instead of the header's ease-in reveal. */
+    .bar,
+    .mobile-top,
+    :host(.is-hidden) .bar,
+    :host(.is-hidden) .mobile-top {
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
     :host(.iinb-dark) .card.connect {
       background: rgba(255, 255, 255, 0.045) !important;
     }

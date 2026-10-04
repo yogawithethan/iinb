@@ -3,9 +3,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  ABOUT_MAX,
   useReaderSettings,
   type Theme,
-  type Decade,
+  type RefreshProfile,
 } from "@/components/reader/SettingsContext";
 import { ColorPicker } from "@/components/reader/ColorPicker";
 import {
@@ -715,12 +716,8 @@ function ProfileStep({
   onBack,
   stepIndex,
 }: {
-  profile: {
-    decade: Decade | null;
-    humor: string[];
-    culture: string[];
-  };
-  onChange: (next: { decade: Decade | null; humor: string[]; culture: string[] }) => void;
+  profile: RefreshProfile;
+  onChange: (next: RefreshProfile) => void;
   onNext: () => void;
   onBack: () => void;
   stepIndex: number;
@@ -786,6 +783,17 @@ function ProfileStep({
           />
         ))}
       </div>
+
+      <StepLabel>About you (optional)</StepLabel>
+      <textarea
+        value={profile.about}
+        onChange={(e) => onChange({ ...profile, about: e.target.value.slice(0, ABOUT_MAX) })}
+        rows={3}
+        maxLength={ABOUT_MAX}
+        placeholder="e.g. Nurse in Chicago, two kids, obsessed with trail running and old Pixar movies."
+        className="mb-6 w-full resize-none rounded-[16px] bg-transparent px-3 py-2.5 text-[13px] leading-snug outline-none"
+        style={{ color: "var(--ink)", border: "1px solid var(--pill-border)" }}
+      />
 
       <FooterNav onBack={onBack} onNext={onNext} nextLabel="Next" />
     </div>

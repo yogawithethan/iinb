@@ -34,7 +34,7 @@ export function ToggleRow({
       role="switch"
       aria-checked={value}
       onClick={() => onChange(!value)}
-      className="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5 text-left transition-colors"
+      className="flex w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left transition-colors"
       style={{
         border: "1px solid var(--pill-border)",
         background: "transparent",
@@ -116,7 +116,7 @@ export function LockedRow({
         type="button"
         onClick={() => paywall.openPaywall()}
         aria-label={`${label} — unlock premium`}
-        className="paywall-locked-row flex w-full items-center justify-between rounded-[12px] px-3 py-2.5 text-left transition-colors"
+        className="paywall-locked-row flex w-full items-center justify-between rounded-[16px] px-3 py-2.5 text-left transition-colors"
         style={{ border: "1px solid var(--pill-border)", cursor: "pointer" }}
       >
         {body}
@@ -126,7 +126,7 @@ export function LockedRow({
 
   return (
     <div
-      className="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5"
+      className="flex w-full items-center justify-between rounded-[16px] px-3 py-2.5"
       style={{ border: "1px solid var(--pill-border)" }}
       aria-disabled="true"
     >
@@ -185,7 +185,7 @@ export function PillGroup<T extends string | number | null>({
             type="button"
             onClick={() => onChange(opt.value)}
             aria-pressed={selected}
-            className="rounded-[12px] px-3 py-2 text-[13px] transition-all active:scale-[0.98]"
+            className="rounded-full px-3 py-2 text-[13px] transition-all active:scale-[0.98]"
             style={{
               border: selected
                 ? "1.5px solid var(--accent)"

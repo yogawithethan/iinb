@@ -3,7 +3,7 @@
 // One tab switcher for every reader panel (Contents/Glossary, Display/Reading/
 // Audio). Mirrors the site-wide sign-in sheet's Log in / Sign up pills in the
 // shared <ywe-header>: a soft track, an ink "glider" that slides under the
-// active label, and the label flipping to the page colour.
+// active label, and the label flipping to the page color.
 
 import { LockIcon } from "./icons";
 

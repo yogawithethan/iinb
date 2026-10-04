@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { GlassBubble } from "./GlassBubble";
 import { DisplaySettings } from "./DisplaySettings";
 import { PillTabs } from "./PillTabs";
+import { ChapterProgress } from "./ChapterProgress";
 import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
@@ -132,6 +133,15 @@ export function Chrome({
   useEffect(() => {
     onPanelStateChange?.(anyPanelOpen);
   }, [anyPanelOpen, onPanelStateChange]);
+
+  // Lock the page behind open panels (wheel/trackpad over a panel used to
+  // scroll the book underneath).
+  useEffect(() => {
+    const root = document.documentElement;
+    if (anyPanelOpen) root.setAttribute("data-reader-panel-open", "");
+    else root.removeAttribute("data-reader-panel-open");
+    return () => root.removeAttribute("data-reader-panel-open");
+  }, [anyPanelOpen]);
 
   // Reader-wide keyboard shortcuts. ⌘F / ⌘K / ⌘L preempt the browser
   // defaults so the in-app versions fire instead.
@@ -457,7 +467,7 @@ export function Chrome({
             transform: effectiveVisible ? "translateY(0)" : "translateY(-90px)",
             // Same distance, durations and curves as <ywe-header>'s .is-hidden
             // slide, so the sidebar button and the reader controls move as one.
-            transition: chromeTransition(effectiveVisible),
+            transition: chromeTransition(),
           }}
         >
           <div
@@ -536,7 +546,7 @@ export function Chrome({
           style={{
             opacity: effectiveVisible ? 1 : 0,
             transform: effectiveVisible ? "translateY(0)" : "translateY(90px)",
-            transition: chromeTransition(effectiveVisible),
+            transition: chromeTransition(),
           }}
         >
           <div
@@ -545,8 +555,18 @@ export function Chrome({
                 closeAllPanels();
               }
             }}
-            className="flex h-[88px] w-full items-end justify-between px-4 pb-4 md:px-8 md:pb-6 lg:px-12"
+            className="relative flex h-[88px] w-full items-end justify-between px-4 pb-4 md:px-8 md:pb-6 lg:px-12"
           >
+            {/* Free readers have the sign-in / paywall bar in this spot. */}
+            {purchased ? (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:bottom-6">
+                <ChapterProgress
+                  currentId={currentId}
+                  purchased={purchased}
+                  onLocked={onOpenPaywall}
+                />
+              </div>
+            ) : null}
             <div className="flex items-center gap-2">
               <GlassBubble
                 label={
@@ -596,11 +616,11 @@ export function Chrome({
   );
 }
 
-// Mirrors the shared header: revealing uses its ease-exit curve, hiding uses
-// ease-enter (each transition takes the timing of the state it moves into).
-function chromeTransition(visible: boolean) {
-  const curve = visible
-    ? "cubic-bezier(0.382, 0, 1, 1)"
-    : "cubic-bezier(0.364, 0, 0.164, 1)";
-  return `transform 320ms ${curve}, opacity 200ms ${curve}`;
+// Tap-to-reveal motion, shared with <ywe-header> via HeaderTuning so the
+// sidebar button and the reader controls move as one. A fast-start curve in
+// both directions: the header's own ease-in reveal sat nearly still for the
+// first ~100ms after a tap, which read as lag.
+export const CHROME_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+function chromeTransition() {
+  return `transform 260ms ${CHROME_EASE}, opacity 180ms ${CHROME_EASE}`;
 }

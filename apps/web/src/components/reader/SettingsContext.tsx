@@ -23,7 +23,11 @@ export type RefreshProfile = {
   decade: Decade | null;
   humor: string[];
   culture: string[];
+  /** Free text: the reader describing themselves in their own words. */
+  about: string;
 };
+
+export const ABOUT_MAX = 300;
 
 export type ReaderPosition = {
   chapterId?: string;
@@ -88,7 +92,7 @@ const DEFAULTS: ReaderSettings = {
   purchased: false,
   onboarded: false,
   userEmail: null,
-  refreshProfile: { decade: null, humor: [], culture: [] },
+  refreshProfile: { decade: null, humor: [], culture: [], about: "" },
   scrollMode: "scroll",
   bionicReading: false,
   rsvpEnabled: false,
@@ -177,7 +181,7 @@ function sanitize(
 
 function sanitizeRefreshProfile(raw: unknown): RefreshProfile {
   const decades: Decade[] = ["70s", "80s", "90s", "00s", "10s"];
-  const out: RefreshProfile = { decade: null, humor: [], culture: [] };
+  const out: RefreshProfile = { decade: null, humor: [], culture: [], about: "" };
   if (!raw || typeof raw !== "object") return out;
   const r = raw as Record<string, unknown>;
   if (typeof r.decade === "string" && decades.includes(r.decade as Decade)) {
@@ -189,6 +193,7 @@ function sanitizeRefreshProfile(raw: unknown): RefreshProfile {
   if (Array.isArray(r.culture)) {
     out.culture = r.culture.filter((x): x is string => typeof x === "string");
   }
+  if (typeof r.about === "string") out.about = r.about.slice(0, ABOUT_MAX);
   return out;
 }
 

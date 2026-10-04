@@ -103,9 +103,34 @@ export function RefreshController({
       }
     }
 
+    // Bottom-bar ↻: new examples for every marked example in a chapter.
+    async function onRefreshChapter(e: Event) {
+      const chapterId = (e as CustomEvent<{ chapterId?: string }>).detail?.chapterId;
+      const done = () =>
+        window.dispatchEvent(new CustomEvent("iinb:refresh-examples-done", { detail: { chapterId } }));
+      if (!chapterId) return done();
+      const section = document.querySelector(
+        `.reader-prose [data-chapter-anchor="${CSS.escape(chapterId)}"]`,
+      );
+      const pairs = Array.from(section?.querySelectorAll<HTMLElement>("[data-refresh-span]") ?? [])
+        .map((span) => {
+          let btn = span.nextElementSibling as HTMLElement | null;
+          // The ↻ follows any punctuation text node, so skip to the button.
+          while (btn && !btn.matches("[data-refresh-btn]")) btn = btn.nextElementSibling as HTMLElement | null;
+          return btn ? ([span, btn] as const) : null;
+        })
+        .filter((p): p is readonly [HTMLElement, HTMLElement] => p !== null);
+      // Always show at least one full turn of the spinner.
+      const minSpin = new Promise((r) => window.setTimeout(r, 700));
+      await Promise.all([minSpin, ...pairs.map(([span, btn]) => refresh(span, btn))]);
+      done();
+    }
+
     document.addEventListener("click", onClick, true);
+    window.addEventListener("iinb:refresh-examples", onRefreshChapter);
     return () => {
       document.removeEventListener("click", onClick, true);
+      window.removeEventListener("iinb:refresh-examples", onRefreshChapter);
       inflight.forEach((c) => c.abort());
     };
   }, []);

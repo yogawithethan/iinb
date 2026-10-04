@@ -2,7 +2,7 @@
 
 // The book cover — the very first thing in the reading flow, above the
 // dedication. Rendered outside `.reader-prose` so the dark-mode line-art
-// invert never touches this full-colour image.
+// invert never touches this full-color image.
 export function CoverSection() {
   return (
     <section

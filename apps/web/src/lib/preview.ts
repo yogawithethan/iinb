@@ -1,7 +1,7 @@
 // Dev-only reading-state preview via a `?preview=` query param, so all three
 // tiers can be reviewed on one server (running three Next dev servers on one
 // codebase collides on the shared .next cache). Inert with no param present —
-// production URLs never carry it, so behaviour is unchanged there.
+// production URLs never carry it, so behavior is unchanged there.
 export type PreviewState = "public" | "member" | "purchased";
 
 // HARD GUARD: the preview override bypasses auth/entitlement, so it must never
