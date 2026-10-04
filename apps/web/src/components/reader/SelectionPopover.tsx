@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CopyIcon, HighlightIcon, NoteIcon, XIcon } from "./icons";
+import { CopyIcon, HighlightIcon, LockIcon, NoteIcon, SparkleIcon, XIcon } from "./icons";
 import { useHighlights } from "./HighlightsContext";
+import { useReaderSettings } from "./SettingsContext";
 
 const HIGHLIGHT_NAME = "iinb-highlight";
 const COPY_ATTRIBUTION = "— Ignorance Is Not Bliss by Ethan Hill";
@@ -61,6 +62,13 @@ export function SelectionPopover() {
   /** Survives the browser clearing the live selection on button click. */
   const rangeRef = useRef<Range | null>(null);
   const { addHighlight, highlights, removeHighlight } = useHighlights();
+  // Highlights, notes and Ask are part of the full book; free readers see
+  // them locked and are sent to sign-in / the paywall (ReaderShell).
+  const { purchased } = useReaderSettings();
+  const requireAccess = () => {
+    dismiss();
+    window.dispatchEvent(new CustomEvent("iinb:require-access"));
+  };
   /** Any existing highlight that overlaps the current selection. Null if
    * the selection covers only virgin text. */
   const overlappingIdRef = useRef<string | null>(null);
@@ -189,6 +197,7 @@ export function SelectionPopover() {
   }
 
   function highlight() {
+    if (!purchased) return requireAccess();
     const range = rangeRef.current;
     if (!range) return;
     if (!apiOk) {
@@ -203,6 +212,7 @@ export function SelectionPopover() {
   }
 
   function addNote() {
+    if (!purchased) return requireAccess();
     const range = rangeRef.current;
     if (!range) return;
     const text = range.toString();
@@ -215,6 +225,16 @@ export function SelectionPopover() {
     registerHighlight(range);
     addHighlight(text, range, note.trim());
     dismiss();
+  }
+
+  // Hand the selection to Ask the book (Chrome owns the panel).
+  function askAbout() {
+    if (!purchased) return requireAccess();
+    const range = rangeRef.current;
+    if (!range) return;
+    const text = range.toString().replace(/\s+/g, " ").trim();
+    dismiss();
+    if (text) window.dispatchEvent(new CustomEvent("iinb:ask-about", { detail: { text } }));
   }
 
   async function copy() {
@@ -255,7 +275,7 @@ export function SelectionPopover() {
           onClick={unhighlight}
           aria-label="Remove highlight"
           title="Remove highlight"
-          className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+          className="iinb-selpop-btn relative flex h-8 w-8 items-center justify-center rounded-full transition-colors"
           style={{
             color: "var(--ink)",
             background:
@@ -270,24 +290,37 @@ export function SelectionPopover() {
           onClick={highlight}
           aria-label="Highlight"
           title="Highlight"
-          className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+          className="iinb-selpop-btn relative flex h-8 w-8 items-center justify-center rounded-full transition-colors"
           style={{
             color: "var(--accent-ink)",
             background: "var(--accent-soft)",
           }}
         >
           <HighlightIcon size={15} />
+          {purchased ? null : <LockBadge />}
         </button>
       )}
+      <button
+        type="button"
+        onClick={askAbout}
+        aria-label="Ask the book about this"
+        title="Ask the book about this"
+        className="iinb-selpop-btn relative flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+        style={{ color: "var(--accent-ink)" }}
+      >
+        <SparkleIcon size={14} />
+        {purchased ? null : <LockBadge />}
+      </button>
       <button
         type="button"
         onClick={addNote}
         aria-label="Add note"
         title="Add note"
-        className="iinb-selpop-btn flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+        className="iinb-selpop-btn relative flex h-8 w-8 items-center justify-center rounded-full transition-colors"
         style={{ color: "var(--ink)" }}
       >
         <NoteIcon size={14} />
+        {purchased ? null : <LockBadge />}
       </button>
       <button
         type="button"
@@ -300,5 +333,22 @@ export function SelectionPopover() {
         <CopyIcon size={14} />
       </button>
     </div>
+  );
+}
+
+function LockBadge() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute -bottom-0.5 -right-0.5 flex h-[13px] w-[13px] items-center justify-center rounded-full"
+      style={{
+        background: "var(--accent)",
+        color: "#fff",
+        border: "1.5px solid var(--panel-bg)",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.15)",
+      }}
+    >
+      <LockIcon size={7} />
+    </span>
   );
 }

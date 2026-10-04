@@ -13,6 +13,24 @@ import {
 import { useReaderSettings, type SyncedHighlight } from "./SettingsContext";
 
 const HIGHLIGHT_NAME = "iinb-highlight";
+function serializeHighlights(list: HighlightEntry[]): SyncedHighlight[] {
+  return list.map((entry) => ({
+    id: entry.id,
+    text: entry.text,
+    note: entry.note,
+    createdAt: entry.createdAt,
+    anchor: entry.anchor,
+    startOffset: entry.startOffset,
+    endOffset: entry.endOffset,
+  }));
+}
+
+function paint(list: HighlightEntry[]) {
+  if (typeof CSS === "undefined" || !("highlights" in CSS)) return;
+  const ranges = list.map((entry) => entry.range).filter((range): range is Range => Boolean(range));
+  if (ranges.length) CSS.highlights.set(HIGHLIGHT_NAME, new Highlight(...ranges));
+  else CSS.highlights.delete(HIGHLIGHT_NAME);
+}
 
 export type HighlightEntry = {
   id: string;
@@ -195,31 +213,21 @@ export function HighlightsProvider({ children }: { children: ReactNode }) {
     };
   }, [rebuildCssHighlights]);
 
+  // Highlights are a full-book feature, synced through /api/reader-state.
   useEffect(() => {
     if (!purchased || !readerSyncReady) return;
-    const restored = syncedHighlights
-      .filter((entry) => entry && typeof entry.id === "string" && typeof entry.text === "string")
-      .map((entry) => ({ ...entry, range: restoreRange(entry) }));
+    const synced = syncedHighlights.filter(
+      (entry) => entry && typeof entry.id === "string" && typeof entry.text === "string",
+    );
+    const restored = synced.map((entry) => ({ ...entry, range: restoreRange(entry) }));
     setHighlights(restored);
-    if (typeof CSS !== "undefined" && "highlights" in CSS) {
-      const ranges = restored.map((entry) => entry.range).filter((range): range is Range => Boolean(range));
-      if (ranges.length) CSS.highlights.set(HIGHLIGHT_NAME, new Highlight(...ranges));
-      else CSS.highlights.delete(HIGHLIGHT_NAME);
-    }
+    paint(restored);
   }, [purchased, readerSyncReady, syncedHighlights]);
 
   useEffect(() => {
     if (!purchased || !readerSyncReady) return;
     const timer = window.setTimeout(() => {
-      const serialized: SyncedHighlight[] = highlights.map((entry) => ({
-        id: entry.id,
-        text: entry.text,
-        note: entry.note,
-        createdAt: entry.createdAt,
-        anchor: entry.anchor,
-        startOffset: entry.startOffset,
-        endOffset: entry.endOffset,
-      }));
+      const serialized = serializeHighlights(highlights);
       void fetch("/api/reader-state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

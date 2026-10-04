@@ -256,6 +256,19 @@ export function ReaderShell({ stream }: Props) {
     scrollToAnchor("paywall");
   }, [scrollToAnchor]);
 
+  // Locked premium features: sign in first if needed, otherwise the paywall.
+  const requireAccess = useCallback(() => {
+    if (!loggedIn) openSignIn();
+    else openPaywall();
+  }, [loggedIn, openSignIn, openPaywall]);
+
+  // Locked actions elsewhere (selection popover) ask for access by event.
+  useEffect(() => {
+    const onRequire = () => requireAccess();
+    window.addEventListener("iinb:require-access", onRequire);
+    return () => window.removeEventListener("iinb:require-access", onRequire);
+  }, [requireAccess]);
+
   // A TOC entry whose chapter isn't in this reader's stream (signed out, not
   // purchased, or the full book still loading) used to silently do nothing.
   const navigateTo = useCallback((id: string) => {
@@ -431,7 +444,7 @@ export function ReaderShell({ stream }: Props) {
         currentId={activeId}
         onNavigate={navigateTo}
         onNavigateParagraph={navigateParagraph}
-        onOpenPaywall={openPaywall}
+        onOpenPaywall={requireAccess}
         onPanelStateChange={setAnyPanelOpen}
       />
       {authReady && !purchased && !loggedIn && (

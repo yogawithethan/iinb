@@ -89,6 +89,8 @@ export function Chrome({
   /** Toggled by the play bubble / ⌘L. Real audio engine TBD. */
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  /** Passage the reader selected and chose "Ask" on (SelectionPopover). */
+  const [askQuote, setAskQuote] = useState<string | null>(null);
 
   const paywallValue = useMemo(
     () => ({
@@ -183,6 +185,24 @@ export function Chrome({
     // pre-login `purchased=false` and sent paying readers to the paywall.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchOpen, anyPanelOpen, aiOpen, audioPlaying, purchased, onOpenPaywall]);
+
+  // "Ask" from the selection popover: open Ask the book about that passage.
+  useEffect(() => {
+    function onAskAbout(e: Event) {
+      const text = (e as CustomEvent<{ text?: string }>).detail?.text?.trim();
+      if (!text || COMING_SOON.ai) return;
+      if (!purchased) {
+        onOpenPaywall();
+        return;
+      }
+      setAskQuote(text.length > 1200 ? `${text.slice(0, 1200)}…` : text);
+      openOnly("ai");
+    }
+    window.addEventListener("iinb:ask-about", onAskAbout);
+    return () => window.removeEventListener("iinb:ask-about", onAskAbout);
+    // openOnly only calls state setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [purchased, onOpenPaywall]);
 
   // Tap-to-reveal: tapping anywhere in the reading area toggles the chrome.
   // Skips interactive affordances, open panels, and active text selections.
@@ -307,6 +327,7 @@ export function Chrome({
             }}
           >
             <TocPanel
+              onClose={() => setTocOpen(false)}
               chapters={chapters}
               parts={parts}
               glossary={glossary}
@@ -350,6 +371,8 @@ export function Chrome({
             <AiPanel
               chapterId={currentId}
               chapterTitle={chapterTitle}
+              quote={askQuote}
+              onClearQuote={() => setAskQuote(null)}
               onClose={() => setAiOpen(false)}
             />
           </div>

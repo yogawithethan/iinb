@@ -4,7 +4,11 @@ import { getAllChapters, type Chapter, type ChapterMeta } from "./chapters";
 import { getAllParts, type Part } from "./parts";
 import { getDedication, type Dedication } from "./dedication";
 import { getGlossary, type GlossaryEntry } from "./glossary";
-import { wrapGlossaryInChapter } from "./glossaryWrap";
+import {
+  chapterMentions,
+  wrapGlossaryInChapter,
+  wrapGlossaryRefreshers,
+} from "./glossaryWrap";
 
 export type ReaderNode =
   | { kind: "dedication"; dedication: Dedication }
@@ -42,19 +46,39 @@ async function buildReaderStream(): Promise<ReaderStream> {
     getGlossary(),
   ]);
 
-  // For each chapter, scope the glossary to that chapter and wrap first
-  // occurrences in the chapter's blocks. glossary.json uses a numeric
-  // `chapter` field that maps to "ch1", "ch2", etc.
-  const chapters = rawChapters.map((ch) => {
-    const numberMatch = ch.id.match(/^ch(\d+)$/);
-    const chapterNumber = numberMatch ? parseInt(numberMatch[1], 10) : -1;
-    const entriesForChapter = glossary.filter(
-      (g) => g.chapter === chapterNumber,
+  // Where each term is introduced: its glossary chapter ("ch1", "ch2", …)
+  // when the text actually uses it there, otherwise the next chapter that
+  // does (e.g. saṃskāra is listed under Chapter 1 but first used in
+  // Chapter 2). Passing mentions before that (the Preface) aren't linked.
+  const indexOf = new Map(rawChapters.map((ch, i) => [ch.id, i]));
+  const introIndex = new Map<string, number>();
+  for (const entry of glossary) {
+    const start = indexOf.get(`ch${entry.chapter}`) ?? 0;
+    let intro = start;
+    for (let i = start; i < rawChapters.length; i++) {
+      if (chapterMentions(rawChapters[i].blocks, entry)) {
+        intro = i;
+        break;
+      }
+    }
+    introIndex.set(entry.term, intro);
+  }
+
+  // Wrap the first occurrence of each term in its introducing chapter, and a
+  // quieter refresher on its first appearance in every later chapter.
+  const chapters = rawChapters.map((ch, i) => {
+    const introduced = glossary.filter((g) => introIndex.get(g.term) === i);
+    const refreshers = glossary
+      .filter((g) => (introIndex.get(g.term) ?? i) < i)
+      .map((g) => ({
+        entry: g,
+        introducedIn: rawChapters[introIndex.get(g.term) ?? 0]?.title ?? "",
+      }));
+    const blocks = wrapGlossaryRefreshers(
+      wrapGlossaryInChapter(ch.blocks, introduced),
+      refreshers,
     );
-    return {
-      ...ch,
-      blocks: wrapGlossaryInChapter(ch.blocks, entriesForChapter),
-    };
+    return { ...ch, blocks };
   });
 
   const nodes: ReaderNode[] = [];

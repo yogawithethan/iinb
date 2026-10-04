@@ -151,6 +151,15 @@ export function GlossaryTooltip({
       >
         {entry.definition}
       </p>
+      {anchor.dataset.introduced ? (
+        // Refresher underline: remind the reader where the term came from.
+        <p
+          className="mt-2 text-[11px] italic"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          First introduced in {anchor.dataset.introduced}
+        </p>
+      ) : null}
       {entry.also_see.length > 0 ? (
         <div
           className="mt-3 text-[11px]"

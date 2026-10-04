@@ -3,30 +3,62 @@
 import { useHighlights } from "./HighlightsContext";
 import { XIcon } from "./icons";
 
-type Props = { onClose: () => void };
+type Props = {
+  onClose: () => void;
+  embedded?: boolean;
+  /** Chapter list (book order) for labels and ordering. */
+  chapters?: { id: string; title: string }[];
+};
 
-export function HighlightsPanel({ onClose }: Props) {
+// "ch3::42" → ["ch3", 42]
+function parseAnchor(anchor?: string): [string, number] {
+  const [id = "", idx = "0"] = (anchor ?? "").split("::");
+  return [id, Number(idx) || 0];
+}
+
+export function HighlightsPanel({ onClose, embedded = false, chapters = [] }: Props) {
   const { highlights, removeHighlight, updateNote } = useHighlights();
+  const chapterIndex = new Map(chapters.map((c, i) => [c.id, i]));
+  const chapterTitle = new Map(chapters.map((c) => [c.id, c.title]));
 
-  const sorted = [...highlights].sort((a, b) => b.createdAt - a.createdAt);
+  // Book order (chapter, paragraph, position); anything unanchored last.
+  const sorted = [...highlights].sort((a, b) => {
+    const [ca, pa] = parseAnchor(a.anchor);
+    const [cb, pb] = parseAnchor(b.anchor);
+    const ia = chapterIndex.get(ca) ?? Number.MAX_SAFE_INTEGER;
+    const ib = chapterIndex.get(cb) ?? Number.MAX_SAFE_INTEGER;
+    return ia - ib || pa - pb || (a.startOffset ?? 0) - (b.startOffset ?? 0) || a.createdAt - b.createdAt;
+  });
 
-  function scrollTo(range?: Range) {
-    if (!range) return;
-    const target = range.startContainer.parentElement;
+  function scrollTo(range?: Range, anchor?: string) {
+    // Prefer the live range; fall back to the paragraph anchor when the
+    // range isn't attached yet (e.g. the full book is still loading).
+    const target =
+      (range?.startContainer.isConnected ? range.startContainer.parentElement : null) ??
+      (anchor
+        ? document.querySelector<HTMLElement>(`[data-p-anchor="${CSS.escape(anchor)}"]`)
+        : null);
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "center" });
       onClose();
     }
   }
 
+  function askAbout(text: string) {
+    onClose();
+    window.dispatchEvent(new CustomEvent("iinb:ask-about", { detail: { text } }));
+  }
+
   return (
     <div className="overflow-y-auto px-4 py-4" style={{ maxHeight: "inherit" }}>
-      <h2
-        className="mb-4 text-center text-[13px] font-medium uppercase tracking-[0.12em]"
-        style={{ color: "var(--ink-tertiary)" }}
-      >
-        Highlights &amp; Notes
-      </h2>
+      {embedded ? null : (
+        <h2
+          className="mb-4 text-center text-[13px] font-medium uppercase tracking-[0.12em]"
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          Highlights &amp; Notes
+        </h2>
+      )}
 
       {sorted.length === 0 ? (
         <div
@@ -48,10 +80,18 @@ export function HighlightsPanel({ onClose }: Props) {
                     "color-mix(in srgb, var(--ink) 2%, transparent)",
                 }}
               >
+                {chapterTitle.get(parseAnchor(h.anchor)[0]) ? (
+                  <p
+                    className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                    style={{ color: "var(--ink-tertiary)" }}
+                  >
+                    {chapterTitle.get(parseAnchor(h.anchor)[0])}
+                  </p>
+                ) : null}
                 <div className="flex items-start gap-2">
                   <button
                     type="button"
-                    onClick={() => scrollTo(h.range)}
+                    onClick={() => scrollTo(h.range, h.anchor)}
                     className="min-w-0 flex-1 text-left text-[13px] leading-snug transition-opacity hover:opacity-80"
                     style={{
                       color: "var(--ink)",
@@ -109,6 +149,14 @@ export function HighlightsPanel({ onClose }: Props) {
                   style={{ color: "var(--ink-tertiary)" }}
                 >
                   {h.note ? "Edit note" : "Add note"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => askAbout(h.text)}
+                  className="ml-3 mt-1.5 text-[11px] underline underline-offset-4 transition-opacity hover:opacity-70"
+                  style={{ color: "var(--accent-ink)" }}
+                >
+                  Ask about this
                 </button>
               </div>
             </li>

@@ -8,6 +8,7 @@ import { useReaderSettings } from "./SettingsContext";
 import { LockIcon } from "./icons";
 import { GlossaryList } from "./GlossaryList";
 import { PillTabs } from "./PillTabs";
+import { HighlightsPanel } from "./HighlightsPanel";
 
 type Props = {
   chapters: ChapterMeta[];
@@ -16,9 +17,11 @@ type Props = {
   currentId: string;
   onNavigate: (id: string) => void;
   onOpenPaywall: () => void;
+  onClose: () => void;
 };
 
-type Tab = "contents" | "glossary";
+type Tab = "contents" | "glossary" | "highlights";
+const TAB_ORDER: Tab[] = ["contents", "glossary", "highlights"];
 
 type Group = { part: PartMeta | null; partLabel: string; items: ChapterMeta[] };
 
@@ -44,6 +47,7 @@ export function TocPanel({
   currentId,
   onNavigate,
   onOpenPaywall,
+  onClose,
 }: Props) {
   const { purchased } = useReaderSettings();
   const [tab, setTab] = useState<Tab>("contents");
@@ -60,18 +64,17 @@ export function TocPanel({
           tabs={[
             { id: "contents", label: "Contents" },
             { id: "glossary", label: "Glossary" },
+            { id: "highlights", label: "Highlights", locked: !purchased },
           ]}
         />
       </div>
 
-      {/* Sliding track — two panels side by side */}
+      {/* Sliding track — panels side by side */}
       <div className="relative mt-3 flex-1 overflow-hidden">
         <div
           className="flex h-full transition-transform duration-[320ms] ease-[cubic-bezier(0.364,0,0.164,1)]"
           style={{
-            transform:
-              tab === "contents" ? "translateX(0)" : "translateX(-100%)",
-            transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+            transform: `translateX(-${TAB_ORDER.indexOf(tab) * 100}%)`,
           }}
         >
           <div className="h-full w-full flex-shrink-0 overflow-y-auto px-4 pb-4">
@@ -85,6 +88,35 @@ export function TocPanel({
           </div>
           <div className="h-full w-full flex-shrink-0 overflow-y-auto px-4 pb-4">
             <GlossaryList entries={glossary} chapters={chapters} />
+          </div>
+          <div className="h-full w-full flex-shrink-0 overflow-y-auto">
+            {purchased ? (
+              <HighlightsPanel embedded onClose={onClose} chapters={chapters} />
+            ) : (
+              <div className="flex flex-col items-center px-6 py-10 text-center">
+                <span
+                  className="mb-3 flex h-10 w-10 items-center justify-center rounded-full"
+                  style={{ background: "var(--accent-soft)", color: "var(--accent-ink)" }}
+                >
+                  <LockIcon size={16} />
+                </span>
+                <p className="mb-1 text-[14px] font-medium" style={{ color: "var(--ink)" }}>
+                  Highlights come with the full book
+                </p>
+                <p className="mb-4 text-[12px] leading-snug" style={{ color: "var(--ink-tertiary)" }}>
+                  Save passages, add notes, and ask the book about anything you
+                  highlight — synced across your devices.
+                </p>
+                <button
+                  type="button"
+                  onClick={onOpenPaywall}
+                  className="rounded-full px-4 py-2 text-[13px] font-semibold"
+                  style={{ background: "var(--ink)", color: "var(--bg)" }}
+                >
+                  Unlock the full book
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

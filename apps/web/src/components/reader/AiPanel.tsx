@@ -5,6 +5,12 @@ import { SparkleIcon } from "./icons";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+const PASSAGE_PROMPTS = [
+  "Explain this in plain words",
+  "Give me an everyday example",
+  "How does this connect to the rest of the book?",
+];
+
 const SUGGESTED_PROMPTS = [
   "What is this book about?",
   "What's the water metaphor all about?",
@@ -14,10 +20,13 @@ const SUGGESTED_PROMPTS = [
 type Props = {
   chapterId?: string;
   chapterTitle?: string;
+  /** A passage the reader selected and chose "Ask" on. */
+  quote?: string | null;
+  onClearQuote?: () => void;
   onClose: () => void;
 };
 
-export function AiPanel({ chapterId, chapterTitle }: Props) {
+export function AiPanel({ chapterId, chapterTitle, quote, onClearQuote }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,8 +48,14 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
   }, [messages, loading]);
 
   async function send(text: string) {
-    const trimmed = text.trim();
-    if (!trimmed || loading) return;
+    const question = text.trim();
+    if (!question || loading) return;
+    // A selected passage travels with the question so the answer is about
+    // exactly those words; once asked, the passage lives in the transcript.
+    const trimmed = quote
+      ? `About this passage from the book:\n“${quote}”\n\n${question}`
+      : question;
+    if (quote) onClearQuote?.();
     const next: Message[] = [...messages, { role: "user", content: trimmed }];
     setMessages(next);
     setInput("");
@@ -123,8 +138,45 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
 
       {/* Messages / empty state */}
       <div ref={scrollerRef} className="flex-1 overflow-y-auto px-4 py-4">
+        {quote ? (
+          <div
+            className="mb-3 rounded-2xl px-3 py-2.5"
+            style={{
+              background: "var(--accent-soft)",
+              border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)",
+            }}
+          >
+            <div className="mb-1 flex items-center justify-between">
+              <span
+                className="text-[10px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: "var(--accent-ink)" }}
+              >
+                About this passage
+              </span>
+              <button
+                type="button"
+                onClick={onClearQuote}
+                aria-label="Remove passage"
+                className="text-[12px]"
+                style={{ color: "var(--ink-tertiary)" }}
+              >
+                ✕
+              </button>
+            </div>
+            <p
+              className="line-clamp-4 text-[13px] italic leading-snug"
+              style={{ color: "var(--ink)", fontFamily: "var(--font-lora), ui-serif, Georgia, serif" }}
+            >
+              “{quote}”
+            </p>
+          </div>
+        ) : null}
         {messages.length === 0 ? (
-          <EmptyState onSelect={send} loading={loading} />
+          <EmptyState
+            onSelect={send}
+            loading={loading}
+            prompts={quote ? PASSAGE_PROMPTS : SUGGESTED_PROMPTS}
+          />
         ) : (
           <MessagesList messages={messages} loading={loading} />
         )}
@@ -198,9 +250,11 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
 function EmptyState({
   onSelect,
   loading,
+  prompts,
 }: {
   onSelect: (q: string) => void;
   loading: boolean;
+  prompts: string[];
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center text-center">
@@ -229,7 +283,7 @@ function EmptyState({
         Answers grounded in the actual text.
       </p>
       <div className="flex w-full max-w-[340px] flex-col gap-1.5">
-        {SUGGESTED_PROMPTS.map((p) => (
+        {prompts.map((p) => (
           <button
             key={p}
             type="button"

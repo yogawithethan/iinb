@@ -13,6 +13,9 @@ export type GlossaryEntry = {
   chapter: number;
   order: number;
   also_see: string[];
+  /** English words that point back to this term in later chapters
+   *  (e.g. "craving" → taṇhā), used only for refresher underlines. */
+  aliases?: string[];
 };
 
 let cached: GlossaryEntry[] | null = null;

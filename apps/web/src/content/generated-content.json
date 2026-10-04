@@ -2,7 +2,7 @@
   "_generated": {
     "schemaVersion": 1,
     "source": "packages/content",
-    "sourceHash": "34d20891b7f8428a30e42066a17caacbd6e605440cf10ceb9d670b30653b5cc6"
+    "sourceHash": "720d92acc0baab1d0aafb52a70ed3d59fd52434b03e0d95c9e05bd1d285b00c4"
   },
   "chapters": [
     {
@@ -90,6 +90,10 @@
       "also_see": [
         "dukkha",
         "nirvana"
+      ],
+      "aliases": [
+        "craving",
+        "clinging"
       ]
     },
     {
@@ -149,6 +153,9 @@
       "also_see": [
         "vedana",
         "vritti"
+      ],
+      "aliases": [
+        "impression"
       ]
     },
     {

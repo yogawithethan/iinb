@@ -5,7 +5,9 @@
 // shared <ywe-header>: a soft track, an ink "glider" that slides under the
 // active label, and the label flipping to the page colour.
 
-export type PillTab<T extends string> = { id: T; label: string };
+import { LockIcon } from "./icons";
+
+export type PillTab<T extends string> = { id: T; label: string; locked?: boolean };
 
 export function PillTabs<T extends string>({
   tabs,
@@ -56,7 +58,10 @@ export function PillTabs<T extends string>({
               letterSpacing: "-0.01em",
             }}
           >
-            {tab.label}
+            <span className="inline-flex items-center justify-center gap-1">
+              {tab.label}
+              {tab.locked ? <LockIcon size={11} /> : null}
+            </span>
           </button>
         );
       })}

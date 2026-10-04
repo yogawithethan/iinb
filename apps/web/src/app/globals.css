@@ -309,6 +309,11 @@ html.reader-paged::-webkit-scrollbar {
 .gloss-term:hover {
   background-color: var(--accent-soft);
 }
+/* Refresher: a term's first appearance in a chapter AFTER the one that
+   introduced it. Same tap target, quieter dash. */
+.gloss-term--refresher {
+  border-bottom: 1.5px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+}
 
 /* Inline footnotes — small colored pill with a dagger, obvious as an
    affordance, unobtrusive in running prose. */
