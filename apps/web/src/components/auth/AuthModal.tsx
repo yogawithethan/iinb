@@ -201,9 +201,7 @@ export function AuthModal({ open, initialMode = "license", onClose }: Props) {
         onClick={step === "entry" ? onClose : undefined}
         className="absolute inset-0"
         style={{
-          backdropFilter: "blur(16px) saturate(1.1)",
-          WebkitBackdropFilter: "blur(16px) saturate(1.1)",
-          background: "color-mix(in srgb, var(--bg) 40%, transparent)",
+          background: "color-mix(in srgb, var(--ink) 18%, transparent)",
         }}
       />
 

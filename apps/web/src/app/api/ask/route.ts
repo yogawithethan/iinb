@@ -12,8 +12,10 @@ export async function POST(request: Request) {
 
   const chapterId = String(body.chapterId || "").slice(0, 80);
   const chapter = chapterId ? await getChapter(chapterId) : null;
+  // Send the model plain prose, not markup: tags and footnote attributes
+  // waste the 24k-character excerpt budget and confuse quoting.
   const chapterExcerpt = chapter?.blocks.map((block) =>
-    "html" in block ? block.html : "---",
+    "html" in block ? htmlToPlainText(block.html) : "---",
   ).join("\n\n") || "";
 
   try {
@@ -32,4 +34,19 @@ export async function POST(request: Request) {
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }
+}
+
+function htmlToPlainText(html: string): string {
+  return html
+    // Footnotes travel in a data attribute; keep their text inline.
+    .replace(/<span class="footnote-ref"[^>]*data-fn-text="([^"]*)"[^>]*>[^<]*<\/span>/g, " [Footnote: $1]")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&#x27;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 }

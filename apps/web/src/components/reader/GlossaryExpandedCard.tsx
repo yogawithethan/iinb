@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GlossaryEntry } from "@/content/glossary";
 import { RefreshIcon } from "./icons";
+import { aiErrorMessage } from "./AiPanel";
 import { useReaderSettings } from "./SettingsContext";
 import { COMING_SOON } from "@/lib/comingSoon";
 
@@ -59,10 +60,12 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
   );
   const [spinningDef, setSpinningDef] = useState(false);
   const [spinningEx, setSpinningEx] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
   async function refresh(kind: "definition" | "example") {
     if (kind === "definition") setSpinningDef(true);
     else setSpinningEx(true);
+    setRefreshError(null);
     try {
       const res = await fetch("/api/glossary/refresh", {
         method: "POST",
@@ -75,13 +78,17 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
           kind,
         }),
       });
-      const data = (await res.json()) as { text?: string };
+      const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
       const next = data.text?.trim();
-      if (!next) return;
+      if (!res.ok || !next) {
+        // Failures used to be swallowed, so a tap just did nothing.
+        setRefreshError(aiErrorMessage(res.status, data.error));
+        return;
+      }
       if (kind === "definition") definition.play(next);
       else example.play(next);
     } catch {
-      // ignore — leave current text
+      setRefreshError("Couldn't reach the server. Check your connection and try again.");
     } finally {
       if (kind === "definition") setSpinningDef(false);
       else setSpinningEx(false);
@@ -100,6 +107,15 @@ export function GlossaryExpandedCard({ entry, entries, onSwitchTo }: Props) {
         background: "color-mix(in srgb, var(--accent) 5%, var(--bg-soft))",
       }}
     >
+      {refreshError ? (
+        <p
+          role="status"
+          className="mb-2 text-[12px] leading-snug"
+          style={{ color: "var(--ink-secondary)" }}
+        >
+          {refreshError}
+        </p>
+      ) : null}
       {/* Definition */}
       <section className="flex flex-col gap-1.5">
         <SectionLabel>Definition</SectionLabel>

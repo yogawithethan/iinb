@@ -7,6 +7,7 @@ import type { PartMeta } from "./Chrome";
 import { useReaderSettings } from "./SettingsContext";
 import { LockIcon } from "./icons";
 import { GlossaryList } from "./GlossaryList";
+import { PillTabs } from "./PillTabs";
 
 type Props = {
   chapters: ChapterMeta[];
@@ -52,40 +53,21 @@ export function TocPanel({
     <div className="flex h-full flex-col overflow-hidden">
       {/* Pill switcher — Contents ↔ Glossary */}
       <div className="px-4 pt-4">
-        <div
-          role="tablist"
-          className="relative flex rounded-full p-[3px]"
-          style={{ background: "var(--bg-soft)" }}
-        >
-          {/* Sliding indicator */}
-          <div
-            aria-hidden="true"
-            className="absolute top-[3px] bottom-[3px] w-[calc(50%-3px)] rounded-full transition-transform duration-[220ms] ease-out"
-            style={{
-              left: 3,
-              background: "var(--bg)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.10)",
-              transform:
-                tab === "contents" ? "translateX(0)" : "translateX(100%)",
-            }}
-          />
-          <TabPill
-            label="Contents"
-            active={tab === "contents"}
-            onClick={() => setTab("contents")}
-          />
-          <TabPill
-            label="Glossary"
-            active={tab === "glossary"}
-            onClick={() => setTab("glossary")}
-          />
-        </div>
+        <PillTabs
+          label="Book navigation"
+          active={tab}
+          onChange={setTab}
+          tabs={[
+            { id: "contents", label: "Contents" },
+            { id: "glossary", label: "Glossary" },
+          ]}
+        />
       </div>
 
       {/* Sliding track — two panels side by side */}
       <div className="relative mt-3 flex-1 overflow-hidden">
         <div
-          className="flex h-full transition-transform duration-[260ms]"
+          className="flex h-full transition-transform duration-[320ms] ease-[cubic-bezier(0.364,0,0.164,1)]"
           style={{
             transform:
               tab === "contents" ? "translateX(0)" : "translateX(-100%)",
@@ -107,32 +89,6 @@ export function TocPanel({
         </div>
       </div>
     </div>
-  );
-}
-
-function TabPill({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className="relative flex-1 rounded-full py-1.5 text-[13px] transition-colors"
-      style={{
-        color: active ? "var(--ink)" : "var(--ink-tertiary)",
-        fontWeight: active ? 600 : 500,
-      }}
-    >
-      {label}
-    </button>
   );
 }
 

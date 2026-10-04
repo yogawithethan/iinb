@@ -43,12 +43,11 @@ export function PaywallSticky({
           onClick={onToggle}
           className="pointer-events-auto fixed inset-0 z-[48]"
           style={{
-            backdropFilter: "blur(16px) saturate(1.1)",
-            WebkitBackdropFilter: "blur(16px) saturate(1.1)",
-            background: "color-mix(in srgb, var(--bg) 30%, transparent)",
+            // Plain scrim (no animated backdrop blur — that was the most
+            // expensive thing the reader did on every paywall open).
+            background: "color-mix(in srgb, var(--ink) 14%, transparent)",
             opacity: backdropAnim.animate ? 1 : 0,
-            transition:
-              "opacity 340ms cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 340ms cubic-bezier(0.4, 0, 0.2, 1)",
+            transition: "opacity 200ms cubic-bezier(0.364, 0, 0.164, 1)",
           }}
         />
       )}

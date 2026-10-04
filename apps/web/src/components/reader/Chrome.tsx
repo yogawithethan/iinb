@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { GlassBubble } from "./GlassBubble";
 import { DisplaySettings } from "./DisplaySettings";
+import { PillTabs } from "./PillTabs";
 import { ReadingSettings } from "./ReadingSettings";
 import { AudioSettings } from "./AudioSettings";
 import { TocPanel } from "./TocPanel";
@@ -15,14 +16,11 @@ import { COMING_SOON } from "@/lib/comingSoon";
 import { useReaderSettings } from "./SettingsContext";
 import type { Chapter } from "@/content/chapters";
 import {
-  BookIcon,
   GearIcon,
-  MusicIcon,
   PlayIcon,
   SearchIcon,
   ShareIcon,
   SparkleIcon,
-  SunIcon,
   TocIcon,
   XIcon,
 } from "./icons";
@@ -285,9 +283,9 @@ export function Chrome({
           onClick={closeAllPanels}
           className="pointer-events-auto fixed inset-0 z-[45] transition-opacity duration-[220ms]"
           style={{
-            backdropFilter: "blur(14px) saturate(1.1)",
-            WebkitBackdropFilter: "blur(14px) saturate(1.1)",
-            background: "color-mix(in srgb, var(--bg) 35%, transparent)",
+            // Plain scrim: a live blur over the full-book page made every
+            // panel open/close stutter.
+            background: "color-mix(in srgb, var(--ink) 14%, transparent)",
             opacity: anyPanelAnimating ? 1 : 0,
           }}
         />
@@ -400,27 +398,16 @@ export function Chrome({
               transformOrigin: isDesktop ? "top right" : "top center",
             }}
           >
-            <div
-              className="flex items-center justify-center gap-2 px-3 py-3"
-              style={{ borderBottom: "1px solid var(--card-border)" }}
-            >
-              <SubTab
-                label="Display"
-                active={settingsTab === "display"}
-                onClick={() => setSettingsTab("display")}
-                icon={<SunIcon />}
-              />
-              <SubTab
-                label="Reading"
-                active={settingsTab === "reading"}
-                onClick={() => setSettingsTab("reading")}
-                icon={<BookIcon />}
-              />
-              <SubTab
-                label="Audio"
-                active={settingsTab === "audio"}
-                onClick={() => setSettingsTab("audio")}
-                icon={<MusicIcon />}
+            <div className="px-4 pb-2 pt-4">
+              <PillTabs
+                label="Settings"
+                active={settingsTab}
+                onChange={setSettingsTab}
+                tabs={[
+                  { id: "display", label: "Display" },
+                  { id: "reading", label: "Reading" },
+                  { id: "audio", label: "Audio" },
+                ]}
               />
             </div>
             <div className="overflow-y-auto">
@@ -444,9 +431,10 @@ export function Chrome({
           className="pointer-events-auto absolute inset-x-0 top-0 min-h-[140px] mask-top"
           style={{
             opacity: effectiveVisible ? 1 : 0,
-            transform: effectiveVisible ? "translateY(0)" : "translateY(-115%)",
-            // Match the global header's entrance exactly so they move as one.
-            transition: "transform 0.26s ease-in, opacity 0.2s ease-in",
+            transform: effectiveVisible ? "translateY(0)" : "translateY(-90px)",
+            // Same distance, durations and curves as <ywe-header>'s .is-hidden
+            // slide, so the sidebar button and the reader controls move as one.
+            transition: chromeTransition(effectiveVisible),
           }}
         >
           <div
@@ -524,8 +512,8 @@ export function Chrome({
           className="pointer-events-auto absolute inset-x-0 bottom-0 min-h-[90px] mask-bottom"
           style={{
             opacity: effectiveVisible ? 1 : 0,
-            transform: effectiveVisible ? "translateY(0)" : "translateY(115%)",
-            transition: "transform 0.26s ease-in, opacity 0.2s ease-in",
+            transform: effectiveVisible ? "translateY(0)" : "translateY(90px)",
+            transition: chromeTransition(effectiveVisible),
           }}
         >
           <div
@@ -585,35 +573,11 @@ export function Chrome({
   );
 }
 
-function SubTab({
-  label,
-  active,
-  onClick,
-  icon,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className="flex flex-col items-center gap-1 rounded-2xl px-4 py-2 transition-all active:scale-95"
-      style={{
-        background: active ? "var(--accent-soft)" : "transparent",
-        color: active ? "var(--accent-ink)" : "var(--ink-secondary)",
-        border: active
-          ? "1px solid color-mix(in srgb, var(--accent) 30%, transparent)"
-          : "1px solid transparent",
-      }}
-    >
-      <span aria-hidden>{icon}</span>
-      <span className="text-[10px] font-medium uppercase tracking-[0.06em]">
-        {label}
-      </span>
-    </button>
-  );
+// Mirrors the shared header: revealing uses its ease-exit curve, hiding uses
+// ease-enter (each transition takes the timing of the state it moves into).
+function chromeTransition(visible: boolean) {
+  const curve = visible
+    ? "cubic-bezier(0.382, 0, 1, 1)"
+    : "cubic-bezier(0.364, 0, 0.164, 1)";
+  return `transform 320ms ${curve}, opacity 200ms ${curve}`;
 }

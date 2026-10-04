@@ -72,7 +72,9 @@ export function AudioClip({ src, label }: { src: string; label: string }) {
           style={{ width: `${Math.round(progress * 100)}%` }}
         />
       </div>
-      <audio ref={ref} src={src} preload="none" />
+      {/* Short clips (~300 KB): fetch with the page so play starts instantly
+          instead of waiting on the network after the tap. */}
+      <audio ref={ref} src={src} preload="auto" />
     </div>
   );
 }

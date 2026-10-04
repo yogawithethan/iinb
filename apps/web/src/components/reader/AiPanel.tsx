@@ -60,7 +60,7 @@ export function AiPanel({ chapterId, chapterTitle }: Props) {
       });
       // A non-JSON 5xx used to surface as a raw "Unexpected token <" error.
       const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
-      if (!res.ok) throw new Error(data.error || "Ask the book is unavailable.");
+      if (!res.ok) throw new Error(aiErrorMessage(res.status, data.error));
       setMessages((prev) => [
         ...prev,
         {
@@ -333,4 +333,13 @@ function MessagesList({
       `}</style>
     </>
   );
+}
+
+// Plain-language reasons instead of raw backend codes.
+export function aiErrorMessage(status: number, fallback?: string): string {
+  if (status === 401) return "Sign in to your Yoga with Ethan account to ask the book.";
+  if (status === 403) return "Ask the book comes with the full book. Unlock it to start asking.";
+  if (status === 429) return "You've asked a lot this hour — give it a little while and try again.";
+  if (status >= 500) return "Ask the book is taking a breather. Try again in a moment.";
+  return fallback || "Something went wrong. Try again.";
 }
